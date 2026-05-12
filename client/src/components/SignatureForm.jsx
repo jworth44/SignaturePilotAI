@@ -32,11 +32,13 @@ export default function SignatureForm({
   onTierChange,
   onDividerToggle,
   onLogoSizeChange,
+  onCustomLogoWidthChange,
   onBrandingToggle,
   onFileSelect,
   onFileRemove
 }) {
   const isFree = draft.tier === "free";
+  const customSizeLocked = isFree && (draft.logoSize === "custom" || draft.logoSize === "extra-large");
 
   return (
     <section className="panel builder-panel">
@@ -93,13 +95,32 @@ export default function SignatureForm({
 
           <label className="field">
             <span>Logo size</span>
-            <select disabled={isFree} value={draft.logoSize} onChange={(event) => onLogoSizeChange(event.target.value)}>
+            <select value={draft.logoSize} onChange={(event) => onLogoSizeChange(event.target.value)}>
               <option value="small">Small</option>
               <option value="medium">Medium</option>
               <option value="large">Large</option>
+              <option disabled={isFree} value="extra-large">Extra Large</option>
+              <option disabled={isFree} value="custom">Custom</option>
             </select>
-            {isFree ? <small className="locked-copy">Advanced brand sizing is a Pro feature.</small> : null}
+            {isFree ? <small className="locked-copy">Free Mode supports Small, Medium, and Large. Extra Large and Custom are Pro features.</small> : null}
           </label>
+
+          {draft.logoSize === "custom" ? (
+            <label className="field">
+              <span>Custom logo width</span>
+              <input
+                disabled={customSizeLocked}
+                max="180"
+                min="40"
+                type="number"
+                value={draft.customLogoWidth}
+                onChange={(event) => onCustomLogoWidthChange(event.target.value)}
+              />
+              <small className="locked-copy">
+                {customSizeLocked ? "Upgrade to Pro to set a custom width." : "Range: 40px to 180px."}
+              </small>
+            </label>
+          ) : null}
 
           <label className="field field-checkbox">
             <span>Vertical divider</span>

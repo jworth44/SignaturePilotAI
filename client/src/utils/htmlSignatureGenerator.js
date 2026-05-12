@@ -8,7 +8,8 @@ const LAYOUT_META = {
 const LOGO_SIZES = {
   small: 56,
   medium: 72,
-  large: 96
+  large: 96,
+  "extra-large": 128
 };
 
 export function getDefaultDraft() {
@@ -28,6 +29,7 @@ export function getDefaultDraft() {
     tier: "free",
     includeBranding: true,
     logoSize: "medium",
+    customLogoWidth: 72,
     showDivider: true,
     logoDataUrl: "",
     photoDataUrl: "",
@@ -75,6 +77,14 @@ export function generateSignatureArtifacts(draft) {
   };
 }
 
+export function getLogoWidth(draft) {
+  if (draft.logoSize === "custom") {
+    return normalizeCustomLogoWidth(draft.customLogoWidth);
+  }
+
+  return LOGO_SIZES[draft.logoSize] || LOGO_SIZES.medium;
+}
+
 export function generateSignatureHtml({ draft, tier, includeBranding }) {
   const sanitized = applyTierRules({
     ...getDefaultDraft(),
@@ -88,7 +98,7 @@ export function generateSignatureHtml({ draft, tier, includeBranding }) {
   const logoMarkup = buildImageMarkup({
     source: sanitized.logoDataUrl || sanitized.photoDataUrl,
     alt: sanitized.companyName || sanitized.fullName,
-    size: LOGO_SIZES[sanitized.logoSize] || LOGO_SIZES.medium,
+    size: getLogoWidth(sanitized),
     brandColor,
     type: "logo"
   });
@@ -160,7 +170,8 @@ function applyTierRules(draft) {
       ...draft,
       includeBranding: true,
       layout: "classic",
-      logoSize: "medium",
+      logoSize: draft.logoSize === "custom" || draft.logoSize === "extra-large" ? "large" : draft.logoSize,
+      customLogoWidth: normalizeCustomLogoWidth(draft.customLogoWidth),
       showDivider: false,
       photoDataUrl: "",
       location: "",
@@ -226,8 +237,7 @@ function buildImageMarkup({ source, alt, size, brandColor, type }) {
         src="${source}"
         alt="${escapeAttribute(alt)}"
         width="${size}"
-        height="${size}"
-        style="display:block;width:${size}px;height:${size}px;border:0;outline:none;text-decoration:none;border-radius:${type === "photo" ? "999px" : "16px"};object-fit:cover;background:#ffffff;"
+        style="display:block;width:${size}px;height:auto;max-width:${size}px;border:0;outline:none;text-decoration:none;border-radius:${type === "photo" ? "999px" : "16px"};object-fit:cover;background:#ffffff;"
       />`;
   }
 
@@ -281,6 +291,15 @@ function fadeColor(hex, alpha) {
   const green = Number.parseInt(normalized.slice(2, 4), 16);
   const blue = Number.parseInt(normalized.slice(4, 6), 16);
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+}
+
+function normalizeCustomLogoWidth(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return 72;
+  }
+
+  return Math.min(180, Math.max(40, Math.round(parsed)));
 }
 
 function escapeHtml(value) {

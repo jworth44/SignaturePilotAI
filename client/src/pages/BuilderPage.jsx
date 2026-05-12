@@ -18,6 +18,7 @@ export default function BuilderPage() {
     }
   });
   const [copyMessage, setCopyMessage] = useState("");
+  const [copyState, setCopyState] = useState("idle");
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
@@ -25,6 +26,18 @@ export default function BuilderPage() {
 
   const artifacts = useMemo(() => generateSignatureArtifacts(draft), [draft]);
   const isFree = draft.tier === "free";
+
+  useEffect(() => {
+    if (copyState === "idle") {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setCopyState("idle");
+    }, 2400);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [copyState]);
 
   function updateField(key, value) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -58,8 +71,10 @@ export default function BuilderPage() {
     try {
       await navigator.clipboard.writeText(text);
       setCopyMessage(`${label} copied.`);
+      setCopyState("success");
     } catch {
-      setCopyMessage(`Unable to copy ${label.toLowerCase()}.`);
+      setCopyMessage("Copy failed. Try again or use another browser.");
+      setCopyState("error");
     }
   }
 
@@ -76,12 +91,15 @@ export default function BuilderPage() {
       }
 
       setCopyMessage("Signature copied. Paste it directly into Gmail, Outlook, Apple Mail, or Yahoo.");
+      setCopyState("success");
     } catch {
       try {
         copyRenderedSignatureFallback(artifacts.exportHtml);
         setCopyMessage("Signature copied using fallback mode.");
+        setCopyState("success");
       } catch {
-        setCopyMessage("Unable to copy the finished signature.");
+        setCopyMessage("Copy failed. Try again or use another browser.");
+        setCopyState("error");
       }
     }
   }
@@ -136,11 +154,16 @@ export default function BuilderPage() {
               setDraft((current) => ({
                 ...current,
                 tier: value,
-                includeBranding: value === "free" ? true : current.includeBranding
+                includeBranding: value === "free" ? true : current.includeBranding,
+                logoSize:
+                  value === "free" && (current.logoSize === "custom" || current.logoSize === "extra-large")
+                    ? "large"
+                    : current.logoSize
               }))
             }
             onDividerToggle={(value) => updateField("showDivider", value)}
             onLogoSizeChange={(value) => updateField("logoSize", value)}
+            onCustomLogoWidthChange={(value) => updateField("customLogoWidth", value)}
             onBrandingToggle={(value) => updateField("includeBranding", value)}
             onFileSelect={readFileAsDataUrl}
             onFileRemove={(field) => updateField(field, "")}
@@ -160,8 +183,12 @@ export default function BuilderPage() {
               </div>
             </div>
             <div className="button-row">
-              <button className="button button-primary" type="button" onClick={handleCopySignature}>
-                Copy Signature
+              <button
+                className={`button button-primary ${copyState === "success" ? "button-success" : ""} ${copyState === "error" ? "button-error" : ""}`}
+                type="button"
+                onClick={handleCopySignature}
+              >
+                {copyState === "success" ? "Copied!" : "Copy Signature"}
               </button>
               {!isFree ? (
                 <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.exportHtml, "Raw HTML")}>
@@ -183,6 +210,8 @@ export default function BuilderPage() {
             <p className="support-copy">
               Use Copy Signature for Gmail, Outlook, Apple Mail, and Yahoo. Do not paste raw HTML into your email settings unless the platform specifically asks for HTML.
             </p>
+            {copyState === "success" ? <p className="copy-feedback copy-feedback-success">Signature copied. Paste it into Gmail, Outlook, Apple Mail, or Yahoo.</p> : null}
+            {copyState === "error" ? <p className="copy-feedback copy-feedback-error">Copy failed. Try again or use another browser.</p> : null}
             {isFree ? <p className="locked-copy">Free users can copy and paste the finished branded signature only. Raw HTML and plain text export are Pro options.</p> : null}
             {copyMessage ? <p className="support-copy">{copyMessage}</p> : null}
           </section>

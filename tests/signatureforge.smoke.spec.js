@@ -14,12 +14,16 @@ test.describe("SignatureForge AI smoke tests", () => {
     await expect(page.locator(".signature-preview-surface")).toContainText("Created with SignatureForge AI");
     await expect(page.getByRole("button", { name: "Copy Signature" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Copy Raw HTML" })).toHaveCount(0);
+    await expect(page.locator('label:has-text("Logo size") select')).toBeVisible();
+    await expect(page.locator('label:has-text("Logo size") select option[value="extra-large"]')).toHaveAttribute("disabled", "");
+    await expect(page.locator('label:has-text("Logo size") select option[value="custom"]')).toHaveAttribute("disabled", "");
 
     await expect(page.locator('label:has-text("Layout") select')).toBeDisabled();
     await expect(page.locator('label:has-text("Vertical divider") input')).toBeDisabled();
     await expect(page.locator('label:has-text("Remove SignatureForge AI branding") input')).toBeDisabled();
 
     await page.getByRole("button", { name: "Copy Signature" }).click();
+    await expect(page.getByRole("button", { name: "Copied!" })).toBeVisible();
     await page.waitForTimeout(150);
 
     const clipboardPayload = await page.evaluate(async () => {
@@ -55,13 +59,18 @@ test.describe("SignatureForge AI smoke tests", () => {
     await expect(page.locator('label:has-text("Remove SignatureForge AI branding") input')).toBeEnabled();
     await expect(page.getByRole("button", { name: "Copy Signature" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Copy Raw HTML" })).toBeVisible();
+    await expect(page.locator('label:has-text("Logo size") select option[value="extra-large"]')).not.toHaveAttribute("disabled", "");
+    await expect(page.locator('label:has-text("Logo size") select option[value="custom"]')).not.toHaveAttribute("disabled", "");
 
     await page.locator('label:has-text("Remove SignatureForge AI branding") input').check();
+    await page.locator('label:has-text("Logo size") select').selectOption("custom");
+    await page.locator('label:has-text("Custom logo width") input').fill("140");
     await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     await page.waitForTimeout(150);
 
     const copiedHtml = await page.evaluate(() => navigator.clipboard.readText());
     expect(copiedHtml).not.toContain("Created with SignatureForge AI");
+    expect(copiedHtml).toContain('width="140"');
   });
 
   test("Generated signature keeps core export and layout rules", async ({ page }) => {
