@@ -63,6 +63,29 @@ export default function BuilderPage() {
     }
   }
 
+  async function handleCopySignature() {
+    try {
+      if (window.ClipboardItem && navigator.clipboard?.write) {
+        const clipboardItem = new window.ClipboardItem({
+          "text/html": new Blob([artifacts.exportHtml], { type: "text/html" }),
+          "text/plain": new Blob([artifacts.plainText], { type: "text/plain" })
+        });
+        await navigator.clipboard.write([clipboardItem]);
+      } else {
+        copyRenderedSignatureFallback(artifacts.exportHtml);
+      }
+
+      setCopyMessage("Signature copied. Paste it directly into Gmail, Outlook, Apple Mail, or Yahoo.");
+    } catch {
+      try {
+        copyRenderedSignatureFallback(artifacts.exportHtml);
+        setCopyMessage("Signature copied using fallback mode.");
+      } catch {
+        setCopyMessage("Unable to copy the finished signature.");
+      }
+    }
+  }
+
   function handleDownloadHtml() {
     const blob = new Blob([artifacts.exportHtmlDocument], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -137,12 +160,19 @@ export default function BuilderPage() {
               </div>
             </div>
             <div className="button-row">
-              <button className="button button-primary" type="button" onClick={() => handleCopy(artifacts.exportHtml, "Signature HTML")}>
-                Copy Signature HTML
+              <button className="button button-primary" type="button" onClick={handleCopySignature}>
+                Copy Signature
               </button>
-              <button className="button button-secondary" disabled={isFree} type="button" onClick={() => handleCopy(artifacts.plainText, "Plain text signature")}>
-                Copy Plain Text Signature
-              </button>
+              {!isFree ? (
+                <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.exportHtml, "Raw HTML")}>
+                  Copy Raw HTML
+                </button>
+              ) : null}
+              {!isFree ? (
+                <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.plainText, "Plain text signature")}>
+                  Copy Plain Text Signature
+                </button>
+              ) : null}
               <button className="button button-secondary" disabled={isFree} type="button" onClick={handleDownloadHtml}>
                 Download HTML File
               </button>
@@ -150,11 +180,44 @@ export default function BuilderPage() {
                 Reset
               </button>
             </div>
-            {isFree ? <p className="locked-copy">Free users can copy and paste the finished branded signature only. Upgrade to Pro for clean HTML export and extra controls.</p> : null}
+            <p className="support-copy">
+              Use Copy Signature for Gmail, Outlook, Apple Mail, and Yahoo. Do not paste raw HTML into your email settings unless the platform specifically asks for HTML.
+            </p>
+            {isFree ? <p className="locked-copy">Free users can copy and paste the finished branded signature only. Raw HTML and plain text export are Pro options.</p> : null}
             {copyMessage ? <p className="support-copy">{copyMessage}</p> : null}
           </section>
         </div>
       </section>
     </div>
   );
+}
+
+function copyRenderedSignatureFallback(html) {
+  const selection = window.getSelection();
+  const previousRanges = [];
+  if (selection) {
+    for (let index = 0; index < selection.rangeCount; index += 1) {
+      previousRanges.push(selection.getRangeAt(index));
+    }
+  }
+
+  const container = document.createElement("div");
+  container.setAttribute("contenteditable", "true");
+  container.setAttribute("aria-hidden", "true");
+  container.style.position = "fixed";
+  container.style.left = "-9999px";
+  container.style.top = "0";
+  container.style.opacity = "0";
+  container.style.pointerEvents = "none";
+  container.innerHTML = html;
+  document.body.appendChild(container);
+
+  const range = document.createRange();
+  range.selectNodeContents(container);
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+  document.execCommand("copy");
+  selection?.removeAllRanges();
+  previousRanges.forEach((previousRange) => selection?.addRange(previousRange));
+  document.body.removeChild(container);
 }

@@ -12,17 +12,39 @@ test.describe("SignatureForge AI smoke tests", () => {
     await expect(page).toHaveURL(/\/builder$/);
     await expect(page.locator(".tier-toggle select")).toHaveValue("free");
     await expect(page.locator(".signature-preview-surface")).toContainText("Created with SignatureForge AI");
+    await expect(page.getByRole("button", { name: "Copy Signature" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Copy Raw HTML" })).toHaveCount(0);
 
     await expect(page.locator('label:has-text("Layout") select')).toBeDisabled();
     await expect(page.locator('label:has-text("Vertical divider") input')).toBeDisabled();
     await expect(page.locator('label:has-text("Remove SignatureForge AI branding") input')).toBeDisabled();
 
-    await page.getByRole("button", { name: "Copy Signature HTML" }).click();
+    await page.getByRole("button", { name: "Copy Signature" }).click();
     await page.waitForTimeout(150);
 
-    const copiedHtml = await page.evaluate(() => navigator.clipboard.readText());
-    expect(copiedHtml).toContain("Created with");
-    expect(copiedHtml).toContain("SignatureForge AI");
+    const clipboardPayload = await page.evaluate(async () => {
+      const items = await navigator.clipboard.read();
+      const summary = { types: [], html: "", text: "" };
+      if (!items.length) {
+        return summary;
+      }
+
+      summary.types = items[0].types;
+      if (items[0].types.includes("text/html")) {
+        const htmlBlob = await items[0].getType("text/html");
+        summary.html = await htmlBlob.text();
+      }
+      if (items[0].types.includes("text/plain")) {
+        const textBlob = await items[0].getType("text/plain");
+        summary.text = await textBlob.text();
+      }
+      return summary;
+    });
+
+    expect(clipboardPayload.types).toContain("text/html");
+    expect(clipboardPayload.html).toContain("Created with");
+    expect(clipboardPayload.html).toContain("SignatureForge AI");
+    expect(clipboardPayload.text).toContain("SignatureForge AI");
   });
 
   test("Pro Mode unlocks controls and can export without footer branding", async ({ page }) => {
@@ -31,9 +53,11 @@ test.describe("SignatureForge AI smoke tests", () => {
     await expect(page.locator('label:has-text("Layout") select')).toBeEnabled();
     await expect(page.locator('label:has-text("Vertical divider") input')).toBeEnabled();
     await expect(page.locator('label:has-text("Remove SignatureForge AI branding") input')).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Copy Signature" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Copy Raw HTML" })).toBeVisible();
 
     await page.locator('label:has-text("Remove SignatureForge AI branding") input').check();
-    await page.getByRole("button", { name: "Copy Signature HTML" }).click();
+    await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     await page.waitForTimeout(150);
 
     const copiedHtml = await page.evaluate(() => navigator.clipboard.readText());
