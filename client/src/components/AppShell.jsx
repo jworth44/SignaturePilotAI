@@ -25,7 +25,12 @@ export default function AppShell({ children }) {
 
         <nav className="topbar-nav" aria-label="Primary">
           {NAV_ITEMS.map((item) => (
-            <NavLink key={item.to} className="topbar-link" end={item.end} to={item.to}>
+            <NavLink
+              key={item.to}
+              className={`topbar-link ${item.to === "/upgrade" ? "topbar-link-upgrade" : ""}`}
+              end={item.end}
+              to={item.to}
+            >
               {item.label}
             </NavLink>
           ))}

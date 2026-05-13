@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const TONE_OPTIONS = ["Professional", "Friendly", "Premium", "Contractor", "Minimal"];
 const GOAL_OPTIONS = ["Book calls", "Get quotes", "Show credibility", "Drive website visits"];
@@ -17,7 +17,7 @@ const INDUSTRY_OPTIONS = [
   "Custom"
 ];
 
-export default function AiSuggestionPanel({ draft, onApplySuggestions, onSaveVersion, onAfterGenerate }) {
+export default function AiSuggestionPanel({ autoGenerateKey = 0, compact = false, draft, filters = null, onApplySuggestions, onSaveVersion, onAfterGenerate }) {
   const isFree = draft.tier === "free";
   const [industry, setIndustry] = useState("General Professional");
   const [customIndustry, setCustomIndustry] = useState("");
@@ -28,9 +28,18 @@ export default function AiSuggestionPanel({ draft, onApplySuggestions, onSaveVer
   const [suggestions, setSuggestions] = useState(null);
 
   const resolvedIndustry = useMemo(
-    () => (industry === "Custom" ? customIndustry.trim() || "Custom business" : industry),
-    [customIndustry, industry]
+    () => ((filters?.industry || industry) === "Custom" ? customIndustry.trim() || "Custom business" : filters?.industry || industry),
+    [customIndustry, filters?.industry, industry]
   );
+  const resolvedTone = filters?.tone || tone;
+  const resolvedGoal = filters?.goal || goal;
+
+  useEffect(() => {
+    if (!autoGenerateKey) {
+      return;
+    }
+    handleGenerate();
+  }, [autoGenerateKey]);
 
   async function handleGenerate() {
     setLoading(true);
@@ -41,8 +50,8 @@ export default function AiSuggestionPanel({ draft, onApplySuggestions, onSaveVer
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           businessType: resolvedIndustry,
-          tone,
-          goal,
+          tone: resolvedTone,
+          goal: resolvedGoal,
           companyName: draft.companyName,
           fullName: draft.fullName
         })
@@ -74,60 +83,64 @@ export default function AiSuggestionPanel({ draft, onApplySuggestions, onSaveVer
     setError("");
   }
 
-  return (
-    <section className="panel ai-panel">
-      <div className="panel-header">
-        <div>
-          <p className="eyebrow">AI assistant panel</p>
-          <h2>Built-in smart suggestions</h2>
-        </div>
-      </div>
+  const content = (
+    <>
+      {!compact ? (
+        <>
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow">AI assistant panel</p>
+              <h2>Built-in smart suggestions</h2>
+            </div>
+          </div>
 
-      <div className="field-grid field-grid-tight">
-        <label className="field">
-          <span>Business type / industry</span>
-          <select disabled={isFree} value={industry} onChange={(event) => setIndustry(event.target.value)}>
-            {INDUSTRY_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
+          <div className="field-grid field-grid-tight">
+            <label className="field">
+              <span>Business type / industry</span>
+              <select disabled={isFree} value={industry} onChange={(event) => setIndustry(event.target.value)}>
+                {INDUSTRY_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-        {industry === "Custom" ? (
-          <label className="field">
-            <span>Custom industry</span>
-            <input disabled={isFree} value={customIndustry} onChange={(event) => setCustomIndustry(event.target.value)} />
-          </label>
-        ) : null}
+            {industry === "Custom" ? (
+              <label className="field">
+                <span>Custom industry</span>
+                <input disabled={isFree} value={customIndustry} onChange={(event) => setCustomIndustry(event.target.value)} />
+              </label>
+            ) : null}
 
-        <label className="field">
-          <span>Desired tone</span>
-          <select disabled={isFree} value={tone} onChange={(event) => setTone(event.target.value)}>
-            {TONE_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
+            <label className="field">
+              <span>Desired tone</span>
+              <select disabled={isFree} value={tone} onChange={(event) => setTone(event.target.value)}>
+                {TONE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-        <label className="field">
-          <span>Goal</span>
-          <select disabled={isFree} value={goal} onChange={(event) => setGoal(event.target.value)}>
-            {GOAL_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+            <label className="field">
+              <span>Goal</span>
+              <select disabled={isFree} value={goal} onChange={(event) => setGoal(event.target.value)}>
+                {GOAL_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
-      <button className={`button ${isFree ? "button-locked" : "button-primary"} button-inline`} disabled={loading || isFree} type="button" onClick={handleGenerate}>
-        {loading ? "Generating..." : "Generate Signature Suggestions"}
-      </button>
+          <button className={`button ${isFree ? "button-locked" : "button-primary"} button-inline`} disabled={loading || isFree} type="button" onClick={handleGenerate}>
+            {loading ? "Generating..." : "Generate Signature Suggestions"}
+          </button>
+        </>
+      ) : null}
 
       {isFree ? <p className="locked-copy">Advanced AI suggestions are available in Pro Mode.</p> : <p className="support-copy">Built-in smart suggestions help you improve wording without auto-overwriting the current signature.</p>}
       {error ? <p className="error-copy">{error}</p> : null}
@@ -181,6 +194,12 @@ export default function AiSuggestionPanel({ draft, onApplySuggestions, onSaveVer
           </div>
         </div>
       ) : null}
-    </section>
+    </>
   );
+
+  if (compact) {
+    return <div className="generator-embedded-ai">{content}</div>;
+  }
+
+  return <section className="panel ai-panel">{content}</section>;
 }

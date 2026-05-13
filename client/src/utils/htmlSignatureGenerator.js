@@ -24,7 +24,7 @@ const LOGO_SIZES = {
 
 export function getDefaultDraft() {
   return {
-    fullName: "Jordan Wells",
+    fullName: "James Worthing",
     jobTitle: "Founder",
     companyName: "Signature Pilot AI",
     phone: "+1 (555) 123-4567",

@@ -172,6 +172,10 @@ export default function BuilderPage() {
   const [activeStep, setActiveStep] = useState("details");
   const [copyMessage, setCopyMessage] = useState("");
   const [copyState, setCopyState] = useState("idle");
+  const [exportCopySuccessTarget, setExportCopySuccessTarget] = useState("");
+  const [advancedOptionsOpen, setAdvancedOptionsOpen] = useState(false);
+  const [aiSuggestionRequestKey, setAiSuggestionRequestKey] = useState(0);
+  const [moreExportOptionsOpen, setMoreExportOptionsOpen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState("desktop");
   const [previewZoom, setPreviewZoom] = useState("100");
   const [smartSetup, setSmartSetup] = useState({
@@ -209,6 +213,24 @@ export default function BuilderPage() {
 
     return () => window.clearTimeout(timeoutId);
   }, [copyState]);
+
+  useEffect(() => {
+    if (!exportCopySuccessTarget) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setExportCopySuccessTarget("");
+    }, 2000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [exportCopySuccessTarget]);
+
+  useEffect(() => {
+    if (activeStep !== "export" && exportCopySuccessTarget) {
+      setExportCopySuccessTarget("");
+    }
+  }, [activeStep, exportCopySuccessTarget]);
 
   useEffect(() => {
     function syncLayoutForScreenWidth() {
@@ -340,6 +362,20 @@ export default function BuilderPage() {
     }));
   }
 
+  function handlePreviousTemplateVariant() {
+    setDraft((current) => ({
+      ...current,
+      templateVariant: current.templateVariant <= 1 ? 12 : current.templateVariant - 1
+    }));
+  }
+
+  function handleNextTemplateVariant() {
+    setDraft((current) => ({
+      ...current,
+      templateVariant: current.templateVariant >= 12 ? 1 : current.templateVariant + 1
+    }));
+  }
+
   function handleRevertTemplate() {
     setDraft((current) => ({
       ...current,
@@ -362,11 +398,12 @@ export default function BuilderPage() {
     reader.readAsDataURL(file);
   }
 
-  async function handleCopy(text, label) {
+  async function handleCopy(text, label, successTarget = "") {
     try {
       await navigator.clipboard.writeText(text);
       setCopyMessage(`${label} copied.`);
       setCopyState("success");
+      setExportCopySuccessTarget(successTarget);
     } catch {
       setCopyMessage("Copy failed. Try again or use another browser.");
       setCopyState("error");
@@ -387,12 +424,14 @@ export default function BuilderPage() {
 
       setCopyMessage("Signature copied. Paste it directly into Gmail, Outlook, Apple Mail, or Yahoo.");
       setCopyState("success");
+      setExportCopySuccessTarget("signature");
       setActiveStep("export");
     } catch {
       try {
         copyRenderedSignatureFallback(artifacts.exportHtml);
         setCopyMessage("Signature copied using fallback mode.");
         setCopyState("success");
+        setExportCopySuccessTarget("signature");
         setActiveStep("export");
       } catch {
         setCopyMessage("Copy failed. Try again or use another browser.");
@@ -454,6 +493,13 @@ export default function BuilderPage() {
     setSmartSetupPreview(buildSmartSetupRecommendation(draft, smartSetup));
   }
 
+  function handleGenerateAiSuggestions() {
+    handleGenerateSmartSetup();
+    if (!isFree) {
+      setAiSuggestionRequestKey((current) => current + 1);
+    }
+  }
+
   function handleApplySmartSetup() {
     if (!smartSetupPreview) {
       return;
@@ -502,7 +548,10 @@ export default function BuilderPage() {
           <div className="generator-card-header">
             <div>
               <p className="eyebrow">{activeStepMeta.eyebrow}</p>
-              <h2>{activeStepMeta.title}</h2>
+              <div className="generator-step-title-row">
+                <h2>{activeStepMeta.title}</h2>
+                {!isFree ? <span className="generator-mini-badge generator-mini-badge-pro">Pro mode</span> : null}
+              </div>
             </div>
             <div className="generator-card-header-side">
               {modeControl}
@@ -588,7 +637,10 @@ export default function BuilderPage() {
           <div className="generator-card-header">
             <div>
               <p className="eyebrow">{activeStepMeta.eyebrow}</p>
-              <h2>{activeStepMeta.title}</h2>
+              <div className="generator-step-title-row">
+                <h2>{activeStepMeta.title}</h2>
+                {!isFree ? <span className="generator-mini-badge generator-mini-badge-pro">Pro mode</span> : null}
+              </div>
             </div>
           </div>
 
@@ -641,7 +693,10 @@ export default function BuilderPage() {
           <div className="generator-card-header">
             <div>
               <p className="eyebrow">{activeStepMeta.eyebrow}</p>
-              <h2>{activeStepMeta.title}</h2>
+              <div className="generator-step-title-row">
+                <h2>{activeStepMeta.title}</h2>
+                {!isFree ? <span className="generator-mini-badge generator-mini-badge-pro">Pro mode</span> : null}
+              </div>
             </div>
           </div>
 
@@ -656,13 +711,11 @@ export default function BuilderPage() {
                   key={template.value}
                   className={`generator-template-card ${active ? "generator-template-card-active" : ""} ${locked ? "generator-template-card-locked" : ""}`}
                 >
-                  <div className="generator-template-label-row">
-                    <strong>{template.label}</strong>
+                  <strong>{template.label}</strong>
+                  <div className="generator-template-preview-frame">
                     <span className={`generator-mini-badge ${template.pro ? "generator-mini-badge-pro" : "generator-mini-badge-free"}`}>
                       {template.pro ? "Pro" : "Free"}
                     </span>
-                  </div>
-                  <div className="generator-template-preview-frame">
                     <div className="generator-template-preview-canvas">
                       <div dangerouslySetInnerHTML={{ __html: templatePreview.previewHtml }} />
                     </div>
@@ -675,7 +728,7 @@ export default function BuilderPage() {
                       type="button"
                       onClick={() => handleLayoutChange(template.value)}
                     >
-                      {locked ? "Pro style" : active ? "Selected" : "Use this style"}
+                      {locked ? "Pro style" : active ? "Selected" : "Select"}
                     </button>
                   </div>
                 </article>
@@ -712,7 +765,10 @@ export default function BuilderPage() {
           <div className="generator-card-header">
             <div>
               <p className="eyebrow">{activeStepMeta.eyebrow}</p>
-              <h2>{activeStepMeta.title}</h2>
+              <div className="generator-step-title-row">
+                <h2>{activeStepMeta.title}</h2>
+                {!isFree ? <span className="generator-mini-badge generator-mini-badge-pro">Pro mode</span> : null}
+              </div>
             </div>
           </div>
 
@@ -737,66 +793,6 @@ export default function BuilderPage() {
               {artifacts.effectiveDraft.previewUsesMobileCompact ? (
                 <small className="support-copy">This preview is temporarily showing Mobile Compact for cleaner phone-safe rendering.</small>
               ) : null}
-            </label>
-
-            <label className="field">
-              <span>Logo size</span>
-              <select value={artifacts.effectiveDraft.logoSize} onChange={(event) => updateField("logoSize", event.target.value)}>
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-                <option disabled={isFree} value="extra-large">
-                  Extra Large
-                </option>
-                <option disabled={isFree} value="custom">
-                  Custom
-                </option>
-              </select>
-            </label>
-
-            {artifacts.effectiveDraft.logoSize === "custom" ? (
-              <label className="field">
-                <span>Custom logo width</span>
-                <input
-                  max="180"
-                  min="40"
-                  type="number"
-                  value={artifacts.effectiveDraft.customLogoWidth}
-                  onChange={(event) => updateField("customLogoWidth", event.target.value)}
-                />
-              </label>
-            ) : null}
-
-            <label className="field">
-              <span>Divider</span>
-              <select
-                disabled={isFree || artifacts.effectiveDraft.layout === "mobile-compact"}
-                value={artifacts.effectiveDraft.showDivider ? "on" : "off"}
-                onChange={(event) => updateField("showDivider", event.target.value === "on")}
-              >
-                <option value="off">Off</option>
-                <option value="on">On</option>
-              </select>
-            </label>
-
-            <label className="field">
-              <span>Branding</span>
-              <select
-                disabled={isFree}
-                value={artifacts.includeBranding ? "include" : "remove"}
-                onChange={(event) => updateField("includeBranding", event.target.value === "include")}
-              >
-                <option value="include">Include</option>
-                <option value="remove">Remove</option>
-              </select>
-            </label>
-
-            <label className="field">
-              <span>Show template tags</span>
-              <select value={artifacts.effectiveDraft.showTemplateTags ? "on" : "off"} onChange={(event) => updateField("showTemplateTags", event.target.value === "on")}>
-                <option value="off">Off</option>
-                <option value="on">On</option>
-              </select>
             </label>
 
             <label className="field field-full">
@@ -832,6 +828,86 @@ export default function BuilderPage() {
               <textarea rows="3" value={draft.disclaimer} onChange={(event) => updateField("disclaimer", event.target.value)} />
             </label>
           </div>
+
+          <div className="generator-section-divider" />
+
+          <section className="generator-advanced-options">
+            <button
+              aria-expanded={advancedOptionsOpen}
+              className="generator-disclosure-toggle"
+              type="button"
+              onClick={() => setAdvancedOptionsOpen((current) => !current)}
+            >
+              <span className="generator-disclosure-chevron" aria-hidden="true">
+                {advancedOptionsOpen ? "▾" : "▸"}
+              </span>
+              <span>Advanced options</span>
+            </button>
+
+            {advancedOptionsOpen ? (
+              <div className="generator-form-grid generator-form-grid-advanced">
+                <label className="field">
+                  <span>Logo size</span>
+                  <select value={artifacts.effectiveDraft.logoSize} onChange={(event) => updateField("logoSize", event.target.value)}>
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                    <option disabled={isFree} value="extra-large">
+                      Extra Large
+                    </option>
+                    <option disabled={isFree} value="custom">
+                      Custom
+                    </option>
+                  </select>
+                </label>
+
+                {artifacts.effectiveDraft.logoSize === "custom" ? (
+                  <label className="field">
+                    <span>Custom logo width</span>
+                    <input
+                      max="180"
+                      min="40"
+                      type="number"
+                      value={artifacts.effectiveDraft.customLogoWidth}
+                      onChange={(event) => updateField("customLogoWidth", event.target.value)}
+                    />
+                  </label>
+                ) : null}
+
+                <label className="field">
+                  <span>Divider</span>
+                  <select
+                    disabled={isFree || artifacts.effectiveDraft.layout === "mobile-compact"}
+                    value={artifacts.effectiveDraft.showDivider ? "on" : "off"}
+                    onChange={(event) => updateField("showDivider", event.target.value === "on")}
+                  >
+                    <option value="off">Off</option>
+                    <option value="on">On</option>
+                  </select>
+                </label>
+
+                <label className="field">
+                  <span>Branding</span>
+                  <select
+                    disabled={isFree}
+                    value={artifacts.includeBranding ? "include" : "remove"}
+                    onChange={(event) => updateField("includeBranding", event.target.value === "include")}
+                  >
+                    <option value="include">Include</option>
+                    <option value="remove">Remove</option>
+                  </select>
+                </label>
+
+                <label className="field">
+                  <span>Show template tags</span>
+                  <select value={artifacts.effectiveDraft.showTemplateTags ? "on" : "off"} onChange={(event) => updateField("showTemplateTags", event.target.value === "on")}>
+                    <option value="off">Off</option>
+                    <option value="on">On</option>
+                  </select>
+                </label>
+              </div>
+            ) : null}
+          </section>
 
           <div className="generator-inline-note">
             <strong>{artifacts.effectiveDraft.variantLabel}</strong>
@@ -877,8 +953,8 @@ export default function BuilderPage() {
         <section className="generator-card">
           <div className="generator-card-header">
             <div>
-              <h3>Smart Setup</h3>
-              <p className="support-copy">Get a stronger recommendation before applying any changes.</p>
+              <h3>AI suggestions</h3>
+              <p className="support-copy">Use one set of prompts to generate smarter recommendations before you apply anything.</p>
             </div>
           </div>
           <div className="generator-form-grid">
@@ -914,8 +990,8 @@ export default function BuilderPage() {
             </label>
           </div>
           <div className="generator-button-row">
-            <button className="button button-secondary" type="button" onClick={handleGenerateSmartSetup}>
-              Preview Smart Setup
+            <button className={`button ${isFree ? "button-secondary" : "button-primary"}`} type="button" onClick={handleGenerateAiSuggestions}>
+              Generate AI suggestions
             </button>
             {smartSetupPreview ? (
               <button className="button button-primary" type="button" onClick={handleApplySmartSetup}>
@@ -944,17 +1020,19 @@ export default function BuilderPage() {
               <p className="support-copy">{smartSetupPreview.note}</p>
             </div>
           ) : null}
+          <AiSuggestionPanel
+            compact
+            draft={draft}
+            filters={smartSetup}
+            autoGenerateKey={aiSuggestionRequestKey}
+            onAfterGenerate={() => setCopyMessage("Suggestions ready to review.")}
+            onApplySuggestions={({ mode, suggestions }) => {
+              setDraft((current) => applySuggestedFields(current, suggestions, mode));
+              setCopyMessage(`${mode} applied.`);
+            }}
+            onSaveVersion={saveCurrentVersion}
+          />
         </section>
-
-        <AiSuggestionPanel
-          draft={draft}
-          onAfterGenerate={() => setCopyMessage("Suggestions ready to review.")}
-          onApplySuggestions={({ mode, suggestions }) => {
-            setDraft((current) => applySuggestedFields(current, suggestions, mode));
-            setCopyMessage(`${mode} applied.`);
-          }}
-          onSaveVersion={saveCurrentVersion}
-        />
       </div>
     );
   }
@@ -966,7 +1044,10 @@ export default function BuilderPage() {
           <div className="generator-card-header">
             <div>
               <p className="eyebrow">{activeStepMeta.eyebrow}</p>
-              <h2>{activeStepMeta.title}</h2>
+              <div className="generator-step-title-row">
+                <h2>{activeStepMeta.title}</h2>
+                {!isFree ? <span className="generator-mini-badge generator-mini-badge-pro">Pro mode</span> : null}
+              </div>
             </div>
           </div>
 
@@ -993,35 +1074,87 @@ export default function BuilderPage() {
             </article>
           </div>
 
-          <div className="generator-export-grid">
+          <div className="generator-export-primary">
             <button
-              className={`button button-primary ${copyState === "success" ? "button-success" : ""} ${copyState === "error" ? "button-error" : ""}`}
+              className={`button button-primary ${exportCopySuccessTarget === "signature" ? "button-success" : ""} ${
+                copyState === "error" ? "button-error" : ""
+              }`}
               type="button"
               onClick={handleCopySignature}
             >
-              {copyState === "success" ? "Copied!" : "Copy Signature"}
-            </button>
-            {!isFree ? (
-              <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.exportHtml, "Raw HTML")}>
-                Copy Raw HTML
-              </button>
-            ) : null}
-            {!isFree ? (
-              <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.plainText, "Plain text signature")}>
-                Copy Plain Text
-              </button>
-            ) : null}
-            <button className={`button ${isFree ? "button-locked" : "button-secondary"}`} disabled={isFree} type="button" onClick={handleDownloadHtml}>
-              Download HTML File
+              <span className="button-feedback-label">
+                <span className="button-feedback-icon" aria-hidden="true">
+                  {exportCopySuccessTarget === "signature" ? "✓" : ""}
+                </span>
+                <span>{exportCopySuccessTarget === "signature" ? "Copied!" : "Copy Signature"}</span>
+              </span>
             </button>
           </div>
 
-          <div className="generator-export-notes">
-            <p>Copy Signature is best for Gmail, Outlook, Apple Mail, and Yahoo.</p>
-            <p>Raw HTML is a Pro export for platforms that specifically ask for HTML code.</p>
-            <p>Download HTML gives you a backup file for handoff or archiving.</p>
-            {isFree ? <p>Free exports always include Signature Pilot AI branding inside the signature.</p> : null}
-          </div>
+          <section className="generator-export-disclosure">
+            <button
+              aria-expanded={moreExportOptionsOpen}
+              className="generator-export-toggle"
+              type="button"
+              onClick={() => setMoreExportOptionsOpen((current) => !current)}
+            >
+              More export options {moreExportOptionsOpen ? "▴" : "▾"}
+            </button>
+
+            {moreExportOptionsOpen ? (
+              <div className="generator-export-disclosure-body">
+                <div className="generator-export-notes">
+                  <p>Copy Signature is best for Gmail, Outlook, Apple Mail, and Yahoo.</p>
+                  <p>Raw HTML is a Pro export for platforms that specifically ask for HTML code.</p>
+                  <p>Download HTML gives you a backup file for handoff or archiving.</p>
+                  {isFree ? <p>Free exports always include Signature Pilot AI branding inside the signature.</p> : null}
+                </div>
+
+                <div className="generator-export-grid">
+                  {!isFree ? (
+                    <button
+                      className={`button button-secondary generator-export-secondary ${
+                        exportCopySuccessTarget === "raw-html" ? "button-secondary-success" : ""
+                      }`}
+                      type="button"
+                      onClick={() => handleCopy(artifacts.exportHtml, "Raw HTML", "raw-html")}
+                    >
+                      <span className="button-feedback-label">
+                        <span className="button-feedback-icon" aria-hidden="true">
+                          {exportCopySuccessTarget === "raw-html" ? "✓" : ""}
+                        </span>
+                        <span>{exportCopySuccessTarget === "raw-html" ? "Copied!" : "Copy Raw HTML"}</span>
+                      </span>
+                    </button>
+                  ) : null}
+                  {!isFree ? (
+                    <button
+                      className={`button button-secondary generator-export-secondary ${
+                        exportCopySuccessTarget === "plain-text" ? "button-secondary-success" : ""
+                      }`}
+                      type="button"
+                      onClick={() => handleCopy(artifacts.plainText, "Plain text signature", "plain-text")}
+                    >
+                      <span className="button-feedback-label">
+                        <span className="button-feedback-icon" aria-hidden="true">
+                          {exportCopySuccessTarget === "plain-text" ? "✓" : ""}
+                        </span>
+                        <span>{exportCopySuccessTarget === "plain-text" ? "Copied!" : "Copy Plain Text"}</span>
+                      </span>
+                    </button>
+                  ) : null}
+                  <button
+                    className={`button generator-export-secondary ${isFree ? "button-locked" : "button-secondary"}`}
+                    disabled={isFree}
+                    type="button"
+                    onClick={handleDownloadHtml}
+                  >
+                    Download HTML File
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </section>
 
           {copyMessage ? (
             <p className={`copy-feedback ${copyState === "error" ? "copy-feedback-error" : "copy-feedback-success"}`}>{copyMessage}</p>
@@ -1087,7 +1220,6 @@ export default function BuilderPage() {
         <div className="generator-builder-topcopy">
           <p className="eyebrow">Signature Generator</p>
           <h1>Build once, paste anywhere.</h1>
-          <p className="generator-version-marker">Step Studio v1</p>
         </div>
         <div className="generator-builder-topactions">
           <Link className="button button-secondary" to="/install">
@@ -1149,6 +1281,8 @@ export default function BuilderPage() {
               effectiveDraft={artifacts.effectiveDraft}
               previewDevice={previewDevice}
               previewZoom={previewZoom}
+              onPreviousVariant={handlePreviousTemplateVariant}
+              onNextVariant={handleNextTemplateVariant}
               onPreviewDeviceChange={setPreviewDevice}
               onPreviewZoomChange={setPreviewZoom}
             />

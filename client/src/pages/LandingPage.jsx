@@ -1,22 +1,64 @@
 import React from "react";
+import { Link2, ShieldCheck, SlidersHorizontal, Smartphone, Sparkles, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
+import { generateSignatureArtifacts } from "../utils/htmlSignatureGenerator";
 
 const FEATURES = [
-  "AI Signature Builder",
-  "Logo + Brand Upload",
-  "Gmail / Outlook Ready",
-  "Clickable Contact Links",
-  "Mobile-Friendly Layouts",
-  "Pro Customization"
+  {
+    title: "AI Signature Builder",
+    description: "Answer three questions and get a tailored layout, wording, and style recommendation in seconds.",
+    Icon: Sparkles
+  },
+  {
+    title: "Logo + Brand Upload",
+    description: "Upload your company logo or profile photo directly - no image hosting or external links needed.",
+    Icon: Upload
+  },
+  {
+    title: "Gmail / Outlook Ready",
+    description: "Every signature is built with email-safe HTML that renders correctly in Gmail, Outlook, Apple Mail, and Yahoo.",
+    Icon: ShieldCheck
+  },
+  {
+    title: "Clickable Contact Links",
+    description: "Phone, email, website, and social links are all tappable - recipients can reach you in one tap.",
+    Icon: Link2
+  },
+  {
+    title: "Mobile-Friendly Layouts",
+    description: "The Mobile Compact layout stacks cleanly on narrow screens so your signature never breaks on phones.",
+    Icon: Smartphone
+  },
+  {
+    title: "Pro Customization",
+    description: "Unlock all template families, custom CTA buttons, advanced styling, and raw HTML export with a Pro plan.",
+    Icon: SlidersHorizontal
+  }
 ];
 
 const TEMPLATE_SHOWCASE = [
-  { name: "Executive", copy: "Leadership-ready with premium spacing", tone: "template-thumb-executive" },
-  { name: "Contractor", copy: "Service CTA and field-ready contact flow", tone: "template-thumb-contractor" },
-  { name: "Minimal", copy: "Clean founder-friendly signature design", tone: "template-thumb-minimal" },
-  { name: "Corporate", copy: "Structured, polished, and brand-led", tone: "template-thumb-corporate" },
-  { name: "Mobile Compact", copy: "Built for narrow email clients", tone: "template-thumb-mobile-compact" }
+  { name: "Executive", copy: "Leadership-ready with premium spacing", tone: "template-thumb-executive", layout: "premium-consultant", renderMode: "desktop" },
+  { name: "Contractor", copy: "Service CTA and field-ready contact flow", tone: "template-thumb-contractor", layout: "contractor-bold", renderMode: "desktop" },
+  { name: "Minimal", copy: "Clean founder-friendly signature design", tone: "template-thumb-minimal", layout: "minimal-clean", renderMode: "desktop" },
+  { name: "Corporate", copy: "Structured, polished, and brand-led", tone: "template-thumb-corporate", layout: "executive-corporate", renderMode: "desktop" },
+  { name: "Mobile Compact", copy: "Built for narrow email clients", tone: "template-thumb-mobile-compact", layout: "mobile-compact", renderMode: "mobile" }
 ];
+
+const TEMPLATE_SHOWCASE_SAMPLE = {
+  fullName: "James Worthing",
+  jobTitle: "HSE Advisor",
+  companyName: "James Worthing Safety Consulting Services",
+  phone: "204-555-5555",
+  email: "James@email.com",
+  location: "Winnipeg, MB",
+  tier: "pro",
+  includeBranding: false,
+  showDivider: false,
+  showTemplateTags: false,
+  ctaText: "Book a quick call",
+  ctaDestinationType: "none",
+  ctaUrl: ""
+};
 
 export default function LandingPage() {
   return (
@@ -43,7 +85,7 @@ export default function LandingPage() {
           <div className="hero-preview-body">
             <span className="preview-avatar">SF</span>
             <div>
-              <strong>Jordan Wells</strong>
+              <strong>James Worthing</strong>
               <p>Founder | Signature Pilot AI</p>
               <small>Smart signatures. Built in minutes.</small>
             </div>
@@ -53,10 +95,12 @@ export default function LandingPage() {
 
       <section className="feature-grid">
         {FEATURES.map((feature) => (
-          <article key={feature} className="feature-card">
-            <p className="feature-icon">{feature.slice(0, 2).toUpperCase()}</p>
-            <h2>{feature}</h2>
-            <p>Built to keep signatures sharp, clickable, and easy to install across major email clients.</p>
+          <article key={feature.title} className="feature-card">
+            <p className="feature-icon">
+              <feature.Icon aria-hidden="true" size={22} strokeWidth={2.1} />
+            </p>
+            <h2>{feature.title}</h2>
+            <p>{feature.description}</p>
           </article>
         ))}
       </section>
@@ -70,11 +114,18 @@ export default function LandingPage() {
         <div className="template-grid">
           {TEMPLATE_SHOWCASE.map((template) => (
             <article key={template.name} className="template-card template-card-static">
-              <div className={`template-thumb ${template.tone}`}>
-                <span className="template-thumb-bar" />
-                <span className="template-thumb-line template-thumb-line-strong" />
-                <span className="template-thumb-line" />
-                <span className="template-thumb-line template-thumb-line-short" />
+              <div className={`template-thumb template-thumb-live ${template.tone}`}>
+                <div
+                  className="template-thumb-preview"
+                  aria-hidden="true"
+                  dangerouslySetInnerHTML={{
+                    __html: generateSignatureArtifacts({
+                      ...TEMPLATE_SHOWCASE_SAMPLE,
+                      layout: template.layout,
+                      renderMode: template.renderMode
+                    }).previewHtml
+                  }}
+                />
               </div>
               <strong>{template.name}</strong>
               <span>{template.copy}</span>
@@ -91,7 +142,7 @@ export default function LandingPage() {
         <div className="before-after-grid">
           <article className="before-card">
             <small>Before</small>
-            <p>Jordan Wells</p>
+            <p>James Worthing</p>
             <p>Founder</p>
             <p>555-123-4567</p>
             <p>hello@company.com</p>
@@ -101,7 +152,7 @@ export default function LandingPage() {
             <div className="after-card-row">
               <span className="preview-avatar">SP</span>
               <div>
-                <strong>Jordan Wells</strong>
+                <strong>James Worthing</strong>
                 <p>Founder | Northlight Studio</p>
                 <small>Book a quick call</small>
               </div>

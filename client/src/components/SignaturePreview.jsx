@@ -6,6 +6,8 @@ export default function SignaturePreview({
   effectiveDraft,
   previewZoom,
   previewDevice,
+  onPreviousVariant,
+  onNextVariant,
   onPreviewZoomChange,
   onPreviewDeviceChange
 }) {
@@ -29,9 +31,6 @@ export default function SignaturePreview({
           </div>
           <div className="workspace-preview-badges">
             <span className="tier-pill">{artifacts.effectiveDraft.variantLabel}</span>
-            <span className={`tier-pill ${effectiveDraft.tier === "pro" ? "tier-pill-pro" : ""}`}>
-              {effectiveDraft.tier === "pro" ? "Pro mode" : "Free mode"}
-            </span>
           </div>
         </div>
 
@@ -65,12 +64,25 @@ export default function SignaturePreview({
         </div>
       </div>
 
-      <div className="preview-meta">
-        <span>{layoutMeta.name}</span>
-        <span>{`Variant ${artifacts.effectiveDraft.templateVariant} of 12`}</span>
-        <span>{artifacts.effectiveDraft.showDivider ? "Divider on" : "Divider off"}</span>
-        <span>No visible borders</span>
-        <span>{artifacts.includeBranding ? "Signature Pilot AI branding included" : "Branding removed"}</span>
+        <div className="preview-meta">
+          <span>{layoutMeta.name}</span>
+          <span className="workspace-variant-switcher">
+            <button
+              aria-label="Previous variant"
+              className="workspace-variant-arrow"
+              type="button"
+              onClick={onPreviousVariant}
+            >
+              ←
+            </button>
+            <span>{`Variant ${artifacts.effectiveDraft.templateVariant} of 12`}</span>
+            <button aria-label="Next variant" className="workspace-variant-arrow" type="button" onClick={onNextVariant}>
+              →
+            </button>
+          </span>
+          <span>{artifacts.effectiveDraft.showDivider ? "Divider on" : "Divider off"}</span>
+          <span>No visible borders</span>
+          <span>{artifacts.includeBranding ? "Signature Pilot AI branding included" : "Branding removed"}</span>
         {artifacts.effectiveDraft.previewUsesMobileCompact ? <span>Mobile Compact recommended for this preview</span> : null}
       </div>
 
@@ -83,7 +95,7 @@ export default function SignaturePreview({
           <div className="workspace-email-header">
             <div className="workspace-email-row">
               <strong>From</strong>
-              <span>{effectiveDraft.fullName || "Jordan Wells"} &lt;{effectiveDraft.email || "hello@signatureforge.ai"}&gt;</span>
+              <span>{effectiveDraft.fullName || "James Worthing"} &lt;{effectiveDraft.email || "hello@signatureforge.ai"}&gt;</span>
             </div>
             <div className="workspace-email-row">
               <strong>To</strong>

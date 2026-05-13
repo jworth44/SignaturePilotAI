@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+async function openDisclosureIfCollapsed(page, namePattern) {
+  const toggle = page.getByRole("button", { name: namePattern });
+  if ((await toggle.getAttribute("aria-expanded")) === "false") {
+    await toggle.click();
+  }
+}
+
 test.describe("Signature Pilot AI step studio smoke tests", () => {
   test.beforeEach(async ({ context, page, baseURL }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"], {
@@ -73,11 +80,12 @@ test.describe("Signature Pilot AI step studio smoke tests", () => {
     await page.locator(".generator-mode-field select").selectOption("pro");
     await page.getByRole("button", { name: /Templates/ }).click();
 
-    await page.locator(".generator-template-card", { hasText: "Executive Corporate" }).getByRole("button", { name: "Use this style" }).click();
+    await page.locator(".generator-template-card", { hasText: "Executive Corporate" }).getByRole("button", { name: "Select" }).click();
     await expect(page.locator(".preview-meta")).toContainText("Executive Corporate");
     await expect(page.locator(".signature-preview-surface")).not.toContainText("Executive Corporate");
 
     await page.getByRole("button", { name: /Export/ }).click();
+    await openDisclosureIfCollapsed(page, /More export options/i);
     await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     const firstHtml = await page.evaluate(() => navigator.clipboard.readText());
     expect(firstHtml).not.toContain("Executive Corporate");
@@ -87,16 +95,19 @@ test.describe("Signature Pilot AI step studio smoke tests", () => {
     await expect(page.locator(".generator-template-toolbar")).toContainText("Executive Corporate - Variant 2 of 12");
 
     await page.getByRole("button", { name: /Export/ }).click();
+    await openDisclosureIfCollapsed(page, /More export options/i);
     await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     const secondHtml = await page.evaluate(() => navigator.clipboard.readText());
 
     expect(secondHtml).not.toBe(firstHtml);
 
     await page.getByRole("button", { name: /Styles/ }).click();
+    await openDisclosureIfCollapsed(page, /Advanced options/i);
     await page.locator('label:has-text("Show template tags") select').selectOption("on");
     await expect(page.locator(".signature-preview-surface")).toContainText("Executive Corporate");
 
     await page.getByRole("button", { name: /Export/ }).click();
+    await openDisclosureIfCollapsed(page, /More export options/i);
     await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     const taggedHtml = await page.evaluate(() => navigator.clipboard.readText());
     expect(taggedHtml).toContain("Executive Corporate");
@@ -122,6 +133,7 @@ test.describe("Signature Pilot AI step studio smoke tests", () => {
     );
 
     await page.getByRole("button", { name: /Export/ }).click();
+    await openDisclosureIfCollapsed(page, /More export options/i);
     await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     const teamsHtml = await page.evaluate(() => navigator.clipboard.readText());
     expect(teamsHtml).toContain('href="https://teams.microsoft.com/l/meetup-join/example"');
@@ -146,9 +158,10 @@ test.describe("Signature Pilot AI step studio smoke tests", () => {
   test("Template tag decorations disappear fully when tags are off and return when enabled", async ({ page }) => {
     await page.locator(".generator-mode-field select").selectOption("pro");
     await page.getByRole("button", { name: /Templates/ }).click();
-    await page.locator(".generator-template-card", { hasText: "Contractor Bold" }).getByRole("button", { name: "Use this style" }).click();
+    await page.locator(".generator-template-card", { hasText: "Contractor Bold" }).getByRole("button", { name: "Select" }).click();
 
     await page.getByRole("button", { name: /Export/ }).click();
+    await page.getByRole("button", { name: /More export options/i }).click();
     await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     const defaultHtml = await page.evaluate(() => navigator.clipboard.readText());
 
@@ -157,9 +170,11 @@ test.describe("Signature Pilot AI step studio smoke tests", () => {
     expect(defaultHtml).not.toContain("display:inline-block;padding:4px 10px;border-radius:999px");
 
     await page.getByRole("button", { name: /Styles/ }).click();
+    await openDisclosureIfCollapsed(page, /Advanced options/i);
     await page.locator('label:has-text("Show template tags") select').selectOption("on");
 
     await page.getByRole("button", { name: /Export/ }).click();
+    await openDisclosureIfCollapsed(page, /More export options/i);
     await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     const taggedHtml = await page.evaluate(() => navigator.clipboard.readText());
 
