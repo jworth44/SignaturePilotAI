@@ -7,6 +7,7 @@ import SignaturePreview from "../components/SignaturePreview";
 import { generateSignatureArtifacts, getDefaultDraft } from "../utils/htmlSignatureGenerator";
 
 const STORAGE_KEY = "signaturepilot.ai.draft";
+const VERSION_STORAGE_KEY = "signaturepilot.ai.versions";
 const MOBILE_LAYOUT_BREAKPOINT = 768;
 const SAMPLE_PROFILES = {
   founder: {
@@ -61,10 +62,22 @@ export default function BuilderPage() {
   });
   const [copyMessage, setCopyMessage] = useState("");
   const [copyState, setCopyState] = useState("idle");
+  const [savedVersions, setSavedVersions] = useState(() => {
+    try {
+      const stored = window.localStorage.getItem(VERSION_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
   }, [draft]);
+
+  useEffect(() => {
+    window.localStorage.setItem(VERSION_STORAGE_KEY, JSON.stringify(savedVersions));
+  }, [savedVersions]);
 
   const artifacts = useMemo(() => generateSignatureArtifacts(draft), [draft]);
   const isFree = draft.tier === "free";
@@ -111,6 +124,19 @@ export default function BuilderPage() {
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
+  function saveCurrentVersion(reason = "Saved version") {
+    setSavedVersions((current) => {
+      const nextVersion = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        timestamp: new Date().toISOString(),
+        summary: `${reason} | ${draft.fullName || "Unnamed"} | ${draft.jobTitle || "No title"}`,
+        draft: { ...draft }
+      };
+
+      return [nextVersion, ...current].slice(0, 5);
+    });
+  }
+
   function applySampleProfile(profileKey) {
     const profile = SAMPLE_PROFILES[profileKey];
     if (!profile) {
@@ -136,14 +162,7 @@ export default function BuilderPage() {
   }
 
   function applySuggestions(payload) {
-    setDraft((current) => ({
-      ...current,
-      jobTitle: payload.suggestedTitleLine || current.jobTitle,
-      ctaText: payload.suggestedCta || current.ctaText,
-      disclaimer: payload.suggestedDisclaimer || current.disclaimer,
-      brandDirection: payload.suggestedColorDirection || current.brandDirection,
-      layout: current.tier === "pro" ? payload.suggestedLayoutValue || current.layout : current.layout
-    }));
+    setDraft((current) => applySuggestedFields(current, payload));
   }
 
   async function readFileAsDataUrl(targetField, file) {
@@ -214,6 +233,15 @@ export default function BuilderPage() {
     setCopyMessage("Draft reset.");
   }
 
+  function restoreVersion(version) {
+    setDraft({ ...getDefaultDraft(), ...version.draft });
+    setCopyMessage("Previous signature restored.");
+  }
+
+  function deleteVersion(versionId) {
+    setSavedVersions((current) => current.filter((version) => version.id !== versionId));
+  }
+
   return (
     <div className="page-stack">
       <section className="builder-hero">
@@ -264,9 +292,56 @@ export default function BuilderPage() {
             onFileRemove={(field) => updateField(field, "")}
           />
 
-          <AiLogoStudio draft={draft} onSelectLogo={(value) => updateField("logoDataUrl", value)} />
+          <section className="panel">
+            <div className="panel-header">
+              <div>
+                <p className="eyebrow">Recovery</p>
+                <h2>Recent Signature Versions</h2>
+              </div>
+              <button className="button button-secondary button-inline" type="button" onClick={() => saveCurrentVersion("Manual save")}>
+                Save Current Version
+              </button>
+            </div>
+            {savedVersions.length ? (
+              <div className="version-list">
+                {savedVersions.map((version) => (
+                  <article key={version.id} className="version-card">
+                    <div>
+                      <strong>{version.summary}</strong>
+                      <p className="support-copy">{new Date(version.timestamp).toLocaleString()}</p>
+                    </div>
+                    <div className="button-row">
+                      <button className="button button-primary" type="button" onClick={() => restoreVersion(version)}>
+                        Restore
+                      </button>
+                      <button className="button button-ghost" type="button" onClick={() => deleteVersion(version.id)}>
+                        Delete version
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="support-copy">Save current work or apply AI/logo changes to build a recoverable version history.</p>
+            )}
+          </section>
 
-          <AiSuggestionPanel draft={draft} onApplySuggestions={applySuggestions} />
+          <AiLogoStudio
+            draft={draft}
+            onSelectLogo={(value) => {
+              saveCurrentVersion("Before logo insert");
+              updateField("logoDataUrl", value);
+            }}
+          />
+
+          <AiSuggestionPanel
+            draft={draft}
+            onApplySuggestions={({ mode, suggestions }) => {
+              setDraft((current) => applySuggestedFields(current, suggestions, mode));
+              setCopyMessage(`${mode} applied.`);
+            }}
+            onSaveVersion={saveCurrentVersion}
+          />
         </div>
 
         <div className="builder-right-column">
@@ -280,29 +355,44 @@ export default function BuilderPage() {
               </div>
             </div>
             <div className="button-row">
-              <button
-                className={`button button-primary ${copyState === "success" ? "button-success" : ""} ${copyState === "error" ? "button-error" : ""}`}
-                type="button"
-                onClick={handleCopySignature}
-              >
-                {copyState === "success" ? "Copied!" : "Copy Signature"}
-              </button>
-              {!isFree ? (
-                <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.exportHtml, "Raw HTML")}>
-                  Copy Raw HTML
+              <div className="export-action-card">
+                <button
+                  className={`button button-primary ${copyState === "success" ? "button-success" : ""} ${copyState === "error" ? "button-error" : ""}`}
+                  type="button"
+                  onClick={handleCopySignature}
+                >
+                  {copyState === "success" ? "Copied!" : "Copy Signature"}
                 </button>
+                <p className="support-copy">Copy Signature: best for Gmail, Outlook, Apple Mail, Yahoo. Copies the finished visual signature.</p>
+              </div>
+              {!isFree ? (
+                <div className="export-action-card">
+                  <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.exportHtml, "Raw HTML")}>
+                    Copy Raw HTML
+                  </button>
+                  <p className="support-copy">Copy Raw HTML: Pro only. For platforms that specifically ask for HTML code.</p>
+                </div>
               ) : null}
               {!isFree ? (
-                <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.plainText, "Plain text signature")}>
-                  Copy Plain Text Signature
-                </button>
+                <div className="export-action-card">
+                  <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.plainText, "Plain text signature")}>
+                    Copy Plain Text Signature
+                  </button>
+                  <p className="support-copy">Copy Plain Text Signature: copies a text-only fallback.</p>
+                </div>
               ) : null}
-              <button className="button button-secondary" disabled={isFree} type="button" onClick={handleDownloadHtml}>
-                Download HTML File
-              </button>
-              <button className="button button-ghost" type="button" onClick={handleReset}>
-                Reset
-              </button>
+              <div className="export-action-card">
+                <button className="button button-secondary" disabled={isFree} type="button" onClick={handleDownloadHtml}>
+                  Download HTML File
+                </button>
+                <p className="support-copy">Download HTML File: Pro export/download backup.</p>
+              </div>
+              <div className="export-action-card">
+                <button className="button button-ghost" type="button" onClick={handleReset}>
+                  Reset
+                </button>
+                <p className="support-copy">Reset: clears the current draft and starts over.</p>
+              </div>
             </div>
             <p className="support-copy">
               Use Copy Signature for Gmail, Outlook, Apple Mail, and Yahoo. Do not paste raw HTML into your email settings unless the platform specifically asks for HTML.
@@ -354,4 +444,39 @@ function copyRenderedSignatureFallback(html) {
   selection?.removeAllRanges();
   previousRanges.forEach((previousRange) => selection?.addRange(previousRange));
   document.body.removeChild(container);
+}
+
+function applySuggestedFields(current, suggestions, mode = "Apply Suggestions") {
+  switch (mode) {
+    case "Apply Only Title":
+      return {
+        ...current,
+        jobTitle: suggestions.suggestedTitleLine || current.jobTitle
+      };
+    case "Apply Only CTA":
+      return {
+        ...current,
+        ctaText: suggestions.suggestedCta || current.ctaText
+      };
+    case "Apply Only Disclaimer":
+      return {
+        ...current,
+        disclaimer: suggestions.suggestedDisclaimer || current.disclaimer
+      };
+    case "Apply Suggested Layout":
+      return {
+        ...current,
+        layout: current.tier === "pro" ? suggestions.suggestedLayoutValue || current.layout : current.layout,
+        layoutManuallySelected: true,
+        layoutAutoSelected: false
+      };
+    default:
+      return {
+        ...current,
+        jobTitle: suggestions.suggestedTitleLine || current.jobTitle,
+        ctaText: suggestions.suggestedCta || current.ctaText,
+        disclaimer: suggestions.suggestedDisclaimer || current.disclaimer,
+        brandDirection: suggestions.suggestedColorDirection || current.brandDirection
+      };
+  }
 }

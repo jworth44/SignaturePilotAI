@@ -50,6 +50,18 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
   }
 
   async function runStudioAction(action) {
+    if (action === "blend" && referenceImages.length === 0) {
+      setError("Blend Uploaded Images needs at least one uploaded reference image.");
+      setStatusMessage("");
+      return;
+    }
+
+    if (action === "refine" && !selectedConcept) {
+      setError("Select a logo concept before refining it.");
+      setStatusMessage("");
+      return;
+    }
+
     setLoadingAction(action);
     setError("");
     setStatusMessage("");
@@ -77,6 +89,9 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
       setConcepts(payload.concepts || []);
       setSource(payload.source || "");
       setStatusMessage(payload.message || "");
+      if (!payload.concepts?.length) {
+        setError("No logo concepts were returned. Try another prompt or style.");
+      }
       if (payload.concepts?.[0]?.id) {
         setSelectedConceptId(payload.concepts[0].id);
       }
@@ -133,7 +148,20 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
         </label>
         <label className="field">
           <span>Industry</span>
-          <input value={industry} onChange={(event) => setIndustry(event.target.value)} />
+          <input list="logo-studio-industries" value={industry} onChange={(event) => setIndustry(event.target.value)} />
+          <datalist id="logo-studio-industries">
+            <option value="Contractor / Trades" />
+            <option value="Safety Consulting" />
+            <option value="Real Estate" />
+            <option value="Law / Legal" />
+            <option value="Finance / Insurance" />
+            <option value="Medical / Health" />
+            <option value="Fitness / Coaching" />
+            <option value="Tech / SaaS" />
+            <option value="Retail / Ecommerce" />
+            <option value="Creative / Design" />
+            <option value="General Professional" />
+          </datalist>
         </label>
         <label className="field">
           <span>Style</span>
@@ -205,7 +233,7 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
         </button>
         <button
           className="button button-secondary"
-          disabled={Boolean(loadingAction) || referenceImages.length === 0}
+          disabled={Boolean(loadingAction)}
           type="button"
           onClick={() => runStudioAction("blend")}
         >
@@ -213,7 +241,7 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
         </button>
         <button
           className="button button-secondary"
-          disabled={Boolean(loadingAction) || !selectedConcept}
+          disabled={Boolean(loadingAction)}
           type="button"
           onClick={() => runStudioAction("refine")}
         >

@@ -39,6 +39,11 @@ const FIELD_SECTIONS = [
   }
 ];
 
+const MESSAGE_FIELDS = [
+  ["ctaText", "CTA text", "text"],
+  ["disclaimer", "Disclaimer", "textarea"]
+];
+
 export default function SignatureForm({
   draft,
   effectiveLayout,
@@ -150,6 +155,27 @@ export default function SignatureForm({
           </div>
         </div>
       ))}
+
+      <div className="form-section">
+        <div className="form-section-heading">
+          <div>
+            <h3>Signature messaging</h3>
+            <p className="support-copy">Everything shown in the signature stays editable here, including CTA and disclaimer copy.</p>
+          </div>
+        </div>
+        <div className="field-grid">
+          {MESSAGE_FIELDS.map(([key, label, type]) => (
+            <label key={key} className="field">
+              <span>{label}</span>
+              {type === "textarea" ? (
+                <textarea className="studio-textarea" rows="3" value={draft[key]} onChange={(event) => onFieldChange(key, event.target.value)} />
+              ) : (
+                <input value={draft[key]} onChange={(event) => onFieldChange(key, event.target.value)} />
+              )}
+            </label>
+          ))}
+        </div>
+      </div>
 
       <div className="form-section">
         <div className="form-section-heading">

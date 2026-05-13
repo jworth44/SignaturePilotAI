@@ -311,6 +311,10 @@ h3 {
   font-weight: 700;
 }
 
+.button-inline {
+  align-self: flex-start;
+}
+
 .button:hover,
 .tab-button:hover,
 .text-button:hover {
@@ -804,6 +808,7 @@ h3 {
 
 .field input,
 .field select,
+.field textarea,
 .tier-toggle select {
   width: 100%;
   min-height: 46px;
@@ -831,6 +836,21 @@ h3 {
 .form-section {
   display: grid;
   gap: 0.9rem;
+}
+
+.version-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.version-card,
+.export-action-card {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(24, 33, 49, 0.08);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .upload-grid {
@@ -995,8 +1015,8 @@ h3 {
 .suggestion-card {
   padding: 1rem;
   border-radius: var(--radius-md);
-  background: rgba(38, 99, 255, 0.05);
-  border: 1px solid rgba(38, 99, 255, 0.1);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(24, 33, 49, 0.08);
 }
 
 .button-row {

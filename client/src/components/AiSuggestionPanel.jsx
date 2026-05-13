@@ -1,16 +1,36 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 const TONE_OPTIONS = ["Professional", "Friendly", "Premium", "Contractor", "Minimal"];
 const GOAL_OPTIONS = ["Book calls", "Get quotes", "Show credibility", "Drive website visits"];
+const INDUSTRY_OPTIONS = [
+  "Contractor / Trades",
+  "Safety Consulting",
+  "Real Estate",
+  "Law / Legal",
+  "Finance / Insurance",
+  "Medical / Health",
+  "Fitness / Coaching",
+  "Tech / SaaS",
+  "Retail / Ecommerce",
+  "Creative / Design",
+  "General Professional",
+  "Custom"
+];
 
-export default function AiSuggestionPanel({ draft, onApplySuggestions }) {
+export default function AiSuggestionPanel({ draft, onApplySuggestions, onSaveVersion }) {
   const isFree = draft.tier === "free";
-  const [businessType, setBusinessType] = useState("Consulting");
+  const [industry, setIndustry] = useState("General Professional");
+  const [customIndustry, setCustomIndustry] = useState("");
   const [tone, setTone] = useState("Professional");
   const [goal, setGoal] = useState("Show credibility");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [suggestions, setSuggestions] = useState(null);
+
+  const resolvedIndustry = useMemo(
+    () => (industry === "Custom" ? customIndustry.trim() || "Custom business" : industry),
+    [customIndustry, industry]
+  );
 
   async function handleGenerate() {
     setLoading(true);
@@ -20,7 +40,7 @@ export default function AiSuggestionPanel({ draft, onApplySuggestions }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          businessType,
+          businessType: resolvedIndustry,
           tone,
           goal,
           companyName: draft.companyName,
@@ -32,12 +52,25 @@ export default function AiSuggestionPanel({ draft, onApplySuggestions }) {
         throw new Error(payload.message || "Unable to generate suggestions.");
       }
       setSuggestions(payload);
-      onApplySuggestions(payload);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  function applySuggestion(mode) {
+    if (!suggestions) {
+      return;
+    }
+
+    onSaveVersion?.(`Before AI ${mode.toLowerCase()}`);
+    onApplySuggestions({ mode, suggestions });
+  }
+
+  function discardSuggestions() {
+    setSuggestions(null);
+    setError("");
   }
 
   return (
@@ -52,8 +85,21 @@ export default function AiSuggestionPanel({ draft, onApplySuggestions }) {
       <div className="field-grid field-grid-tight">
         <label className="field">
           <span>Business type / industry</span>
-          <input disabled={isFree} value={businessType} onChange={(event) => setBusinessType(event.target.value)} />
+          <select disabled={isFree} value={industry} onChange={(event) => setIndustry(event.target.value)}>
+            {INDUSTRY_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
         </label>
+
+        {industry === "Custom" ? (
+          <label className="field">
+            <span>Custom industry</span>
+            <input disabled={isFree} value={customIndustry} onChange={(event) => setCustomIndustry(event.target.value)} />
+          </label>
+        ) : null}
 
         <label className="field">
           <span>Desired tone</span>
@@ -78,12 +124,11 @@ export default function AiSuggestionPanel({ draft, onApplySuggestions }) {
         </label>
       </div>
 
-      <button className="button button-primary" disabled={loading || isFree} type="button" onClick={handleGenerate}>
+      <button className="button button-primary button-inline" disabled={loading || isFree} type="button" onClick={handleGenerate}>
         {loading ? "Generating..." : "Generate Signature Suggestions"}
       </button>
 
       {isFree ? <p className="locked-copy">Advanced AI suggestions are available in Pro Mode.</p> : null}
-
       {error ? <p className="error-copy">{error}</p> : null}
 
       {suggestions ? (
@@ -108,10 +153,31 @@ export default function AiSuggestionPanel({ draft, onApplySuggestions }) {
             <span className="suggestion-label">Suggested layout</span>
             <p>{suggestions.suggestedLayout}</p>
           </div>
+          <p className="support-copy">Current layout will stay unchanged unless you explicitly apply the suggested layout.</p>
           <p className="support-copy">
             Source: {suggestions.source === "openai" ? "OpenAI API" : "Built-in fallback logic"}
           </p>
           {suggestions.message ? <p className="support-copy">{suggestions.message}</p> : null}
+          <div className="button-row">
+            <button className="button button-primary" type="button" onClick={() => applySuggestion("Apply Suggestions")}>
+              Apply Suggestions
+            </button>
+            <button className="button button-secondary" type="button" onClick={() => applySuggestion("Apply Only Title")}>
+              Apply Only Title
+            </button>
+            <button className="button button-secondary" type="button" onClick={() => applySuggestion("Apply Only CTA")}>
+              Apply Only CTA
+            </button>
+            <button className="button button-secondary" type="button" onClick={() => applySuggestion("Apply Only Disclaimer")}>
+              Apply Only Disclaimer
+            </button>
+            <button className="button button-secondary" type="button" onClick={() => applySuggestion("Apply Suggested Layout")}>
+              Apply Suggested Layout
+            </button>
+            <button className="button button-ghost" type="button" onClick={discardSuggestions}>
+              Discard Suggestions
+            </button>
+          </div>
         </div>
       ) : null}
     </section>

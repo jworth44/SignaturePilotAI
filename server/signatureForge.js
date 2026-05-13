@@ -43,6 +43,75 @@ const GOAL_SUFFIX_MAP = {
   "Drive website visits": "for site traffic"
 };
 
+const INDUSTRY_MAP = {
+  "Contractor / Trades": {
+    noun: "Project Lead",
+    cta: "Request a site visit",
+    disclaimer: "Quotes and project timelines are confirmed after scope review.",
+    layout: "contractor"
+  },
+  "Safety Consulting": {
+    noun: "Safety Consultant",
+    cta: "Book a compliance review",
+    disclaimer: "Safety recommendations are tailored after a documented assessment.",
+    layout: "executive"
+  },
+  "Real Estate": {
+    noun: "Real Estate Advisor",
+    cta: "Book a property consult",
+    disclaimer: "Availability, pricing, and disclosures are confirmed before listing or purchase.",
+    layout: "corporate"
+  },
+  "Law / Legal": {
+    noun: "Legal Counsel",
+    cta: "Schedule a confidential consult",
+    disclaimer: "This email does not create a solicitor-client relationship until confirmed in writing.",
+    layout: "executive"
+  },
+  "Finance / Insurance": {
+    noun: "Financial Advisor",
+    cta: "Review your options",
+    disclaimer: "Coverage and financial guidance are subject to suitability and policy review.",
+    layout: "corporate"
+  },
+  "Medical / Health": {
+    noun: "Care Specialist",
+    cta: "Book a consultation",
+    disclaimer: "Medical guidance is confirmed after individual assessment and intake.",
+    layout: "executive"
+  },
+  "Fitness / Coaching": {
+    noun: "Performance Coach",
+    cta: "Start your plan",
+    disclaimer: "Training recommendations are adjusted to goals, readiness, and health history.",
+    layout: "minimal"
+  },
+  "Tech / SaaS": {
+    noun: "Product Advisor",
+    cta: "See the platform in action",
+    disclaimer: "Roadmap and pricing details are shared during live demos and onboarding.",
+    layout: "minimal"
+  },
+  "Retail / Ecommerce": {
+    noun: "Brand Manager",
+    cta: "Browse featured collections",
+    disclaimer: "Availability, fulfillment, and pricing are subject to active inventory.",
+    layout: "minimal"
+  },
+  "Creative / Design": {
+    noun: "Creative Director",
+    cta: "View the portfolio",
+    disclaimer: "Project timelines and licensing are finalized in the approved scope.",
+    layout: "minimal"
+  },
+  "General Professional": {
+    noun: "Business Advisor",
+    cta: "Schedule an introduction",
+    disclaimer: "Replies are monitored during regular business hours.",
+    layout: "executive"
+  }
+};
+
 const LOGO_STYLE_PALETTES = {
   Modern: ["circle", "monogram", "square", "wordmark"],
   Luxury: ["crest", "ring", "monogram", "shield"],
@@ -132,17 +201,19 @@ export function normalizeSignatureLayoutValue(value) {
 
 function buildFallbackSuggestions(input) {
   const tonePreset = TONE_MAP[input.tone] || TONE_MAP.Professional;
+  const industryPreset = INDUSTRY_MAP[input.businessType] || INDUSTRY_MAP["General Professional"];
   const company = input.companyName || input.businessType || "Your Company";
   const person = input.fullName || "Your Name";
   const goalSuffix = GOAL_SUFFIX_MAP[input.goal] || "for professional outreach";
+  const compactIndustry = input.businessType === "Custom" ? "Business" : input.businessType;
 
   return {
-    suggestedTitleLine: `${tonePreset.titlePrefix} ${input.businessType} Advisor at ${company}`,
-    suggestedCta: `${tonePreset.cta} ${goalSuffix}.`,
-    suggestedDisclaimer: tonePreset.disclaimer,
-    suggestedColorDirection: tonePreset.colorDirection,
-    suggestedLayout: readableLayoutName(tonePreset.layout),
-    suggestedLayoutValue: tonePreset.layout,
+    suggestedTitleLine: `${tonePreset.titlePrefix} ${industryPreset.noun} | ${company}`,
+    suggestedCta: `${industryPreset.cta || tonePreset.cta} ${goalSuffix}.`,
+    suggestedDisclaimer: industryPreset.disclaimer || tonePreset.disclaimer,
+    suggestedColorDirection: `${tonePreset.colorDirection} for ${compactIndustry}.`,
+    suggestedLayout: readableLayoutName(industryPreset.layout || tonePreset.layout),
+    suggestedLayoutValue: industryPreset.layout || tonePreset.layout,
     promptEcho: `${person} | ${input.businessType} | ${input.tone} | ${input.goal}`
   };
 }
