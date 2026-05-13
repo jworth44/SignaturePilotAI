@@ -4,7 +4,7 @@ const LAYOUT_META = {
   minimal: { name: "Minimal", accentWeight: 500, label: "Connect" },
   corporate: { name: "Corporate", accentWeight: 700, label: "Visit our website" },
   "mobile-compact": { name: "Mobile Compact", accentWeight: 600, label: "Tap to connect" },
-  "premium-split": { name: "Corporate Split", accentWeight: 700, label: "Discover" },
+  "premium-split": { name: "Premium", accentWeight: 700, label: "Discover" },
   classic: { name: "Classic", accentWeight: 500, label: "Call" },
   modern: { name: "Modern", accentWeight: 600, label: "Connect" },
   compact: { name: "Compact", accentWeight: 500, label: "Reach" }
@@ -30,7 +30,7 @@ export function getDefaultDraft() {
     facebookUrl: "",
     instagramUrl: "",
     brandColor: "#2663ff",
-    layout: "minimal",
+    layout: "classic",
     layoutManuallySelected: false,
     layoutAutoSelected: false,
     tier: "free",
@@ -250,11 +250,12 @@ export function generateSignatureHtml({ draft, tier, includeBranding }) {
 }
 
 function applyTierRules(draft) {
+  const normalizedLayout = normalizeLayoutValue(draft.layout);
   if (draft.tier !== "pro") {
     return {
       ...draft,
       includeBranding: true,
-      layout: draft.layout === "mobile-compact" ? "mobile-compact" : draft.layout === "minimal" ? "minimal" : "executive",
+      layout: ["classic", "minimal", "mobile-compact"].includes(normalizedLayout) ? normalizedLayout : "classic",
       logoSize: draft.logoSize === "custom" || draft.logoSize === "extra-large" ? "large" : draft.logoSize,
       customLogoWidth: normalizeCustomLogoWidth(draft.customLogoWidth),
       showDivider: false,
@@ -266,7 +267,30 @@ function applyTierRules(draft) {
     };
   }
 
-  return draft;
+  return {
+    ...draft,
+    layout: normalizedLayout
+  };
+}
+
+function normalizeLayoutValue(value) {
+  switch (String(value || "").trim().toLowerCase()) {
+    case "executive":
+    case "contractor":
+      return "classic";
+    case "premium":
+      return "premium-split";
+    case "corporate":
+    case "minimal":
+    case "mobile-compact":
+    case "premium-split":
+    case "classic":
+    case "modern":
+    case "compact":
+      return String(value || "").trim().toLowerCase();
+    default:
+      return "classic";
+  }
 }
 
 function buildTitleLine(draft) {

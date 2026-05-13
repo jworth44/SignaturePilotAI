@@ -868,6 +868,10 @@ h3 {
   background: rgba(255, 255, 255, 0.7);
 }
 
+.cross-sell-card {
+  align-content: space-between;
+}
+
 .asset-uploader-header {
   display: flex;
   align-items: center;
@@ -944,6 +948,23 @@ h3 {
   flex-wrap: wrap;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.preview-controls-card,
+.preview-controls-header {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.preview-controls-card {
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(24, 33, 49, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.preview-controls-grid {
+  align-items: end;
 }
 
 .tier-pill {

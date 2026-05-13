@@ -4,7 +4,7 @@ import cors from "cors";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Stripe from "stripe";
-import { buildLogoStudioConcepts, buildSignatureSuggestions } from "./signatureForge.js";
+import { buildSignatureSuggestions } from "./signatureForge.js";
 
 const app = express();
 const port = process.env.PORT || 3101;
@@ -33,28 +33,10 @@ app.get("/api/health", (_request, response) => {
   });
 });
 
-app.get("/api/ai/logo-studio/status", (_request, response) => {
-  response.json({
-    logoAiEnabled: Boolean(process.env.OPENAI_API_KEY),
-    message: process.env.OPENAI_API_KEY
-      ? "AI image generation is available."
-      : "AI image generation is not connected in this deployment."
-  });
-});
-
 app.post("/api/ai/signature-suggestions", async (request, response) => {
   try {
     const suggestions = await buildSignatureSuggestions(request.body || {});
     return response.json(suggestions);
-  } catch (error) {
-    return response.status(400).json({ message: error.message });
-  }
-});
-
-app.post("/api/ai/logo-studio", async (request, response) => {
-  try {
-    const payload = await buildLogoStudioConcepts(request.body || {});
-    return response.json(payload);
   } catch (error) {
     return response.status(400).json({ message: error.message });
   }

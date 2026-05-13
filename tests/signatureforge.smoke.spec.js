@@ -15,21 +15,24 @@ test.describe("Signature Pilot AI smoke tests", () => {
     await expect(page.getByText("Free signatures include Signature Pilot AI branding. Editing/removing branding is a Pro feature.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Copy Signature" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Copy Raw HTML" })).toHaveCount(0);
-    await expect(page.locator('label:has-text("Logo size") select')).toBeVisible();
-    await expect(page.locator('label:has-text("Logo size") select option[value="extra-large"]')).toHaveAttribute("disabled", "");
-    await expect(page.locator('label:has-text("Logo size") select option[value="custom"]')).toHaveAttribute("disabled", "");
-    await expect(page.locator('label:has-text("Layout") select option[value="mobile-compact"]')).toHaveCount(1);
+    await expect(page.getByText("Logo Pilot AI will help you create, refine, and blend logo concepts.")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Explore Logo Pilot AI" })).toBeVisible();
+    await expect(page.getByText("AI Logo Studio")).toHaveCount(0);
+    await expect(page.locator("#logo-upload")).toBeVisible();
+    await expect(page.locator('[aria-label="Preview logo size"]')).toBeVisible();
+    await expect(page.locator('[aria-label="Preview logo size"] option[value="extra-large"]')).toHaveAttribute("disabled", "");
+    await expect(page.locator('[aria-label="Preview logo size"] option[value="custom"]')).toHaveAttribute("disabled", "");
+    await expect(page.locator('[aria-label="Preview layout"] option[value="mobile-compact"]')).toHaveCount(1);
     await expect(page.getByRole("button", { name: "Startup Founder" })).toBeVisible();
-    await expect(page.getByText("Free Mode includes Executive, Minimal, and Mobile Compact. Contractor and Corporate unlock with Pro.")).toBeVisible();
-    await expect(page.getByText("AI Logo Studio is included with Pro. Generate, upload, blend, and refine logo concepts for your signature.")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Generate Logo Concepts" })).toHaveCount(0);
+    await expect(page.getByText("Free Mode includes Classic, Minimal, and Mobile Compact. Corporate and Premium unlock with Pro.")).toBeVisible();
     await expect(page.getByText("Copy Signature: best for Gmail, Outlook, Apple Mail, Yahoo. Copies the finished visual signature.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Revert to Original" })).toBeVisible();
 
-    await expect(page.locator('label:has-text("Layout") select')).toBeEnabled();
-    await page.locator('label:has-text("Layout") select').selectOption("mobile-compact");
+    await expect(page.locator('[aria-label="Preview layout"]')).toBeEnabled();
+    await page.locator('[aria-label="Preview layout"]').selectOption("mobile-compact");
     await expect(page.locator(".preview-meta")).toContainText("Mobile Compact");
-    await expect(page.locator('label:has-text("Pro visual divider") input')).toBeDisabled();
-    await expect(page.locator('label:has-text("Remove Signature Pilot AI branding") input')).toBeDisabled();
+    await expect(page.locator('[aria-label="Preview divider"]')).toBeDisabled();
+    await expect(page.locator('[aria-label="Preview branding"]')).toBeDisabled();
 
     await page.getByRole("button", { name: "Copy Signature" }).click();
     await expect(page.getByRole("button", { name: "Copied!" })).toBeVisible();
@@ -72,7 +75,7 @@ test.describe("Signature Pilot AI smoke tests", () => {
     expect(clipboardPayload.text).toContain("Signature Pilot AI");
   });
 
-  test("Pro Mode unlocks controls, logo studio is honest when AI is not connected, and exports stay clean", async ({ page }) => {
+  test("Pro Mode unlocks preview controls and exports stay clean", async ({ page }) => {
     await page.locator(".tier-toggle select").selectOption("pro");
 
     const aiButton = page.getByRole("button", { name: "Generate Signature Suggestions" });
@@ -85,24 +88,16 @@ test.describe("Signature Pilot AI smoke tests", () => {
     });
     expect(buttonMetrics.width).toBeLessThan(buttonMetrics.panelWidth * 0.9);
 
-    await expect(page.locator('label:has-text("Layout") select')).toBeEnabled();
-    await expect(page.locator('label:has-text("Pro visual divider") input')).toBeEnabled();
-    await expect(page.locator('label:has-text("Remove Signature Pilot AI branding") input')).toBeEnabled();
+    await expect(page.locator('[aria-label="Preview layout"]')).toBeEnabled();
+    await expect(page.locator('[aria-label="Preview divider"]')).toBeEnabled();
+    await expect(page.locator('[aria-label="Preview branding"]')).toBeEnabled();
     await expect(page.getByRole("button", { name: "Copy Signature" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Copy Raw HTML" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Generate Logo Concepts" })).toBeVisible();
     await expect(page.locator('label:has-text("CTA text") input')).toBeVisible();
     await expect(page.locator('label:has-text("Disclaimer") textarea')).toBeVisible();
-    await expect(page.locator('label:has-text("Logo size") select option[value="extra-large"]')).not.toHaveAttribute("disabled", "");
-    await expect(page.locator('label:has-text("Logo size") select option[value="custom"]')).not.toHaveAttribute("disabled", "");
+    await expect(page.locator('[aria-label="Preview logo size"] option[value="extra-large"]')).not.toHaveAttribute("disabled", "");
+    await expect(page.locator('[aria-label="Preview logo size"] option[value="custom"]')).not.toHaveAttribute("disabled", "");
     await expect(page.locator('label:has-text("Business type / industry") select')).toBeVisible();
-
-    await expect(page.getByText("AI logo generation is not configured yet. Pro Logo Studio will be available when live AI image generation is connected.")).toBeVisible();
-    await expect(page.getByText("AI image generation is not connected in this deployment.")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Generate Logo Concepts" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "Blend Uploaded Images" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "Refine Selected Logo" })).toBeDisabled();
-    await expect(page.locator(".logo-concept-card")).toHaveCount(0);
 
     const logoBuffer = Buffer.from(
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9s7h5XQAAAAASUVORK5CYII=",
@@ -115,32 +110,22 @@ test.describe("Signature Pilot AI smoke tests", () => {
     });
     await expect(page.getByAltText("Logo upload")).toBeVisible();
     await expect(page.locator(".signature-preview-surface img")).toHaveAttribute("src", /data:image\/png;base64/);
-    await page.locator("#ai-logo-references").setInputFiles({
-      name: "reference.png",
-      mimeType: "image/png",
-      buffer: logoBuffer
-    });
-    await expect(page.getByAltText("Reference 1")).toBeVisible();
-    const logoStudio = page.locator(".ai-logo-panel");
-    await logoStudio.locator('label:has-text("Fit") select').selectOption("cover");
-    await logoStudio.locator('label:has-text("Shape") select').selectOption("circle");
-
-    await page.locator('label:has-text("Remove Signature Pilot AI branding") input').check();
-    await page.locator('label:has-text("Layout") select').selectOption("mobile-compact");
-    await page.locator('label:has-text("Logo size") select').selectOption("custom");
-    await page.locator('label:has-text("Custom logo width") input').fill("140");
+    await page.locator('[aria-label="Preview branding"]').selectOption("remove");
+    await page.locator('[aria-label="Preview layout"]').selectOption("premium-split");
+    await expect(page.locator(".preview-meta")).toContainText("Premium");
+    await page.locator('[aria-label="Preview divider"]').selectOption("on");
+    await expect(page.locator(".preview-meta")).toContainText("Divider on");
+    await page.locator('[aria-label="Preview logo size"]').selectOption("custom");
+    await page.locator('[aria-label="Preview custom logo width"]').fill("140");
+    await expect(page.locator(".signature-preview-surface")).not.toContainText("Created with Signature Pilot AI");
     await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     await page.waitForTimeout(150);
 
     const copiedHtml = await page.evaluate(() => navigator.clipboard.readText());
     expect(copiedHtml).not.toContain("Created with Signature Pilot AI");
     expect(copiedHtml).toContain('width="140"');
-    expect(copiedHtml).toContain("max-width:340px");
-    expect(copiedHtml).toContain('<td align="center" valign="top"');
-    expect(copiedHtml).toContain("object-fit:cover");
-    expect(copiedHtml).toContain("border-radius:999px");
-    expect(copiedHtml).not.toContain("border-left");
-    expect(copiedHtml).not.toContain("width:18px;padding:0 12px");
+    expect(copiedHtml).toContain("Premium split layout");
+    expect(copiedHtml).toContain("width:18px;padding:0 12px");
   });
 
   test("Suggestions do not auto-overwrite, can be applied selectively, and recovery restores", async ({ page }) => {
@@ -177,11 +162,13 @@ test.describe("Signature Pilot AI smoke tests", () => {
 
   test("Generated signature keeps core export and layout rules", async ({ page }) => {
     await page.locator(".tier-toggle select").selectOption("pro");
-    const layouts = ["executive", "minimal", "contractor", "corporate", "mobile-compact"];
+    const layouts = ["classic", "minimal", "corporate", "premium-split", "mobile-compact"];
 
     for (const layout of layouts) {
-      await page.locator('label:has-text("Layout") select').selectOption(layout);
-      await page.locator('label:has-text("Pro visual divider") input').uncheck();
+      await page.locator('[aria-label="Preview layout"]').selectOption(layout);
+      if (layout !== "mobile-compact") {
+        await page.locator('[aria-label="Preview divider"]').selectOption("off");
+      }
       const preview = page.locator(".signature-preview-surface");
       const previewHtml = await preview.innerHTML();
 
@@ -224,12 +211,12 @@ test.describe("Signature Pilot AI smoke tests", () => {
 
     await expect(page.locator(".builder-layout")).toBeVisible();
     await expect(page.getByRole("button", { name: "Copy Signature" })).toBeVisible();
-    await expect(page.locator('label:has-text("Layout") select')).toHaveValue("mobile-compact");
+    await expect(page.locator('[aria-label="Preview layout"]')).toHaveValue("mobile-compact");
     await expect(page.getByText("Mobile Compact selected for better mobile email compatibility.")).toBeVisible();
 
-    await page.locator('label:has-text("Layout") select').selectOption("executive");
+    await page.locator('[aria-label="Preview layout"]').selectOption("classic");
     await page.reload({ waitUntil: "networkidle" });
-    await expect(page.locator('label:has-text("Layout") select')).toHaveValue("executive");
+    await expect(page.locator('[aria-label="Preview layout"]')).toHaveValue("classic");
     await expect(page.getByText("Mobile Compact selected for better mobile email compatibility.")).toHaveCount(0);
 
     await page.locator('label:has-text("Job title") input').fill("Senior Regional Partnerships Director");
@@ -238,5 +225,15 @@ test.describe("Signature Pilot AI smoke tests", () => {
 
     const previewOverflow = await page.locator(".signature-preview-surface").evaluate((element) => element.scrollWidth > element.clientWidth);
     expect(previewOverflow).toBe(false);
+  });
+
+  test("Preview quick controls can revert to the original draft", async ({ page }) => {
+    const originalName = await page.locator('label:has-text("Full name") input').inputValue();
+    await page.locator('label:has-text("Full name") input').fill("Taylor Rivers");
+    await page.locator('[aria-label="Preview layout"]').selectOption("mobile-compact");
+    await page.getByRole("button", { name: "Revert to Original" }).click();
+    await expect(page.locator('label:has-text("Full name") input')).toHaveValue(originalName);
+    await expect(page.locator('[aria-label="Preview layout"]')).toHaveValue("classic");
+    await expect(page.getByText("Reverted to the original signature.")).toBeVisible();
   });
 });

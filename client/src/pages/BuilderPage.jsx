@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import AiSuggestionPanel from "../components/AiSuggestionPanel";
-import AiLogoStudio from "../components/AiLogoStudio";
 import SignatureForm from "../components/SignatureForm";
 import SignaturePreview from "../components/SignaturePreview";
 import { generateSignatureArtifacts, getDefaultDraft } from "../utils/htmlSignatureGenerator";
@@ -32,7 +31,7 @@ const SAMPLE_PROFILES = {
     website: "ortizbuildco.com",
     location: "Dallas, TX",
     brandColor: "#d97706",
-    layout: "contractor",
+    layout: "classic",
     ctaText: "Request a project quote"
   },
   executive: {
@@ -45,21 +44,15 @@ const SAMPLE_PROFILES = {
     location: "Chicago, IL",
     linkedinUrl: "https://linkedin.com/company/summitridgecapital",
     brandColor: "#0f172a",
-    layout: "executive",
+    layout: "corporate",
     ctaText: "Schedule an introduction"
   }
 };
 
 export default function BuilderPage() {
-  const [draft, setDraft] = useState(() => {
-    const fallback = getDefaultDraft();
-    try {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
-      return saved ? { ...fallback, ...JSON.parse(saved) } : fallback;
-    } catch {
-      return fallback;
-    }
-  });
+  const initialDraft = useMemo(() => loadInitialDraft(), []);
+  const originalDraftRef = useRef(initialDraft);
+  const [draft, setDraft] = useState(initialDraft);
   const [copyMessage, setCopyMessage] = useState("");
   const [copyState, setCopyState] = useState("idle");
   const [savedVersions, setSavedVersions] = useState(() => {
@@ -146,7 +139,10 @@ export default function BuilderPage() {
     setDraft((current) => ({
       ...current,
       ...profile,
-      layout: current.tier === "free" && profile.layout !== "mobile-compact" && profile.layout !== "minimal" ? "executive" : profile.layout,
+      layout:
+        current.tier === "free" && !["classic", "minimal", "mobile-compact"].includes(profile.layout)
+          ? "classic"
+          : profile.layout,
       layoutManuallySelected: true,
       layoutAutoSelected: false
     }));
@@ -220,7 +216,7 @@ export default function BuilderPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "signatureforge-signature.html";
+    link.download = "signature-pilot-signature.html";
     link.click();
     URL.revokeObjectURL(url);
     setCopyMessage("HTML file downloaded.");
@@ -231,6 +227,11 @@ export default function BuilderPage() {
     setDraft(fallback);
     window.localStorage.removeItem(STORAGE_KEY);
     setCopyMessage("Draft reset.");
+  }
+
+  function handleRevertToOriginal() {
+    setDraft({ ...getDefaultDraft(), ...originalDraftRef.current });
+    setCopyMessage("Reverted to the original signature.");
   }
 
   function restoreVersion(version) {
@@ -266,12 +267,9 @@ export default function BuilderPage() {
         <div className="builder-left-column">
           <SignatureForm
             draft={draft}
-            effectiveLayout={artifacts.effectiveDraft.layout}
-            showAutoLayoutNotice={showAutoLayoutNotice}
             onApplySampleProfile={applySampleProfile}
             onFieldChange={updateField}
             onColorChange={(value) => updateField("brandColor", value)}
-            onLayoutChange={handleLayoutChange}
             onTierChange={(value) =>
               setDraft((current) => ({
                 ...current,
@@ -284,10 +282,6 @@ export default function BuilderPage() {
                     : current.logoSize
               }))
             }
-            onDividerToggle={(value) => updateField("showDivider", value)}
-            onLogoSizeChange={(value) => updateField("logoSize", value)}
-            onCustomLogoWidthChange={(value) => updateField("customLogoWidth", value)}
-            onBrandingToggle={(value) => updateField("includeBranding", value)}
             onFileSelect={readFileAsDataUrl}
             onFileRemove={(field) => updateField(field, "")}
           />
@@ -322,18 +316,9 @@ export default function BuilderPage() {
                 ))}
               </div>
             ) : (
-              <p className="support-copy">Save current work or apply AI/logo changes to build a recoverable version history.</p>
+              <p className="support-copy">Save current work or apply AI suggestions to build a recoverable version history.</p>
             )}
           </section>
-
-          <AiLogoStudio
-            draft={draft}
-            onSelectLogo={(value) => {
-              saveCurrentVersion("Before logo insert");
-              updateField("logoDataUrl", value);
-            }}
-            onLogoStyleChange={updateField}
-          />
 
           <AiSuggestionPanel
             draft={draft}
@@ -346,7 +331,17 @@ export default function BuilderPage() {
         </div>
 
         <div className="builder-right-column">
-          <SignaturePreview draft={draft} />
+          <SignaturePreview
+            draft={draft}
+            effectiveDraft={artifacts.effectiveDraft}
+            onLayoutChange={handleLayoutChange}
+            onDividerToggle={(value) => updateField("showDivider", value)}
+            onLogoSizeChange={(value) => updateField("logoSize", value)}
+            onCustomLogoWidthChange={(value) => updateField("customLogoWidth", value)}
+            onBrandingToggle={(value) => updateField("includeBranding", value)}
+            onRevertToOriginal={handleRevertToOriginal}
+            showAutoLayoutNotice={showAutoLayoutNotice}
+          />
 
           <section className="panel export-panel">
             <div className="panel-header">
@@ -415,6 +410,16 @@ export default function BuilderPage() {
       </section>
     </div>
   );
+}
+
+function loadInitialDraft() {
+  const fallback = getDefaultDraft();
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? { ...fallback, ...JSON.parse(saved) } : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 function copyRenderedSignatureFallback(html) {
