@@ -51,11 +51,11 @@ const SAMPLE_PROFILES = {
 };
 
 const TEMPLATE_OPTIONS = [
-  { value: "classic", label: "Professional Classic", description: "Balanced and polished for daily business email.", pro: false },
-  { value: "corporate", label: "Corporate", description: "Structured and brand-forward for teams and partnerships.", pro: true },
-  { value: "minimal", label: "Minimal", description: "Clean, modern, and founder-friendly.", pro: false },
-  { value: "premium-split", label: "Premium", description: "A richer presentation with a stronger executive feel.", pro: true },
-  { value: "mobile-compact", label: "Mobile Compact", description: "Built to stay readable in narrow mobile email apps.", pro: false }
+  { value: "classic", label: "Professional Classic", description: "Balanced and polished for daily business email.", pro: false, tone: "blue", person: "Jordan Wells", title: "Founder | Northlight Studio", cta: "Book a quick call" },
+  { value: "corporate", label: "Corporate", description: "Structured and brand-forward for teams and partnerships.", pro: true, tone: "charcoal", person: "Avery Chen", title: "VP, Strategic Partnerships", cta: "Schedule an introduction" },
+  { value: "minimal", label: "Minimal", description: "Clean, modern, and founder-friendly.", pro: false, tone: "slate", person: "Jordan Wells", title: "Founder | Signature Pilot AI", cta: "See our latest work" },
+  { value: "premium-split", label: "Premium", description: "A richer presentation with a stronger executive feel.", pro: true, tone: "violet", person: "Avery Chen", title: "Strategic Partnerships | Summit Ridge", cta: "Private client briefing" },
+  { value: "mobile-compact", label: "Mobile Compact", description: "Built to stay readable in narrow mobile email apps.", pro: false, tone: "mobile", person: "Mason Ortiz", title: "Licensed General Contractor", cta: "Request a quote" }
 ];
 
 const CONTROL_TABS = ["Content", "Style", "AI", "Export"];
@@ -506,7 +506,7 @@ export default function BuilderPage() {
           <p className="hero-subheadline">A focused workspace for professional email signatures that stay clean in Gmail, Outlook, Apple Mail, and Yahoo.</p>
         </div>
         <div className="workspace-topbar-actions">
-          <label className="tier-toggle">
+          <label className="tier-toggle workspace-mode-control">
             <span>Mode</span>
             <select value={draft.tier} onChange={(event) => handleTierChange(event.target.value)}>
               <option value="free">Free Mode</option>
@@ -562,11 +562,13 @@ export default function BuilderPage() {
                   type="button"
                   onClick={() => handleLayoutChange(template.value)}
                 >
-                  <div className={`template-thumb template-thumb-${template.value}`}>
-                    <span className="template-thumb-bar" />
-                    <span className="template-thumb-line template-thumb-line-strong" />
-                    <span className="template-thumb-line" />
-                    <span className="template-thumb-line template-thumb-line-short" />
+                  <div className={`template-mini-preview template-mini-preview-${template.tone}`}>
+                    <div className="template-mini-logo" />
+                    <div className="template-mini-copy">
+                      <span className="template-mini-name">{template.person}</span>
+                      <span className="template-mini-title">{template.title}</span>
+                      <span className="template-mini-cta">{template.cta}</span>
+                    </div>
                   </div>
                   <div className="workspace-template-copy">
                     <div className="workspace-template-title-row">
