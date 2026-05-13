@@ -12,6 +12,7 @@ export default function SignaturePreview({
   const artifacts = useMemo(() => generateSignatureArtifacts(draft), [draft]);
   const layoutMeta = getLayoutMeta(artifacts.effectiveDraft.layout);
   const zoomFactor = Number(previewZoom) / 100;
+  const previewShellMaxWidth = previewDevice === "mobile" ? Math.round(390 * zoomFactor) : Math.round(960 * zoomFactor);
 
   return (
     <section className="workspace-preview-shell">
@@ -67,7 +68,7 @@ export default function SignaturePreview({
       </div>
 
       <div className={`workspace-email-stage workspace-email-stage-${previewDevice}`}>
-        <div className="workspace-email-shell">
+        <div className="workspace-email-shell" style={{ maxWidth: `${previewShellMaxWidth}px` }}>
           <div className="workspace-email-header">
             <div className="workspace-email-row">
               <strong>From</strong>
@@ -87,10 +88,7 @@ export default function SignaturePreview({
             <p>Hi there,</p>
             <p>I wanted to send over a quick follow-up with the contact details and next step link below.</p>
             <p>Best regards,</p>
-            <div
-              className="workspace-preview-scale"
-              style={{ transform: `scale(${zoomFactor})`, transformOrigin: "top center" }}
-            >
+            <div className="workspace-preview-scale">
               <div className="signature-preview-surface" dangerouslySetInnerHTML={{ __html: artifacts.previewHtml }} />
             </div>
           </div>

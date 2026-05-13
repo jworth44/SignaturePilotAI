@@ -167,6 +167,37 @@ test.describe("Signature Pilot AI smoke tests", () => {
     }
   });
 
+  test("Desktop builder fits the viewport without horizontal overflow", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/builder", { waitUntil: "networkidle" });
+
+    await expect(page.locator(".workspace-templates")).toBeVisible();
+    await expect(page.locator(".workspace-preview")).toBeVisible();
+    await expect(page.locator(".workspace-controls")).toBeVisible();
+
+    const layout = await page.evaluate(() => {
+      const root = document.documentElement;
+      const controls = document.querySelector(".workspace-controls")?.getBoundingClientRect();
+      const preview = document.querySelector(".workspace-preview")?.getBoundingClientRect();
+      const previewStage = document.querySelector(".workspace-email-stage");
+
+      return {
+        scrollWidth: root.scrollWidth,
+        innerWidth: window.innerWidth,
+        controlsRight: controls?.right ?? 0,
+        controlsLeft: controls?.left ?? 0,
+        previewRight: preview?.right ?? 0,
+        previewOverflow: previewStage ? previewStage.scrollWidth > previewStage.clientWidth : true
+      };
+    });
+
+    expect(layout.scrollWidth).toBeLessThanOrEqual(layout.innerWidth + 1);
+    expect(layout.controlsLeft).toBeGreaterThanOrEqual(0);
+    expect(layout.controlsRight).toBeLessThanOrEqual(layout.innerWidth + 1);
+    expect(layout.previewRight).toBeLessThanOrEqual(layout.innerWidth + 1);
+    expect(layout.previewOverflow).toBe(false);
+  });
+
   test("Homepage stays within the viewport on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/", { waitUntil: "networkidle" });
