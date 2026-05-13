@@ -73,11 +73,12 @@ test.describe("Signature Pilot AI step studio smoke tests", () => {
 
     await page.locator(".generator-template-card", { hasText: "Executive Corporate" }).getByRole("button", { name: "Use this style" }).click();
     await expect(page.locator(".preview-meta")).toContainText("Executive Corporate");
+    await expect(page.locator(".signature-preview-surface")).not.toContainText("Executive Corporate");
 
     await page.getByRole("button", { name: /Export/ }).click();
     await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     const firstHtml = await page.evaluate(() => navigator.clipboard.readText());
-    expect(firstHtml).toContain("Executive Corporate");
+    expect(firstHtml).not.toContain("Executive Corporate");
 
     await page.getByRole("button", { name: /Templates/ }).click();
     await page.getByRole("button", { name: "Regenerate layout" }).click();
@@ -87,8 +88,16 @@ test.describe("Signature Pilot AI step studio smoke tests", () => {
     await page.getByRole("button", { name: "Copy Raw HTML" }).click();
     const secondHtml = await page.evaluate(() => navigator.clipboard.readText());
 
-    expect(secondHtml).toContain("Executive Corporate");
     expect(secondHtml).not.toBe(firstHtml);
+
+    await page.getByRole("button", { name: /Styles/ }).click();
+    await page.locator('label:has-text("Show template tags") select').selectOption("on");
+    await expect(page.locator(".signature-preview-surface")).toContainText("Executive Corporate");
+
+    await page.getByRole("button", { name: /Export/ }).click();
+    await page.getByRole("button", { name: "Copy Raw HTML" }).click();
+    const taggedHtml = await page.evaluate(() => navigator.clipboard.readText());
+    expect(taggedHtml).toContain("Executive Corporate");
 
     await page.getByRole("button", { name: "Copy Signature" }).click();
     await expect(page.getByRole("button", { name: "Copied!" })).toBeVisible();

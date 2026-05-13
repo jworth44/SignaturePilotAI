@@ -773,6 +773,14 @@ export default function BuilderPage() {
               </select>
             </label>
 
+            <label className="field">
+              <span>Show template tags</span>
+              <select value={artifacts.effectiveDraft.showTemplateTags ? "on" : "off"} onChange={(event) => updateField("showTemplateTags", event.target.value === "on")}>
+                <option value="off">Off</option>
+                <option value="on">On</option>
+              </select>
+            </label>
+
             <label className="field field-full">
               <span>CTA text</span>
               <input value={draft.ctaText} onChange={(event) => updateField("ctaText", event.target.value)} />

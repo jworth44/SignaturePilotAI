@@ -46,6 +46,7 @@ export function getDefaultDraft() {
     logoShape: "rounded",
     customLogoWidth: 72,
     showDivider: false,
+    showTemplateTags: false,
     logoDataUrl: "",
     photoDataUrl: "",
     ctaText: "Book a quick call",
@@ -178,6 +179,7 @@ function applyTierRules(draft) {
     logoSize: tier === "free" && (draft.logoSize === "custom" || draft.logoSize === "extra-large") ? "large" : draft.logoSize,
     customLogoWidth: normalizeCustomLogoWidth(draft.customLogoWidth),
     showDivider: tier === "free" ? false : Boolean(draft.showDivider),
+    showTemplateTags: Boolean(draft.showTemplateTags),
     photoDataUrl: tier === "free" ? "" : draft.photoDataUrl,
     linkedinUrl: tier === "free" ? "" : draft.linkedinUrl,
     facebookUrl: tier === "free" ? "" : draft.facebookUrl,
@@ -305,7 +307,7 @@ function renderSplitLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, sa
   const infoBlock = buildInfoBlock({ brandColor, familyMeta, sanitized, variantConfig });
   const visualBlock = buildVisualBlock({
     accentBar: variantConfig.accentBar,
-    badgeText: variantConfig.topBadge ? familyMeta.name : "",
+    badgeText: sanitized.showTemplateTags && variantConfig.topBadge ? familyMeta.name : "",
     brandColor,
     logoMarkup,
     photoMarkup,
@@ -346,7 +348,7 @@ function renderStackedLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, 
     url: ensureProtocol(sanitized.website)
   });
 
-  const badgeMarkup = variantConfig.topBadge
+  const badgeMarkup = sanitized.showTemplateTags && variantConfig.topBadge
     ? `<tr><td align="center" style="${cellResetStyle()}padding:0 0 10px 0;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background:${fadeColor(brandColor, 0.12)};color:${brandColor};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;">${familyMeta.name}</span></td></tr>`
     : "";
 
@@ -429,7 +431,7 @@ function buildInfoBlock({ brandColor, familyMeta, sanitized, variantConfig }) {
     text: sanitized.ctaText || familyMeta.label,
     url: ensureProtocol(sanitized.website)
   });
-  const badgeMarkup = variantConfig.topBadge
+  const badgeMarkup = sanitized.showTemplateTags && variantConfig.topBadge
     ? `<tr><td style="${cellResetStyle()}padding:0 0 8px 0;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background:${fadeColor(brandColor, 0.12)};color:${brandColor};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;">${familyMeta.name}</span></td></tr>`
     : "";
 
