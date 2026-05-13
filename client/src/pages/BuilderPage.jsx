@@ -332,6 +332,7 @@ export default function BuilderPage() {
               saveCurrentVersion("Before logo insert");
               updateField("logoDataUrl", value);
             }}
+            onLogoStyleChange={updateField}
           />
 
           <AiSuggestionPanel

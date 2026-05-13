@@ -28,7 +28,7 @@ test.describe("Signature Pilot AI smoke tests", () => {
     await expect(page.locator('label:has-text("Layout") select')).toBeEnabled();
     await page.locator('label:has-text("Layout") select').selectOption("mobile-compact");
     await expect(page.locator(".preview-meta")).toContainText("Mobile Compact");
-    await expect(page.locator('label:has-text("Vertical divider") input')).toBeDisabled();
+    await expect(page.locator('label:has-text("Pro visual divider") input')).toBeDisabled();
     await expect(page.locator('label:has-text("Remove Signature Pilot AI branding") input')).toBeDisabled();
 
     await page.getByRole("button", { name: "Copy Signature" }).click();
@@ -63,13 +63,16 @@ test.describe("Signature Pilot AI smoke tests", () => {
     expect(clipboardPayload.html).toContain("Signature Pilot AI");
     expect(clipboardPayload.html).toContain('https://signature-forge-ai.vercel.app');
     expect(clipboardPayload.html).toContain("border:none");
+    expect(clipboardPayload.html).not.toContain("border-left");
     expect(clipboardPayload.html).not.toContain("border-top:");
     expect(clipboardPayload.html).not.toContain("padding:0 0 0 12px");
     expect(clipboardPayload.html).not.toContain("min-width:62px");
+    expect(clipboardPayload.html).not.toContain("width:18px;padding:0 12px");
+    expect(clipboardPayload.html).not.toContain("min-height:96px");
     expect(clipboardPayload.text).toContain("Signature Pilot AI");
   });
 
-  test("Pro Mode unlocks controls, AI logo studio works, and exports stay clean", async ({ page }) => {
+  test("Pro Mode unlocks controls, logo studio is honest when AI is not connected, and exports stay clean", async ({ page }) => {
     await page.locator(".tier-toggle select").selectOption("pro");
 
     const aiButton = page.getByRole("button", { name: "Generate Signature Suggestions" });
@@ -83,7 +86,7 @@ test.describe("Signature Pilot AI smoke tests", () => {
     expect(buttonMetrics.width).toBeLessThan(buttonMetrics.panelWidth * 0.9);
 
     await expect(page.locator('label:has-text("Layout") select')).toBeEnabled();
-    await expect(page.locator('label:has-text("Vertical divider") input')).toBeEnabled();
+    await expect(page.locator('label:has-text("Pro visual divider") input')).toBeEnabled();
     await expect(page.locator('label:has-text("Remove Signature Pilot AI branding") input')).toBeEnabled();
     await expect(page.getByRole("button", { name: "Copy Signature" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Copy Raw HTML" })).toBeVisible();
@@ -94,31 +97,33 @@ test.describe("Signature Pilot AI smoke tests", () => {
     await expect(page.locator('label:has-text("Logo size") select option[value="custom"]')).not.toHaveAttribute("disabled", "");
     await expect(page.locator('label:has-text("Business type / industry") select')).toBeVisible();
 
-    await page.getByRole("button", { name: "Blend Uploaded Images" }).click();
-    await expect(page.getByText("Blend Uploaded Images needs at least one uploaded reference image.")).toBeVisible();
-    await page.getByRole("button", { name: "Refine Selected Logo" }).click();
-    await expect(page.getByText("Select a logo concept before refining it.")).toBeVisible();
+    await expect(page.getByText("AI logo generation is not configured yet. Pro Logo Studio will be available when live AI image generation is connected.")).toBeVisible();
+    await expect(page.getByText("AI image generation is not connected in this deployment.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Generate Logo Concepts" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Blend Uploaded Images" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Refine Selected Logo" })).toBeDisabled();
+    await expect(page.locator(".logo-concept-card")).toHaveCount(0);
 
     const logoBuffer = Buffer.from(
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9s7h5XQAAAAASUVORK5CYII=",
       "base64"
     );
+    await page.locator("#logo-upload").setInputFiles({
+      name: "logo.png",
+      mimeType: "image/png",
+      buffer: logoBuffer
+    });
+    await expect(page.getByAltText("Logo upload")).toBeVisible();
+    await expect(page.locator(".signature-preview-surface img")).toHaveAttribute("src", /data:image\/png;base64/);
     await page.locator("#ai-logo-references").setInputFiles({
       name: "reference.png",
       mimeType: "image/png",
       buffer: logoBuffer
     });
     await expect(page.getByAltText("Reference 1")).toBeVisible();
-
-    await page.getByRole("button", { name: "Generate Logo Concepts" }).click();
-    await expect(page.getByText("Demo logo concepts generated locally because AI image generation is not configured.")).toBeVisible();
-    await expect(page.locator(".logo-concept-card")).toHaveCount(4);
-    await page.getByRole("button", { name: "Blend Uploaded Images" }).click();
-    await expect(page.getByText("Uploaded references blended into fresh logo concepts.")).toBeVisible();
-    await page.getByRole("button", { name: "Select for Signature" }).first().click();
-    await expect(page.locator(".signature-preview-surface img")).toHaveAttribute("src", /data:image\/svg\+xml;base64/);
-    await page.getByRole("button", { name: "Refine Selected Logo" }).click();
-    await expect(page.getByText("Selected logo refined into new concept variations.")).toBeVisible();
+    const logoStudio = page.locator(".ai-logo-panel");
+    await logoStudio.locator('label:has-text("Fit") select').selectOption("cover");
+    await logoStudio.locator('label:has-text("Shape") select').selectOption("circle");
 
     await page.locator('label:has-text("Remove Signature Pilot AI branding") input').check();
     await page.locator('label:has-text("Layout") select').selectOption("mobile-compact");
@@ -132,6 +137,10 @@ test.describe("Signature Pilot AI smoke tests", () => {
     expect(copiedHtml).toContain('width="140"');
     expect(copiedHtml).toContain("max-width:340px");
     expect(copiedHtml).toContain('<td align="center" valign="top"');
+    expect(copiedHtml).toContain("object-fit:cover");
+    expect(copiedHtml).toContain("border-radius:999px");
+    expect(copiedHtml).not.toContain("border-left");
+    expect(copiedHtml).not.toContain("width:18px;padding:0 12px");
   });
 
   test("Suggestions do not auto-overwrite, can be applied selectively, and recovery restores", async ({ page }) => {
@@ -167,21 +176,31 @@ test.describe("Signature Pilot AI smoke tests", () => {
   });
 
   test("Generated signature keeps core export and layout rules", async ({ page }) => {
-    const preview = page.locator(".signature-preview-surface");
-    const previewHtml = await preview.innerHTML();
+    await page.locator(".tier-toggle select").selectOption("pro");
+    const layouts = ["executive", "minimal", "contractor", "corporate", "mobile-compact"];
 
-    expect(previewHtml).toContain('href="tel:');
-    expect(previewHtml).toContain('href="mailto:');
-    expect(previewHtml).toContain('border="0"');
-    expect(previewHtml).toContain('border-collapse:collapse');
-    expect(previewHtml).toContain("border:none");
-    expect(previewHtml).toContain("mso-table-lspace:0pt");
-    expect(previewHtml).not.toContain('border="1"');
-    expect(previewHtml).not.toContain("border-top:");
-    expect(previewHtml).not.toContain("border:1px solid #");
+    for (const layout of layouts) {
+      await page.locator('label:has-text("Layout") select').selectOption(layout);
+      await page.locator('label:has-text("Pro visual divider") input').uncheck();
+      const preview = page.locator(".signature-preview-surface");
+      const previewHtml = await preview.innerHTML();
 
-    const hasHorizontalOverflow = await preview.evaluate((element) => element.scrollWidth > element.clientWidth);
-    expect(hasHorizontalOverflow).toBe(false);
+      expect(previewHtml).toContain('href="tel:');
+      expect(previewHtml).toContain('href="mailto:');
+      expect(previewHtml).toContain('border="0"');
+      expect(previewHtml).toContain('border-collapse:collapse');
+      expect(previewHtml).toContain("border:none");
+      expect(previewHtml).toContain("mso-table-lspace:0pt");
+      expect(previewHtml).not.toContain('border="1"');
+      expect(previewHtml).not.toContain("border-top:");
+      expect(previewHtml).not.toContain("border-left");
+      expect(previewHtml).not.toContain("border:1px solid #");
+      expect(previewHtml).not.toContain("width:18px;padding:0 12px");
+      expect(previewHtml).not.toContain("min-height:96px");
+
+      const hasHorizontalOverflow = await preview.evaluate((element) => element.scrollWidth > element.clientWidth);
+      expect(hasHorizontalOverflow).toBe(false);
+    }
   });
 
   test("Homepage stays within the viewport on mobile", async ({ page }) => {

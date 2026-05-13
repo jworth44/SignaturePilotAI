@@ -238,7 +238,7 @@ export default function SignatureForm({
           ) : null}
 
           <label className="field field-checkbox">
-            <span>Vertical divider</span>
+            <span>Pro visual divider</span>
             <input disabled={isFree || draft.layout === "mobile-compact"} checked={draft.showDivider} type="checkbox" onChange={(event) => onDividerToggle(event.target.checked)} />
             {isFree || draft.layout === "mobile-compact" ? <small className="locked-copy">Advanced layout controls stay off in Free Mode and are not used in Mobile Compact.</small> : null}
           </label>

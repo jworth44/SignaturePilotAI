@@ -155,7 +155,7 @@ export default function AiSuggestionPanel({ draft, onApplySuggestions, onSaveVer
           </div>
           <p className="support-copy">Current layout will stay unchanged unless you explicitly apply the suggested layout.</p>
           <p className="support-copy">
-            Source: {suggestions.source === "openai" ? "OpenAI API" : "Built-in fallback logic"}
+            Source: {suggestions.source === "openai" ? "OpenAI API" : "Built-in smart suggestions"}
           </p>
           {suggestions.message ? <p className="support-copy">{suggestions.message}</p> : null}
           <div className="button-row">

@@ -27,8 +27,18 @@ app.get("/api/health", (_request, response) => {
     app: "signature-pilot-ai",
     integrations: {
       openaiConfigured: Boolean(process.env.OPENAI_API_KEY),
+      logoAiEnabled: Boolean(process.env.OPENAI_API_KEY),
       stripeConfigured: Boolean(stripe && monthlyPriceId)
     }
+  });
+});
+
+app.get("/api/ai/logo-studio/status", (_request, response) => {
+  response.json({
+    logoAiEnabled: Boolean(process.env.OPENAI_API_KEY),
+    message: process.env.OPENAI_API_KEY
+      ? "AI image generation is available."
+      : "AI image generation is not connected in this deployment."
   });
 });
 

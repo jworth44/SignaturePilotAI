@@ -36,8 +36,10 @@ export function getDefaultDraft() {
     tier: "free",
     includeBranding: true,
     logoSize: "medium",
+    logoFit: "contain",
+    logoShape: "rounded",
     customLogoWidth: 72,
-    showDivider: true,
+    showDivider: false,
     logoDataUrl: "",
     photoDataUrl: "",
     ctaText: "Book a quick call",
@@ -108,7 +110,9 @@ export function generateSignatureHtml({ draft, tier, includeBranding }) {
     alt: sanitized.companyName || sanitized.fullName,
     size: getLogoWidth(sanitized),
     brandColor,
-    type: "logo"
+    type: "logo",
+    fit: sanitized.logoFit,
+    shape: sanitized.logoShape
   });
   const photoMarkup = sanitized.photoDataUrl && sanitized.logoDataUrl
     ? buildImageMarkup({
@@ -116,7 +120,9 @@ export function generateSignatureHtml({ draft, tier, includeBranding }) {
         alt: sanitized.fullName,
         size: 52,
         brandColor,
-        type: "photo"
+        type: "photo",
+        fit: "cover",
+        shape: "circle"
       })
     : "";
   const isMobileCompact = sanitized.layout === "mobile-compact";
@@ -407,14 +413,16 @@ function buildMobileCompactRow(value, color = "#4b5563") {
     </tr>`;
 }
 
-function buildImageMarkup({ source, alt, size, brandColor, type }) {
+function buildImageMarkup({ source, alt, size, brandColor, type, fit = "contain", shape }) {
+  const resolvedShape = shape || (type === "photo" ? "circle" : "rounded");
+  const radius = resolvedShape === "circle" ? "999px" : resolvedShape === "square" ? "0" : "16px";
   if (source) {
     return `
       <img
         src="${source}"
         alt="${escapeAttribute(alt)}"
         width="${size}"
-        style="display:block;width:${size}px;height:auto;max-width:${size}px;border:0;border:none;outline:none;box-shadow:none;text-decoration:none;border-radius:${type === "photo" ? "999px" : "16px"};object-fit:cover;background:#ffffff;"
+        style="display:block;width:${size}px;height:auto;max-width:${size}px;border:0;border:none;outline:none;box-shadow:none;text-decoration:none;border-radius:${radius};object-fit:${fit};background:#ffffff;"
       />`;
   }
 
@@ -422,7 +430,7 @@ function buildImageMarkup({ source, alt, size, brandColor, type }) {
     <table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}">
       <tbody>
       <tr>
-        <td align="center" valign="middle" width="${size}" height="${size}" style="${cellResetStyle()}width:${size}px;height:${size}px;border-radius:${type === "photo" ? "999px" : "16px"};background:${fadeColor(brandColor, 0.12)};color:${brandColor};font-family:Arial,Helvetica,sans-serif;font-size:${Math.max(14, Math.round(size / 3.1))}px;font-weight:700;">
+        <td align="center" valign="middle" width="${size}" height="${size}" style="${cellResetStyle()}width:${size}px;height:${size}px;border-radius:${radius};background:${fadeColor(brandColor, 0.12)};color:${brandColor};font-family:Arial,Helvetica,sans-serif;font-size:${Math.max(14, Math.round(size / 3.1))}px;font-weight:700;">
           ${escapeHtml(initialsFromAlt(alt))}
         </td>
       </tr>

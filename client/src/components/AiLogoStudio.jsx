@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const STYLE_OPTIONS = ["Modern", "Luxury", "Minimal", "Corporate", "Contractor", "Tech", "Bold"];
 
-export default function AiLogoStudio({ draft, onSelectLogo }) {
+export default function AiLogoStudio({ draft, onSelectLogo, onLogoStyleChange }) {
   const isFree = draft.tier === "free";
   const [businessName, setBusinessName] = useState(draft.companyName || "Signature Pilot AI");
   const [industry, setIndustry] = useState("Professional services");
@@ -12,12 +12,11 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
   const [secondaryColor, setSecondaryColor] = useState("#8b6dff");
   const [instructions, setInstructions] = useState("Make it cleaner and more premium.");
   const [referenceImages, setReferenceImages] = useState([]);
-  const [concepts, setConcepts] = useState([]);
-  const [selectedConceptId, setSelectedConceptId] = useState("");
   const [loadingAction, setLoadingAction] = useState("");
   const [error, setError] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
-  const [source, setSource] = useState("");
+  const [logoAiEnabled, setLogoAiEnabled] = useState(false);
+  const [statusLoaded, setStatusLoaded] = useState(false);
 
   useEffect(() => {
     setBusinessName(draft.companyName || "Signature Pilot AI");
@@ -27,10 +26,32 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
     setPrimaryColor(draft.brandColor || "#2663ff");
   }, [draft.brandColor]);
 
-  const selectedConcept = useMemo(
-    () => concepts.find((concept) => concept.id === selectedConceptId) || null,
-    [concepts, selectedConceptId]
-  );
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadStatus() {
+      try {
+        const response = await fetch("/api/ai/logo-studio/status");
+        const payload = await response.json();
+        if (!cancelled) {
+          setLogoAiEnabled(Boolean(payload.logoAiEnabled));
+          setStatusMessage(payload.message || "");
+          setStatusLoaded(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setLogoAiEnabled(false);
+          setStatusMessage("AI image generation is not connected in this deployment.");
+          setStatusLoaded(true);
+        }
+      }
+    }
+
+    loadStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleReferenceUpload(files) {
     const incoming = Array.from(files || []).slice(0, 3);
@@ -43,6 +64,7 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
     );
 
     setReferenceImages((current) => [...current, ...mapped].slice(0, 3));
+    setStatusMessage(mapped.length ? "Reference image ready. You can use it as a visual guide once AI image generation is connected." : statusMessage);
   }
 
   function removeReferenceImage(id) {
@@ -50,14 +72,20 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
   }
 
   async function runStudioAction(action) {
+    if (!logoAiEnabled) {
+      setError("AI image generation is not connected in this deployment.");
+      setStatusMessage("");
+      return;
+    }
+
     if (action === "blend" && referenceImages.length === 0) {
       setError("Blend Uploaded Images needs at least one uploaded reference image.");
       setStatusMessage("");
       return;
     }
 
-    if (action === "refine" && !selectedConcept) {
-      setError("Select a logo concept before refining it.");
+    if (action === "refine" && !draft.logoDataUrl) {
+      setError("Select or upload a logo before refining it.");
       setStatusMessage("");
       return;
     }
@@ -78,7 +106,7 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
           secondaryColor,
           instructions,
           references: referenceImages.map((image) => image.dataUrl),
-          selectedLogo: selectedConcept?.dataUrl || ""
+          selectedLogo: draft.logoDataUrl || ""
         })
       });
       const payload = await response.json();
@@ -86,31 +114,13 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
         throw new Error(payload.message || "Unable to generate logo concepts.");
       }
 
-      setConcepts(payload.concepts || []);
-      setSource(payload.source || "");
-      setStatusMessage(payload.message || "");
-      if (!payload.concepts?.length) {
-        setError("No logo concepts were returned. Try another prompt or style.");
-      }
-      if (payload.concepts?.[0]?.id) {
-        setSelectedConceptId(payload.concepts[0].id);
-      }
+      setStatusMessage(payload.message || "AI logo action completed.");
+      setError("");
     } catch (requestError) {
       setError(requestError.message);
     } finally {
       setLoadingAction("");
     }
-  }
-
-  function handleSelectForSignature(concept) {
-    setSelectedConceptId(concept.id);
-    onSelectLogo(concept.dataUrl);
-    setStatusMessage("Selected logo inserted into your signature.");
-  }
-
-  async function handleRefineConcept(concept) {
-    setSelectedConceptId(concept.id);
-    await runStudioAction("refine");
   }
 
   if (isFree) {
@@ -125,7 +135,7 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
         <div className="locked-banner">
           AI Logo Studio is included with Pro. Generate, upload, blend, and refine logo concepts for your signature.
         </div>
-        <Link className="button button-primary" to="/upgrade">
+        <Link className="button button-primary button-inline" to="/upgrade">
           Upgrade to Pro
         </Link>
       </section>
@@ -137,7 +147,7 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
       <div className="panel-header">
         <div>
           <p className="eyebrow">AI Logo Studio</p>
-          <h2>Generate, blend, and refine logo concepts</h2>
+          <h2>Pro logo workflow</h2>
         </div>
       </div>
 
@@ -197,7 +207,7 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
         <div className="form-section-heading">
           <div>
             <h3>Reference uploads</h3>
-            <p className="support-copy">Upload up to 3 reference images, logos, or sketches for blend and refine actions.</p>
+            <p className="support-copy">Upload up to 3 reference images or sketches now. These stay local to this browser for the MVP.</p>
           </div>
         </div>
         <label className="upload-dropzone studio-dropzone" htmlFor="ai-logo-references">
@@ -227,53 +237,59 @@ export default function AiLogoStudio({ draft, onSelectLogo }) {
         ) : null}
       </div>
 
+      <div className="form-section">
+        <div className="form-section-heading">
+          <div>
+            <h3>Logo cleanup controls</h3>
+            <p className="support-copy">Pro users can still tune an uploaded logo in this deployment while live AI image generation is offline.</p>
+          </div>
+        </div>
+        <div className="field-grid field-grid-tight">
+          <label className="field">
+            <span>Fit</span>
+            <select value={draft.logoFit} onChange={(event) => onLogoStyleChange("logoFit", event.target.value)}>
+              <option value="contain">Contain</option>
+              <option value="cover">Cover</option>
+            </select>
+          </label>
+          <label className="field">
+            <span>Shape</span>
+            <select value={draft.logoShape} onChange={(event) => onLogoStyleChange("logoShape", event.target.value)}>
+              <option value="square">Square</option>
+              <option value="rounded">Rounded</option>
+              <option value="circle">Circle</option>
+            </select>
+          </label>
+          <label className="field">
+            <span>Use current uploaded logo</span>
+            <button className="button button-secondary button-inline" disabled={!draft.logoDataUrl} type="button" onClick={() => onSelectLogo(draft.logoDataUrl)}>
+              Insert current logo into signature
+            </button>
+          </label>
+        </div>
+      </div>
+
       <div className="button-row">
-        <button className="button button-primary" disabled={Boolean(loadingAction)} type="button" onClick={() => runStudioAction("generate")}>
+        <button className="button button-primary" disabled={!logoAiEnabled || Boolean(loadingAction)} type="button" onClick={() => runStudioAction("generate")}>
           {loadingAction === "generate" ? "Generating..." : "Generate Logo Concepts"}
         </button>
-        <button
-          className="button button-secondary"
-          disabled={Boolean(loadingAction)}
-          type="button"
-          onClick={() => runStudioAction("blend")}
-        >
+        <button className="button button-secondary" disabled={!logoAiEnabled || Boolean(loadingAction)} type="button" onClick={() => runStudioAction("blend")}>
           {loadingAction === "blend" ? "Blending..." : "Blend Uploaded Images"}
         </button>
-        <button
-          className="button button-secondary"
-          disabled={Boolean(loadingAction)}
-          type="button"
-          onClick={() => runStudioAction("refine")}
-        >
+        <button className="button button-secondary" disabled={!logoAiEnabled || Boolean(loadingAction)} type="button" onClick={() => runStudioAction("refine")}>
           {loadingAction === "refine" ? "Refining..." : "Refine Selected Logo"}
         </button>
       </div>
 
-      {error ? <p className="error-copy">{error}</p> : null}
-      {statusMessage ? <p className="support-copy">{statusMessage}</p> : null}
-      {source === "fallback" ? (
-        <p className="locked-copy">Demo logo concepts generated locally because AI image generation is not configured.</p>
-      ) : null}
-
-      {concepts.length ? (
-        <div className="logo-concepts-grid">
-          {concepts.map((concept) => (
-            <article key={concept.id} className={`logo-concept-card ${selectedConceptId === concept.id ? "logo-concept-card-active" : ""}`}>
-              <img alt={concept.label} className="logo-concept-image" src={concept.dataUrl} />
-              <strong>{concept.label}</strong>
-              <span>{concept.description}</span>
-              <div className="button-row">
-                <button className="button button-primary" type="button" onClick={() => handleSelectForSignature(concept)}>
-                  Select for Signature
-                </button>
-                <button className="button button-secondary" type="button" onClick={() => handleRefineConcept(concept)}>
-                  Refine
-                </button>
-              </div>
-            </article>
-          ))}
+      {!statusLoaded ? <p className="support-copy">Checking AI logo capability...</p> : null}
+      {!logoAiEnabled && statusLoaded ? (
+        <div className="locked-banner">
+          AI logo generation is not configured yet. Pro Logo Studio will be available when live AI image generation is connected.
         </div>
       ) : null}
+      {statusLoaded && !logoAiEnabled ? <p className="support-copy">AI image generation is not connected in this deployment.</p> : null}
+      {error ? <p className="error-copy">{error}</p> : null}
+      {statusMessage && logoAiEnabled ? <p className="support-copy">{statusMessage}</p> : null}
     </section>
   );
 }
