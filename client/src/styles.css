@@ -560,11 +560,12 @@ h3 {
 }
 
 .template-thumb-live {
-  min-height: 158px;
+  height: 190px;
   padding: 0.7rem;
   display: flex;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-start;
+  overflow: hidden;
 }
 
 .template-thumb-live::before {
@@ -574,7 +575,7 @@ h3 {
 .template-thumb-preview {
   width: 300px;
   transform: scale(0.42);
-  transform-origin: top center;
+  transform-origin: top left;
   pointer-events: none;
 }
 
@@ -651,7 +652,7 @@ h3 {
 }
 
 .template-thumb-mobile-compact.template-thumb-live {
-  align-items: center;
+  align-items: flex-start;
 }
 
 .template-thumb-mobile-compact .template-thumb-preview {

@@ -83,7 +83,7 @@ export default function LandingPage() {
         <div className="hero-preview-card">
           <div className="hero-preview-bar" />
           <div className="hero-preview-body">
-            <span className="preview-avatar">SF</span>
+            <span className="preview-avatar">JW</span>
             <div>
               <strong>James Worthing</strong>
               <p>Founder | Signature Pilot AI</p>
@@ -153,9 +153,13 @@ export default function LandingPage() {
               <span className="preview-avatar">SP</span>
               <div>
                 <strong>James Worthing</strong>
-                <p>Founder | Northlight Studio</p>
-                <small>Book a quick call</small>
+                <p>HSE Advisor | James Worthing Safety Consulting</p>
+                <small>Book a strategy call</small>
               </div>
+            </div>
+            <div className="after-card-contact">
+              <p>204-791-7999</p>
+              <p>j_worthing@hotmail.com</p>
             </div>
             <div className="after-card-meta">
               <span>Clickable links</span>
