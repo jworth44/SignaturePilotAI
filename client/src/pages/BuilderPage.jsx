@@ -918,7 +918,7 @@ export default function BuilderPage() {
             <button className="button button-secondary" type="button" onClick={handleRevertToOriginal}>
               Revert to original
             </button>
-            <button className={`button ${isFree ? "button-locked" : "button-primary"}`} disabled={isFree} type="button" onClick={handleGeneratePolish}>
+            <button className={`button ${isFree ? "button-locked" : "button-secondary"}`} disabled={isFree} type="button" onClick={handleGeneratePolish}>
               {isFree ? "Pro polish" : "Preview one-click polish"}
             </button>
           </div>

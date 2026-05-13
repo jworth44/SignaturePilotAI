@@ -481,6 +481,15 @@ h3 {
   flex: 1 1 260px;
 }
 
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.feature-grid > * {
+  min-width: 0;
+}
+
 .feature-card,
 .pricing-card,
 .pricing-mini-card,

@@ -142,10 +142,10 @@ export default function LandingPage() {
         <div className="before-after-grid">
           <article className="before-card">
             <small>Before</small>
-            <p>James Worthing</p>
+            <p>Alex Chen</p>
             <p>Founder</p>
             <p>555-123-4567</p>
-            <p>hello@company.com</p>
+            <p>hello@mycompany.com</p>
           </article>
           <article className="after-card">
             <small>After</small>
