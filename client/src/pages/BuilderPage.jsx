@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import AiSuggestionPanel from "../components/AiSuggestionPanel";
-import SignatureForm from "../components/SignatureForm";
 import SignaturePreview from "../components/SignaturePreview";
 import { generateSignatureArtifacts, getDefaultDraft } from "../utils/htmlSignatureGenerator";
 
@@ -51,11 +50,94 @@ const SAMPLE_PROFILES = {
 };
 
 const TEMPLATE_OPTIONS = [
-  { value: "classic", label: "Professional Classic", description: "Balanced and polished for daily business email.", pro: false, tone: "blue", person: "Jordan Wells", title: "Founder | Northlight Studio", cta: "Book a quick call" },
-  { value: "corporate", label: "Corporate", description: "Structured and brand-forward for teams and partnerships.", pro: true, tone: "charcoal", person: "Avery Chen", title: "VP, Strategic Partnerships", cta: "Schedule an introduction" },
-  { value: "minimal", label: "Minimal", description: "Clean, modern, and founder-friendly.", pro: false, tone: "slate", person: "Jordan Wells", title: "Founder | Signature Pilot AI", cta: "See our latest work" },
-  { value: "premium-split", label: "Premium", description: "A richer presentation with a stronger executive feel.", pro: true, tone: "violet", person: "Avery Chen", title: "Strategic Partnerships | Summit Ridge", cta: "Private client briefing" },
-  { value: "mobile-compact", label: "Mobile Compact", description: "Built to stay readable in narrow mobile email apps.", pro: false, tone: "mobile", person: "Mason Ortiz", title: "Licensed General Contractor", cta: "Request a quote" }
+  {
+    value: "classic",
+    label: "Professional Classic",
+    description: "Balanced, traditional, logo-left and easy to scan.",
+    pro: false
+  },
+  {
+    value: "corporate",
+    label: "Corporate",
+    description: "Structured, executive, and stronger for leadership roles.",
+    pro: true
+  },
+  {
+    value: "minimal",
+    label: "Minimal",
+    description: "Lighter and cleaner with softer branding emphasis.",
+    pro: false
+  },
+  {
+    value: "premium-split",
+    label: "Premium",
+    description: "Refined spacing with a more polished premium finish.",
+    pro: true
+  },
+  {
+    value: "mobile-compact",
+    label: "Mobile Compact",
+    description: "Stacked, centered, and safer for mobile email apps.",
+    pro: false
+  }
+];
+
+const DETAILS_FIELDS = [
+  ["fullName", "Full name", true],
+  ["jobTitle", "Job title", true],
+  ["companyName", "Company name", true],
+  ["phone", "Office phone number", false],
+  ["email", "Email address", true],
+  ["website", "Website URL", false]
+];
+
+const SOCIAL_FIELDS = [
+  ["linkedinUrl", "LinkedIn"],
+  ["facebookUrl", "Facebook"],
+  ["instagramUrl", "Instagram"]
+];
+
+const STEP_ITEMS = [
+  {
+    key: "details",
+    label: "Details",
+    eyebrow: "Step 1: Details",
+    title: "Enter your signature details",
+    copy: "Start with the essentials your recipients should see first.",
+    icon: "T"
+  },
+  {
+    key: "images",
+    label: "Images",
+    eyebrow: "Step 2: Images",
+    title: "Upload your logo or profile image",
+    copy: "Use direct file uploads instead of hosted image URLs.",
+    icon: "I"
+  },
+  {
+    key: "templates",
+    label: "Templates",
+    eyebrow: "Step 3: Templates",
+    title: "Select your template",
+    copy: "Choose a layout that matches how your signature should feel.",
+    icon: "L"
+  },
+  {
+    key: "styles",
+    label: "Styles",
+    eyebrow: "Step 4: Styles",
+    title: "Style your signature",
+    copy: "Adjust the visual finish without breaking email-safe export.",
+    icon: "S"
+  },
+  {
+    key: "export",
+    label: "Export",
+    eyebrow: "Step 5: Export",
+    title: "Create and copy your signature",
+    copy: "Export a finished signature for Gmail, Outlook, Apple Mail, and Yahoo.",
+    icon: "C"
+  }
 ];
 
 const INDUSTRY_OPTIONS = [
@@ -74,17 +156,14 @@ const INDUSTRY_OPTIONS = [
 
 const GOAL_OPTIONS = ["Book calls", "Get quotes", "Show credibility", "Drive website visits"];
 const TONE_OPTIONS = ["Professional", "Friendly", "Premium", "Contractor", "Minimal"];
-const CONTROL_TABS = ["Content", "Style", "AI", "Export"];
-const MOBILE_WORKSPACE_TABS = ["Templates", "Preview", "Edit", "Export"];
 
 export default function BuilderPage() {
   const initialDraft = useMemo(() => loadInitialDraft(), []);
   const originalDraftRef = useRef(initialDraft);
   const [draft, setDraft] = useState(initialDraft);
+  const [activeStep, setActiveStep] = useState("details");
   const [copyMessage, setCopyMessage] = useState("");
   const [copyState, setCopyState] = useState("idle");
-  const [activeControlTab, setActiveControlTab] = useState("Content");
-  const [mobileWorkspaceTab, setMobileWorkspaceTab] = useState("Preview");
   const [previewDevice, setPreviewDevice] = useState("desktop");
   const [previewZoom, setPreviewZoom] = useState("100");
   const [smartSetup, setSmartSetup] = useState({
@@ -111,21 +190,17 @@ export default function BuilderPage() {
     window.localStorage.setItem(VERSION_STORAGE_KEY, JSON.stringify(savedVersions));
   }, [savedVersions]);
 
-  const artifacts = useMemo(() => generateSignatureArtifacts(draft), [draft]);
-  const isFree = artifacts.effectiveDraft.tier === "free";
-  const showAutoLayoutNotice = draft.layout === "mobile-compact" && draft.layoutAutoSelected;
-  const healthScore = useMemo(() => evaluateSignatureHealth(artifacts.effectiveDraft), [artifacts.effectiveDraft]);
-  const compatibilityChecklist = useMemo(() => buildCompatibilityChecklist(artifacts.effectiveDraft), [artifacts.effectiveDraft]);
-  const templatePreviewMap = useMemo(
-    () =>
-      Object.fromEntries(
-        TEMPLATE_OPTIONS.map((template) => {
-          const previewDraft = buildTemplatePreviewDraft(template, draft);
-          return [template.value, generateSignatureArtifacts(previewDraft)];
-        })
-      ),
-    [draft]
-  );
+  useEffect(() => {
+    if (copyState === "idle") {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setCopyState("idle");
+    }, 2400);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [copyState]);
 
   useEffect(() => {
     function syncLayoutForScreenWidth() {
@@ -152,17 +227,23 @@ export default function BuilderPage() {
     return () => window.removeEventListener("resize", syncLayoutForScreenWidth);
   }, []);
 
-  useEffect(() => {
-    if (copyState === "idle") {
-      return undefined;
-    }
+  const artifacts = useMemo(() => generateSignatureArtifacts(draft), [draft]);
+  const isFree = artifacts.effectiveDraft.tier === "free";
+  const healthScore = useMemo(() => evaluateSignatureHealth(artifacts.effectiveDraft), [artifacts.effectiveDraft]);
+  const compatibilityChecklist = useMemo(() => buildCompatibilityChecklist(artifacts.effectiveDraft), [artifacts.effectiveDraft]);
+  const templatePreviewMap = useMemo(
+    () =>
+      Object.fromEntries(
+        TEMPLATE_OPTIONS.map((template) => {
+          const previewDraft = buildTemplatePreviewDraft(template, draft);
+          return [template.value, generateSignatureArtifacts(previewDraft)];
+        })
+      ),
+    [draft]
+  );
 
-    const timeoutId = window.setTimeout(() => {
-      setCopyState("idle");
-    }, 2400);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [copyState]);
+  const stepIndex = STEP_ITEMS.findIndex((step) => step.key === activeStep);
+  const activeStepMeta = STEP_ITEMS[stepIndex] || STEP_ITEMS[0];
 
   function updateField(key, value) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -176,7 +257,6 @@ export default function BuilderPage() {
         summary: `${reason} | ${draft.fullName || "Unnamed"} | ${draft.jobTitle || "No title"}`,
         draft: { ...draft }
       };
-
       return [nextVersion, ...current].slice(0, 5);
     });
   }
@@ -206,7 +286,6 @@ export default function BuilderPage() {
       layoutManuallySelected: true,
       layoutAutoSelected: false
     }));
-    setMobileWorkspaceTab("Preview");
   }
 
   async function readFileAsDataUrl(targetField, file) {
@@ -227,7 +306,6 @@ export default function BuilderPage() {
       await navigator.clipboard.writeText(text);
       setCopyMessage(`${label} copied.`);
       setCopyState("success");
-      setMobileWorkspaceTab("Preview");
     } catch {
       setCopyMessage("Copy failed. Try again or use another browser.");
       setCopyState("error");
@@ -248,13 +326,13 @@ export default function BuilderPage() {
 
       setCopyMessage("Signature copied. Paste it directly into Gmail, Outlook, Apple Mail, or Yahoo.");
       setCopyState("success");
-      setMobileWorkspaceTab("Preview");
+      setActiveStep("export");
     } catch {
       try {
         copyRenderedSignatureFallback(artifacts.exportHtml);
         setCopyMessage("Signature copied using fallback mode.");
         setCopyState("success");
-        setMobileWorkspaceTab("Preview");
+        setActiveStep("export");
       } catch {
         setCopyMessage("Copy failed. Try again or use another browser.");
         setCopyState("error");
@@ -274,24 +352,22 @@ export default function BuilderPage() {
   }
 
   function handleReset() {
-    const fallback = getDefaultDraft();
-    setDraft(fallback);
+    setDraft(getDefaultDraft());
+    setSavedVersions([]);
     window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(VERSION_STORAGE_KEY);
     setCopyMessage("Draft reset.");
+  }
+
+  function handleCreateSignature() {
+    setActiveStep("export");
+    setCopyMessage("Signature is ready to copy.");
+    setCopyState("success");
   }
 
   function handleRevertToOriginal() {
     setDraft({ ...getDefaultDraft(), ...originalDraftRef.current });
     setCopyMessage("Reverted to the original signature.");
-  }
-
-  function restoreVersion(version) {
-    setDraft({ ...getDefaultDraft(), ...version.draft });
-    setCopyMessage("Previous signature restored.");
-  }
-
-  function deleteVersion(versionId) {
-    setSavedVersions((current) => current.filter((version) => version.id !== versionId));
   }
 
   function handleTierChange(value) {
@@ -302,6 +378,15 @@ export default function BuilderPage() {
       layoutAutoSelected: false,
       logoSize: value === "free" && (current.logoSize === "custom" || current.logoSize === "extra-large") ? "large" : current.logoSize
     }));
+  }
+
+  function restoreVersion(version) {
+    setDraft({ ...getDefaultDraft(), ...version.draft });
+    setCopyMessage("Previous signature restored.");
+  }
+
+  function deleteVersion(versionId) {
+    setSavedVersions((current) => current.filter((version) => version.id !== versionId));
   }
 
   function handleGenerateSmartSetup() {
@@ -324,7 +409,6 @@ export default function BuilderPage() {
       layoutAutoSelected: false
     }));
     setCopyMessage("Smart setup applied.");
-    setMobileWorkspaceTab("Preview");
   }
 
   function handleGeneratePolish() {
@@ -348,338 +432,532 @@ export default function BuilderPage() {
       layoutAutoSelected: false
     }));
     setCopyMessage("One-click polish applied.");
-    setMobileWorkspaceTab("Preview");
   }
 
-  const contentEditor = (
-    <SignatureForm
-      draft={draft}
-      compatibilityChecklist={compatibilityChecklist}
-      healthScore={healthScore}
-      smartSetup={smartSetup}
-      smartSetupPreview={smartSetupPreview}
-      smartSetupOptions={{ industries: INDUSTRY_OPTIONS, goals: GOAL_OPTIONS, tones: TONE_OPTIONS }}
-      onApplySampleProfile={applySampleProfile}
-      onApplySmartSetup={handleApplySmartSetup}
-      onFieldChange={updateField}
-      onColorChange={(value) => updateField("brandColor", value)}
-      onGenerateSmartSetup={handleGenerateSmartSetup}
-      onTierChange={handleTierChange}
-      onFileSelect={readFileAsDataUrl}
-      onFileRemove={(field) => updateField(field, "")}
-      onSmartSetupChange={(key, value) => setSmartSetup((current) => ({ ...current, [key]: value }))}
-    />
-  );
-
-  const styleEditor = (
-    <section className="workspace-panel-section">
-      <div className="workspace-section-heading">
-        <div>
-          <p className="eyebrow">Style</p>
-          <h3>Fine-tune the signature</h3>
-        </div>
-      </div>
-      <div className="workspace-style-quick-grid">
-        {TEMPLATE_OPTIONS.map((option) => {
-          const locked = isFree && option.pro;
-          const active = artifacts.effectiveDraft.layout === option.value;
-          return (
-            <button
-              key={option.value}
-              className={`button ${active ? "button-primary" : locked ? "button-locked" : "button-secondary"} workspace-style-chip`}
-              disabled={locked}
-              type="button"
-              onClick={() => handleLayoutChange(option.value)}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-      <div className="field-grid">
-        <label className="field">
-          <span>Layout</span>
-          <select aria-label="Preview layout" value={artifacts.effectiveDraft.layout} onChange={(event) => handleLayoutChange(event.target.value)}>
-            {TEMPLATE_OPTIONS.map((option) => (
-              <option key={option.value} disabled={isFree && option.pro} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <small className="locked-copy">
-            {isFree
-              ? "Free Mode includes Professional Classic, Minimal, and Mobile Compact. Corporate and Premium unlock with Pro."
-              : "Use Mobile Compact if your signature looks squeezed in mobile email apps."}
-          </small>
-          {showAutoLayoutNotice ? <small className="support-copy">Mobile Compact selected for better mobile email compatibility.</small> : null}
-        </label>
-
-        <label className="field">
-          <span>Brand colour</span>
-          <input type="color" value={draft.brandColor} onChange={(event) => updateField("brandColor", event.target.value)} />
-        </label>
-
-        <label className="field">
-          <span>Logo size</span>
-          <select aria-label="Preview logo size" value={artifacts.effectiveDraft.logoSize} onChange={(event) => updateField("logoSize", event.target.value)}>
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
-            <option disabled={isFree} value="extra-large">Extra Large</option>
-            <option disabled={isFree} value="custom">Custom</option>
-          </select>
-          <small className="locked-copy">
-            {isFree ? "Free Mode supports Small, Medium, and Large. Extra Large and Custom are Pro features." : "Logo size updates the live preview and copied signature."}
-          </small>
-        </label>
-
-        <label className="field">
-          <span>Logo shape</span>
-          <select disabled={isFree} value={artifacts.effectiveDraft.logoShape} onChange={(event) => updateField("logoShape", event.target.value)}>
-            <option value="rounded">Rounded</option>
-            <option value="square">Square</option>
-            <option value="circle">Circle</option>
-          </select>
-          <small className="locked-copy">{isFree ? "Logo shape is a Pro customization feature." : "Shape styling updates the preview and export together."}</small>
-        </label>
-
-        {artifacts.effectiveDraft.logoSize === "custom" ? (
-          <label className="field">
-            <span>Custom logo width</span>
-            <input
-              aria-label="Preview custom logo width"
-              max="180"
-              min="40"
-              type="number"
-              value={artifacts.effectiveDraft.customLogoWidth}
-              onChange={(event) => updateField("customLogoWidth", event.target.value)}
-            />
-            <small className="support-copy">Range: 40px to 180px.</small>
-          </label>
-        ) : null}
-
-        <label className="field">
-          <span>Divider</span>
-          <select
-            aria-label="Preview divider"
-            disabled={isFree || artifacts.effectiveDraft.layout === "mobile-compact"}
-            value={artifacts.effectiveDraft.showDivider ? "on" : "off"}
-            onChange={(event) => updateField("showDivider", event.target.value === "on")}
-          >
-            <option value="off">Off</option>
-            <option value="on">On</option>
-          </select>
-          <small className="locked-copy">
-            {isFree || artifacts.effectiveDraft.layout === "mobile-compact"
-              ? "Divider stays off in Free Mode and is not used in Mobile Compact."
-              : "Optional Pro visual divider."}
-          </small>
-        </label>
-
-        <label className="field">
-          <span>Branding</span>
-          <select
-            aria-label="Preview branding"
-            disabled={isFree}
-            value={artifacts.includeBranding ? "include" : "remove"}
-            onChange={(event) => updateField("includeBranding", event.target.value === "include")}
-          >
-            <option value="include">Include</option>
-            <option value="remove">Remove</option>
-          </select>
-          <small className="locked-copy">{isFree ? "Signature Pilot AI branding included." : "Pro can export clean unbranded HTML."}</small>
-        </label>
-      </div>
-      <div className="workspace-inline-actions">
-        <button className="button button-secondary button-inline" type="button" onClick={handleRevertToOriginal}>
-          Revert to Original
-        </button>
-        {copyMessage ? <p className="support-copy">{copyMessage}</p> : null}
-      </div>
-    </section>
-  );
-
-  const aiEditor = (
-    <div className="workspace-ai-grid">
-      <AiSuggestionPanel
-        draft={draft}
-        onAfterGenerate={() => setMobileWorkspaceTab("Preview")}
-        onApplySuggestions={({ mode, suggestions }) => {
-          setDraft((current) => applySuggestedFields(current, suggestions, mode));
-          setCopyMessage(`${mode} applied.`);
-          setMobileWorkspaceTab("Preview");
-        }}
-        onSaveVersion={saveCurrentVersion}
-      />
-
-      <section className="panel workspace-panel-section">
-        <div className="panel-header">
-          <div>
-            <p className="eyebrow">One-click polish</p>
-            <h2>Clean up the signature in one pass</h2>
-          </div>
-        </div>
-        {isFree ? (
-          <div className="locked-banner">
-            One-click polish is a Pro feature. Upgrade to tighten wording, improve CTA copy, and recommend a cleaner layout.
-          </div>
-        ) : (
-          <>
-            <p className="support-copy">Review a cleaner, shorter version before applying anything to your live signature.</p>
-            <div className="button-row">
-              <button className="button button-secondary" type="button" onClick={handleGeneratePolish}>
-                Preview One-click Polish
-              </button>
-              {polishPreview ? (
-                <button className="button button-primary" type="button" onClick={handleApplyPolish}>
-                  Apply One-click Polish
-                </button>
-              ) : null}
+  function renderDetailsStep() {
+    return (
+      <div className="generator-step-stack">
+        <section className="generator-card">
+          <div className="generator-card-header">
+            <div>
+              <p className="eyebrow">{activeStepMeta.eyebrow}</p>
+              <h2>{activeStepMeta.title}</h2>
             </div>
-            {polishPreview ? (
-              <div className="suggestion-card">
-                <div>
-                  <span className="suggestion-label">Polished title</span>
-                  <strong>{[polishPreview.jobTitle, polishPreview.companyName].filter(Boolean).join(" | ")}</strong>
-                </div>
-                <div>
-                  <span className="suggestion-label">Polished CTA</span>
-                  <p>{polishPreview.ctaText}</p>
-                </div>
-                <div>
-                  <span className="suggestion-label">Polished disclaimer</span>
-                  <p>{polishPreview.disclaimer}</p>
-                </div>
-                <div>
-                  <span className="suggestion-label">Recommended layout</span>
-                  <p>{lookupTemplateLabel(polishPreview.layout)}</p>
-                </div>
-                <p className="support-copy">{polishPreview.note}</p>
-              </div>
-            ) : null}
-          </>
-        )}
-      </section>
-
-      <section className="panel workspace-history-panel">
-        <div className="panel-header">
-          <div>
-            <p className="eyebrow">Recovery</p>
-            <h2>Recent Signature Versions</h2>
+            <p className="generator-required-note">* Indicates a required field</p>
           </div>
-          <button className="button button-secondary button-inline" type="button" onClick={() => saveCurrentVersion("Manual save")}>
-            Save Current Version
-          </button>
-        </div>
-        {savedVersions.length ? (
-          <div className="version-list">
-            {savedVersions.map((version) => (
-              <article key={version.id} className="version-card">
-                <div>
-                  <strong>{version.summary}</strong>
-                  <p className="support-copy">{new Date(version.timestamp).toLocaleString()}</p>
-                </div>
-                <div className="button-row">
-                  <button className="button button-primary" type="button" onClick={() => restoreVersion(version)}>
-                    Restore
-                  </button>
-                  <button className="button button-ghost" type="button" onClick={() => deleteVersion(version.id)}>
-                    Delete version
-                  </button>
-                </div>
-              </article>
+
+          <div className="generator-form-grid">
+            {DETAILS_FIELDS.map(([key, label, required]) => (
+              <label key={key} className={`field ${key === "location" ? "field-full" : ""}`}>
+                <span>
+                  {label}
+                  {required ? "*" : ""}
+                </span>
+                <input value={draft[key]} onChange={(event) => updateField(key, event.target.value)} />
+              </label>
+            ))}
+
+            <label className="field field-full">
+              <span>Address</span>
+              <textarea rows="4" value={draft.location} onChange={(event) => updateField("location", event.target.value)} />
+            </label>
+          </div>
+        </section>
+
+        <section className="generator-card">
+          <div className="generator-card-header">
+            <div>
+              <h3>Enter your social links</h3>
+              <p className="support-copy">Add the links recipients are most likely to click.</p>
+            </div>
+          </div>
+          <div className="generator-form-grid">
+            {SOCIAL_FIELDS.map(([key, label]) => (
+              <label key={key} className="field">
+                <span>{label}</span>
+                <input disabled={isFree} value={draft[key]} onChange={(event) => updateField(key, event.target.value)} />
+                {isFree ? <small className="locked-copy">Upgrade to Pro to unlock social links.</small> : null}
+              </label>
             ))}
           </div>
-        ) : (
-          <p className="support-copy">Save current work or apply AI suggestions to build a recoverable version history.</p>
-        )}
-      </section>
-    </div>
-  );
+        </section>
 
-  const exportEditor = (
-    <section className="panel export-panel">
-      <div className="panel-header">
-        <div>
-          <p className="eyebrow">Export</p>
-          <h2>Copy or download your signature</h2>
-        </div>
-      </div>
-      <div className="workspace-export-grid">
-        <div className="export-action-card">
-          <button
-            className={`button button-primary ${copyState === "success" ? "button-success" : ""} ${copyState === "error" ? "button-error" : ""}`}
-            type="button"
-            onClick={handleCopySignature}
-          >
-            {copyState === "success" ? "Copied!" : "Copy Signature"}
-          </button>
-          <p className="support-copy">Copy Signature: best for Gmail, Outlook, Apple Mail, Yahoo. Copies the finished visual signature.</p>
-        </div>
-
-        {!isFree ? (
-          <div className="export-action-card">
-            <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.exportHtml, "Raw HTML")}>
-              Copy Raw HTML
-            </button>
-            <p className="support-copy">Copy Raw HTML: Pro only. For platforms that specifically ask for HTML code.</p>
+        <section className="generator-card">
+          <div className="generator-card-header">
+            <div>
+              <h3>Start faster</h3>
+              <p className="support-copy">Load a polished sample, then personalize it.</p>
+            </div>
           </div>
-        ) : null}
-
-        {!isFree ? (
-          <div className="export-action-card">
-            <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.plainText, "Plain text signature")}>
-              Copy Plain Text Signature
+          <div className="generator-sample-grid">
+            <button className="generator-sample-card" type="button" onClick={() => applySampleProfile("founder")}>
+              <strong>Startup Founder</strong>
+              <span>Modern SaaS founder example</span>
             </button>
-            <p className="support-copy">Copy Plain Text Signature: copies a text-only fallback.</p>
+            <button className="generator-sample-card" type="button" onClick={() => applySampleProfile("contractor")}>
+              <strong>Contractor</strong>
+              <span>Quote-focused service example</span>
+            </button>
+            <button className="generator-sample-card" type="button" onClick={() => applySampleProfile("executive")}>
+              <strong>Executive</strong>
+              <span>Corporate leadership example</span>
+            </button>
           </div>
-        ) : null}
-
-        <div className="export-action-card">
-          <button className="button button-secondary" disabled={isFree} type="button" onClick={handleDownloadHtml}>
-            Download HTML File
-          </button>
-          <p className="support-copy">Download HTML File: Pro export/download backup.</p>
-        </div>
-
-        <div className="export-action-card">
-          <button className="button button-ghost" type="button" onClick={handleReset}>
-            Reset
-          </button>
-          <p className="support-copy">Reset: clears the current draft and starts over.</p>
-        </div>
-
-        <div className="export-action-card">
-          <Link className="button button-secondary" to="/install">
-            Install help
-          </Link>
-          <p className="support-copy">Install help: step-by-step Gmail, Outlook, Apple Mail, Yahoo, and general HTML instructions.</p>
-        </div>
+        </section>
       </div>
-      <p className="support-copy">
-        Use Copy Signature for Gmail, Outlook, Apple Mail, and Yahoo. Do not paste raw HTML into your email settings unless the platform specifically asks for HTML.
-      </p>
-      {isFree ? <p className="locked-copy">Free signatures include Signature Pilot AI branding. Editing/removing branding is a Pro feature.</p> : null}
-      {copyState === "success" ? <p className="copy-feedback copy-feedback-success">Signature copied. Paste it into Gmail, Outlook, Apple Mail, or Yahoo.</p> : null}
-      {copyState === "error" ? <p className="copy-feedback copy-feedback-error">Copy failed. Try again or use another browser.</p> : null}
-      {isFree ? <p className="locked-copy">Free signatures are branded and limited. Upgrade to Pro to remove branding, unlock advanced layout controls, and export clean editable HTML.</p> : null}
-      <p className="support-copy">
-        Why can I still edit after pasting? Email clients such as Outlook and Gmail allow users to edit pasted signature content. Signature Pilot AI controls what is generated and exported, but cannot lock third-party editors. Pro unlocks clean, editable, unbranded output.
-      </p>
-      {copyMessage ? <p className="support-copy">{copyMessage}</p> : null}
-    </section>
-  );
+    );
+  }
+
+  function renderImagesStep() {
+    return (
+      <div className="generator-step-stack">
+        <section className="generator-card">
+          <div className="generator-card-header">
+            <div>
+              <p className="eyebrow">{activeStepMeta.eyebrow}</p>
+              <h2>{activeStepMeta.title}</h2>
+            </div>
+          </div>
+
+          <p className="support-copy">
+            Add your profile photo or logo to enhance your email signature. Use direct file uploads here instead of image links.
+          </p>
+
+          <div className="generator-upload-grid">
+            <UploadAssetCard
+              description="Upload a logo from your computer for a cleaner branded signature."
+              disabled={false}
+              inputId="logo-upload"
+              label="Company Logo"
+              onFileRemove={() => updateField("logoDataUrl", "")}
+              onFileSelect={(file) => readFileAsDataUrl("logoDataUrl", file)}
+              value={draft.logoDataUrl}
+            />
+            <UploadAssetCard
+              description={isFree ? "Profile photos unlock with Pro Mode." : "Upload a profile image for a more personal signature style."}
+              disabled={isFree}
+              inputId="photo-upload"
+              label="Profile Picture"
+              onFileRemove={() => updateField("photoDataUrl", "")}
+              onFileSelect={(file) => readFileAsDataUrl("photoDataUrl", file)}
+              value={draft.photoDataUrl}
+            />
+          </div>
+        </section>
+
+        <section className="generator-card">
+          <div className="generator-card-header">
+            <div>
+              <h3>Need a logo?</h3>
+              <p className="support-copy">Logo Pilot AI is our separate logo app for concept creation and refinement.</p>
+            </div>
+          </div>
+          <a className="button button-secondary" href="#">
+            Explore Logo Pilot AI
+          </a>
+        </section>
+      </div>
+    );
+  }
+
+  function renderTemplatesStep() {
+    return (
+      <div className="generator-step-stack">
+        <section className="generator-card">
+          <div className="generator-card-header">
+            <div>
+              <p className="eyebrow">{activeStepMeta.eyebrow}</p>
+              <h2>{activeStepMeta.title}</h2>
+            </div>
+          </div>
+
+          <div className="generator-template-grid">
+            {TEMPLATE_OPTIONS.map((template) => {
+              const locked = isFree && template.pro;
+              const active = artifacts.effectiveDraft.layout === template.value;
+              const templatePreview = templatePreviewMap[template.value];
+
+              return (
+                <article
+                  key={template.value}
+                  className={`generator-template-card ${active ? "generator-template-card-active" : ""} ${locked ? "generator-template-card-locked" : ""}`}
+                >
+                  <div className="generator-template-label-row">
+                    <strong>{template.label}</strong>
+                    <span className={`generator-mini-badge ${template.pro ? "generator-mini-badge-pro" : "generator-mini-badge-free"}`}>
+                      {template.pro ? "Pro" : "Free"}
+                    </span>
+                  </div>
+                  <div className="generator-template-preview-frame">
+                    <div className="generator-template-preview-canvas">
+                      <div dangerouslySetInnerHTML={{ __html: templatePreview.previewHtml }} />
+                    </div>
+                  </div>
+                  <p className="support-copy">{template.description}</p>
+                  <button
+                    className={`button ${active ? "button-primary" : locked ? "button-locked" : "button-secondary"}`}
+                    disabled={locked}
+                    type="button"
+                    onClick={() => handleLayoutChange(template.value)}
+                  >
+                    {locked ? "Pro style" : active ? "Selected" : "Use this style"}
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  function renderStylesStep() {
+    return (
+      <div className="generator-step-stack">
+        <section className="generator-card">
+          <div className="generator-card-header">
+            <div>
+              <p className="eyebrow">{activeStepMeta.eyebrow}</p>
+              <h2>{activeStepMeta.title}</h2>
+            </div>
+          </div>
+
+          <div className="generator-form-grid">
+            <label className="field">
+              <span>Select theme colour</span>
+              <input type="color" value={draft.brandColor} onChange={(event) => updateField("brandColor", event.target.value)} />
+            </label>
+
+            <label className="field">
+              <span>Layout</span>
+              <select value={artifacts.effectiveDraft.layout} onChange={(event) => handleLayoutChange(event.target.value)}>
+                {TEMPLATE_OPTIONS.map((option) => (
+                  <option key={option.value} disabled={isFree && option.pro} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {draft.layout === "mobile-compact" && draft.layoutAutoSelected ? (
+                <small className="support-copy">Mobile Compact selected for better mobile email compatibility.</small>
+              ) : null}
+            </label>
+
+            <label className="field">
+              <span>Logo size</span>
+              <select value={artifacts.effectiveDraft.logoSize} onChange={(event) => updateField("logoSize", event.target.value)}>
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+                <option disabled={isFree} value="extra-large">
+                  Extra Large
+                </option>
+                <option disabled={isFree} value="custom">
+                  Custom
+                </option>
+              </select>
+            </label>
+
+            {artifacts.effectiveDraft.logoSize === "custom" ? (
+              <label className="field">
+                <span>Custom logo width</span>
+                <input
+                  max="180"
+                  min="40"
+                  type="number"
+                  value={artifacts.effectiveDraft.customLogoWidth}
+                  onChange={(event) => updateField("customLogoWidth", event.target.value)}
+                />
+              </label>
+            ) : null}
+
+            <label className="field">
+              <span>Divider</span>
+              <select
+                disabled={isFree || artifacts.effectiveDraft.layout === "mobile-compact"}
+                value={artifacts.effectiveDraft.showDivider ? "on" : "off"}
+                onChange={(event) => updateField("showDivider", event.target.value === "on")}
+              >
+                <option value="off">Off</option>
+                <option value="on">On</option>
+              </select>
+            </label>
+
+            <label className="field">
+              <span>Branding</span>
+              <select
+                disabled={isFree}
+                value={artifacts.includeBranding ? "include" : "remove"}
+                onChange={(event) => updateField("includeBranding", event.target.value === "include")}
+              >
+                <option value="include">Include</option>
+                <option value="remove">Remove</option>
+              </select>
+            </label>
+
+            <label className="field field-full">
+              <span>CTA text</span>
+              <input value={draft.ctaText} onChange={(event) => updateField("ctaText", event.target.value)} />
+            </label>
+
+            <label className="field field-full">
+              <span>Disclaimer</span>
+              <textarea rows="3" value={draft.disclaimer} onChange={(event) => updateField("disclaimer", event.target.value)} />
+            </label>
+          </div>
+
+          <div className="generator-button-row">
+            <button className="button button-secondary" type="button" onClick={handleRevertToOriginal}>
+              Revert to original
+            </button>
+            <button className={`button ${isFree ? "button-locked" : "button-primary"}`} disabled={isFree} type="button" onClick={handleGeneratePolish}>
+              {isFree ? "Pro polish" : "Preview one-click polish"}
+            </button>
+          </div>
+
+          {polishPreview ? (
+            <div className="suggestion-card">
+              <div>
+                <span className="suggestion-label">Polished title line</span>
+                <strong>{[polishPreview.jobTitle, polishPreview.companyName].filter(Boolean).join(" | ")}</strong>
+              </div>
+              <div>
+                <span className="suggestion-label">Polished CTA</span>
+                <p>{polishPreview.ctaText}</p>
+              </div>
+              <div>
+                <span className="suggestion-label">Polished disclaimer</span>
+                <p>{polishPreview.disclaimer}</p>
+              </div>
+              <div className="generator-button-row">
+                <button className="button button-primary" type="button" onClick={handleApplyPolish}>
+                  Apply one-click polish
+                </button>
+                <button className="button button-ghost" type="button" onClick={() => setPolishPreview(null)}>
+                  Dismiss
+                </button>
+              </div>
+              <p className="support-copy">{polishPreview.note}</p>
+            </div>
+          ) : null}
+        </section>
+
+        <section className="generator-card">
+          <div className="generator-card-header">
+            <div>
+              <h3>Smart Setup</h3>
+              <p className="support-copy">Get a stronger recommendation before applying any changes.</p>
+            </div>
+          </div>
+          <div className="generator-form-grid">
+            <label className="field">
+              <span>Industry</span>
+              <select value={smartSetup.industry} onChange={(event) => setSmartSetup((current) => ({ ...current, industry: event.target.value }))}>
+                {INDUSTRY_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>Goal</span>
+              <select value={smartSetup.goal} onChange={(event) => setSmartSetup((current) => ({ ...current, goal: event.target.value }))}>
+                {GOAL_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>Tone</span>
+              <select value={smartSetup.tone} onChange={(event) => setSmartSetup((current) => ({ ...current, tone: event.target.value }))}>
+                {TONE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="generator-button-row">
+            <button className="button button-secondary" type="button" onClick={handleGenerateSmartSetup}>
+              Preview Smart Setup
+            </button>
+            {smartSetupPreview ? (
+              <button className="button button-primary" type="button" onClick={handleApplySmartSetup}>
+                Apply Smart Setup
+              </button>
+            ) : null}
+          </div>
+          {smartSetupPreview ? (
+            <div className="suggestion-card">
+              <div>
+                <span className="suggestion-label">Recommended template</span>
+                <strong>{smartSetupPreview.templateLabel}</strong>
+              </div>
+              <div>
+                <span className="suggestion-label">Suggested title</span>
+                <p>{smartSetupPreview.titleLine}</p>
+              </div>
+              <div>
+                <span className="suggestion-label">Suggested CTA</span>
+                <p>{smartSetupPreview.ctaText}</p>
+              </div>
+              <div>
+                <span className="suggestion-label">Suggested disclaimer</span>
+                <p>{smartSetupPreview.disclaimer}</p>
+              </div>
+              <p className="support-copy">{smartSetupPreview.note}</p>
+            </div>
+          ) : null}
+        </section>
+
+        <AiSuggestionPanel
+          draft={draft}
+          onAfterGenerate={() => setCopyMessage("Suggestions ready to review.")}
+          onApplySuggestions={({ mode, suggestions }) => {
+            setDraft((current) => applySuggestedFields(current, suggestions, mode));
+            setCopyMessage(`${mode} applied.`);
+          }}
+          onSaveVersion={saveCurrentVersion}
+        />
+      </div>
+    );
+  }
+
+  function renderExportStep() {
+    return (
+      <div className="generator-step-stack">
+        <section className="generator-card">
+          <div className="generator-card-header">
+            <div>
+              <p className="eyebrow">{activeStepMeta.eyebrow}</p>
+              <h2>{activeStepMeta.title}</h2>
+            </div>
+          </div>
+
+          <div className="generator-status-grid">
+            <article className="generator-status-card">
+              <span className="generator-status-label">Signature Health Score</span>
+              <strong>{healthScore.score}/100</strong>
+              <ul className="workspace-checklist">
+                {healthScore.tips.map((tip) => (
+                  <li key={tip}>{tip}</li>
+                ))}
+              </ul>
+            </article>
+
+            <article className="generator-status-card">
+              <span className="generator-status-label">Client Compatibility</span>
+              <ul className="workspace-checklist workspace-checklist-tight">
+                {compatibilityChecklist.map((item) => (
+                  <li key={item.label} className={item.passed ? "workspace-checklist-pass" : "workspace-checklist-warn"}>
+                    {item.label}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
+
+          <div className="generator-export-grid">
+            <button
+              className={`button button-primary ${copyState === "success" ? "button-success" : ""} ${copyState === "error" ? "button-error" : ""}`}
+              type="button"
+              onClick={handleCopySignature}
+            >
+              {copyState === "success" ? "Copied!" : "Copy Signature"}
+            </button>
+            {!isFree ? (
+              <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.exportHtml, "Raw HTML")}>
+                Copy Raw HTML
+              </button>
+            ) : null}
+            {!isFree ? (
+              <button className="button button-secondary" type="button" onClick={() => handleCopy(artifacts.plainText, "Plain text signature")}>
+                Copy Plain Text
+              </button>
+            ) : null}
+            <button className={`button ${isFree ? "button-locked" : "button-secondary"}`} disabled={isFree} type="button" onClick={handleDownloadHtml}>
+              Download HTML File
+            </button>
+          </div>
+
+          <div className="generator-export-notes">
+            <p>Copy Signature is best for Gmail, Outlook, Apple Mail, and Yahoo.</p>
+            <p>Raw HTML is a Pro export for platforms that specifically ask for HTML code.</p>
+            <p>Download HTML gives you a backup file for handoff or archiving.</p>
+            {isFree ? <p>Free exports always include Signature Pilot AI branding inside the signature.</p> : null}
+          </div>
+
+          {copyMessage ? (
+            <p className={`copy-feedback ${copyState === "error" ? "copy-feedback-error" : "copy-feedback-success"}`}>{copyMessage}</p>
+          ) : null}
+        </section>
+
+        <section className="generator-card">
+          <div className="generator-card-header">
+            <div>
+              <h3>Recent versions</h3>
+              <p className="support-copy">Restore an earlier draft if you want to backtrack safely.</p>
+            </div>
+            <button className="button button-secondary" type="button" onClick={() => saveCurrentVersion("Manual save")}>
+              Save current version
+            </button>
+          </div>
+
+          {savedVersions.length ? (
+            <div className="version-list">
+              {savedVersions.map((version) => (
+                <article key={version.id} className="version-card">
+                  <div>
+                    <strong>{version.summary}</strong>
+                    <p className="support-copy">{new Date(version.timestamp).toLocaleString()}</p>
+                  </div>
+                  <div className="generator-button-row">
+                    <button className="button button-primary" type="button" onClick={() => restoreVersion(version)}>
+                      Restore
+                    </button>
+                    <button className="button button-ghost" type="button" onClick={() => deleteVersion(version.id)}>
+                      Delete
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="support-copy">Apply suggestions or save the current draft to create recovery points.</p>
+          )}
+        </section>
+      </div>
+    );
+  }
+
+  function renderActiveStep() {
+    switch (activeStep) {
+      case "images":
+        return renderImagesStep();
+      case "templates":
+        return renderTemplatesStep();
+      case "styles":
+        return renderStylesStep();
+      case "export":
+        return renderExportStep();
+      default:
+        return renderDetailsStep();
+    }
+  }
 
   return (
-    <div className="page-stack workspace-page">
-      <section className="workspace-topbar panel">
-        <div className="workspace-topbar-copy">
-          <p className="eyebrow">Builder workspace</p>
+    <div className="generator-builder-page">
+      <section className="generator-builder-topbar">
+        <div className="generator-builder-topcopy">
+          <p className="eyebrow">Signature Generator</p>
           <h1>Build once, paste anywhere.</h1>
-          <p className="hero-subheadline">A focused workspace for professional email signatures that stay clean in Gmail, Outlook, Apple Mail, and Yahoo.</p>
+          <p className="generator-version-marker">Step Studio v1</p>
         </div>
-        <div className="workspace-topbar-actions">
-          <label className="tier-toggle workspace-mode-control">
+        <div className="generator-builder-topactions">
+          <label className="tier-toggle">
             <span>Mode</span>
             <select value={draft.tier} onChange={(event) => handleTierChange(event.target.value)}>
               <option value="free">Free Mode</option>
@@ -695,138 +973,122 @@ export default function BuilderPage() {
         </div>
       </section>
 
-      <div className="workspace-mobile-tabs">
-        {MOBILE_WORKSPACE_TABS.map((tab) => (
-          <button
-            key={tab}
-            className={`tab-button ${mobileWorkspaceTab === tab ? "tab-button-active" : ""}`}
-            type="button"
-            onClick={() => {
-              setMobileWorkspaceTab(tab);
-              if (tab === "Export") {
-                setActiveControlTab("Export");
-              } else if (tab === "Edit" && activeControlTab === "Export") {
-                setActiveControlTab("Content");
-              }
-            }}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      <section className="workspace-shell">
-        <aside className={`panel workspace-templates ${mobileWorkspaceTab === "Templates" ? "workspace-mobile-active" : ""}`}>
-          <div className="panel-header">
-            <div>
-              <p className="eyebrow">Templates</p>
-              <h2>Pick a signature style</h2>
-            </div>
-          </div>
-          <div className="workspace-template-list">
-            {TEMPLATE_OPTIONS.map((template) => {
-              const locked = isFree && template.pro;
-              const active = artifacts.effectiveDraft.layout === template.value;
-              const templatePreview = templatePreviewMap[template.value];
-              return (
-                <article
-                  key={template.value}
-                  className={`template-card workspace-template-card ${active ? "template-card-active" : ""} ${locked ? "template-card-locked" : ""}`}
-                >
-                  <div className="workspace-template-card-head">
-                    <div className="workspace-template-copy">
-                      <div className="workspace-template-title-row">
-                        <strong>{template.label}</strong>
-                        <span className={`workspace-badge ${locked ? "workspace-badge-pro" : "workspace-badge-free"}`}>{template.pro ? "Pro" : "Free"}</span>
-                      </div>
-                      <span>{template.description}</span>
-                    </div>
-                  </div>
-                  <div className={`workspace-template-signature-shell workspace-template-signature-shell-${template.tone}`}>
-                    <div className="workspace-template-signature-frame">
-                      <div className="workspace-template-signature-canvas">
-                        <div
-                          className="workspace-template-signature-surface"
-                          dangerouslySetInnerHTML={{ __html: templatePreview.previewHtml }}
-                        />
-                      </div>
-                    </div>
-                    <div className="workspace-template-card-meta">
-                      <span>{template.person}</span>
-                      <span>{template.cta}</span>
-                    </div>
-                  </div>
-                  <button
-                    className={`button ${active ? "button-primary" : locked ? "button-locked" : "button-secondary"} workspace-template-action`}
-                    disabled={locked}
-                    type="button"
-                    onClick={() => handleLayoutChange(template.value)}
-                  >
-                    {locked ? "Pro style" : active ? "Selected style" : "Use this style"}
-                  </button>
-                </article>
-              );
-            })}
-          </div>
+      <section className="generator-builder-shell">
+        <aside className="generator-step-rail">
+          {STEP_ITEMS.map((step) => {
+            const active = step.key === activeStep;
+            return (
+              <button
+                key={step.key}
+                className={`generator-step-link ${active ? "generator-step-link-active" : ""}`}
+                type="button"
+                onClick={() => setActiveStep(step.key)}
+              >
+                <span className="generator-step-icon" aria-hidden="true">
+                  {step.icon}
+                </span>
+                <span className="generator-step-name">{step.label}</span>
+              </button>
+            );
+          })}
         </aside>
 
-        <div className={`panel workspace-preview ${mobileWorkspaceTab === "Preview" ? "workspace-mobile-active" : ""}`}>
-          <SignaturePreview
-            draft={draft}
-            effectiveDraft={artifacts.effectiveDraft}
-            previewZoom={previewZoom}
-            previewDevice={previewDevice}
-            onPreviewZoomChange={setPreviewZoom}
-            onPreviewDeviceChange={setPreviewDevice}
-          />
-        </div>
+        <section className="generator-editor-pane">
+          <div className="generator-editor-scroll">{renderActiveStep()}</div>
 
-        <div className={`panel workspace-controls ${mobileWorkspaceTab === "Edit" || mobileWorkspaceTab === "Export" ? "workspace-mobile-active" : ""}`}>
-          <div className="panel-header">
-            <div>
-              <p className="eyebrow">Controls</p>
-              <h2>Edit, refine, and export</h2>
-            </div>
+          <div className="generator-editor-footer">
+            <button
+              className="button button-ghost"
+              disabled={stepIndex === 0}
+              type="button"
+              onClick={() => setActiveStep(STEP_ITEMS[Math.max(0, stepIndex - 1)].key)}
+            >
+              Previous
+            </button>
+            <button
+              className="button button-primary"
+              disabled={stepIndex === STEP_ITEMS.length - 1}
+              type="button"
+              onClick={() => setActiveStep(STEP_ITEMS[Math.min(STEP_ITEMS.length - 1, stepIndex + 1)].key)}
+            >
+              Next
+            </button>
+          </div>
+        </section>
+
+        <aside className="generator-preview-pane">
+          <div className="generator-preview-scroll">
+            <SignaturePreview
+              draft={draft}
+              effectiveDraft={artifacts.effectiveDraft}
+              previewDevice={previewDevice}
+              previewZoom={previewZoom}
+              onPreviewDeviceChange={setPreviewDevice}
+              onPreviewZoomChange={setPreviewZoom}
+            />
           </div>
 
-          <div className="workspace-control-tabs">
-            {CONTROL_TABS.map((tab) => (
-              <button
-                key={tab}
-                className={`tab-button ${activeControlTab === tab ? "tab-button-active" : ""}`}
-                type="button"
-                onClick={() => {
-                  setActiveControlTab(tab);
-                  setMobileWorkspaceTab(tab === "Export" ? "Export" : "Edit");
-                }}
-              >
-                {tab}
-              </button>
-            ))}
+          <div className="generator-preview-footer">
+            <button className="generator-clear-button" type="button" onClick={handleReset}>
+              Clear all input fields
+            </button>
+            <button className="generator-create-button" type="button" onClick={handleCreateSignature}>
+              Create signature
+            </button>
           </div>
-
-          <div className="workspace-control-body">
-            <div className={`workspace-tab-panel ${activeControlTab === "Content" ? "workspace-tab-panel-active" : ""}`}>{contentEditor}</div>
-            <div className={`workspace-tab-panel ${activeControlTab === "Style" ? "workspace-tab-panel-active" : ""}`}>{styleEditor}</div>
-            <div className={`workspace-tab-panel ${activeControlTab === "AI" ? "workspace-tab-panel-active" : ""}`}>{aiEditor}</div>
-            <div className={`workspace-tab-panel ${activeControlTab === "Export" ? "workspace-tab-panel-active" : ""}`}>{exportEditor}</div>
-          </div>
-        </div>
+        </aside>
       </section>
+    </div>
+  );
+}
+
+function UploadAssetCard({ description, disabled = false, inputId, label, onFileRemove, onFileSelect, value }) {
+  return (
+    <div className="generator-upload-card">
+      <div className="generator-upload-copy">
+        <h3>{label}</h3>
+        <p className="support-copy">{description}</p>
+      </div>
+      {value ? <img alt={label} className="asset-preview" src={value} /> : <div className="asset-preview asset-preview-empty">No file uploaded yet.</div>}
+      <div className="generator-button-row">
+        <label className={`button button-secondary ${disabled ? "button-locked" : ""}`} htmlFor={inputId}>
+          Upload
+        </label>
+        {value ? (
+          <button className="button button-danger" disabled={disabled} type="button" onClick={onFileRemove}>
+            Remove
+          </button>
+        ) : null}
+      </div>
+      <input
+        key={`${inputId}-${value ? "filled" : "empty"}`}
+        accept="image/*"
+        disabled={disabled}
+        hidden
+        id={inputId}
+        type="file"
+        onChange={(event) => onFileSelect(event.target.files?.[0] || null)}
+      />
     </div>
   );
 }
 
 function buildTemplatePreviewDraft(template, draft) {
   const fallback = getDefaultDraft();
+  const previewBase = {
+    classic: { brandColor: "#2663ff", logoSize: "medium", showDivider: false, includeBranding: false },
+    corporate: { brandColor: "#0f172a", logoSize: "medium", showDivider: true, includeBranding: false },
+    minimal: { brandColor: "#64748b", logoSize: "small", showDivider: false, includeBranding: false, logoShape: "circle" },
+    "premium-split": { brandColor: "#7c3aed", logoSize: "medium", showDivider: true, includeBranding: false },
+    "mobile-compact": { brandColor: "#0f766e", logoSize: "medium", showDivider: false, includeBranding: false }
+  };
 
   return {
     ...fallback,
     ...draft,
+    ...(previewBase[template.value] || {}),
     tier: template.pro ? "pro" : draft.tier,
-    layout: template.value,
-    showDivider: template.value === "mobile-compact" ? false : draft.showDivider,
-    includeBranding: template.pro ? false : draft.tier === "free" ? true : draft.includeBranding
+    layout: template.value
   };
 }
 
@@ -834,7 +1096,6 @@ function resolveRecommendedLayout(draft, recommendedLayout) {
   if (draft.tier !== "pro" && ["corporate", "premium-split"].includes(recommendedLayout)) {
     return "classic";
   }
-
   return recommendedLayout;
 }
 
@@ -914,15 +1175,14 @@ function buildSmartSetupRecommendation(draft, smartSetup) {
 
   const base = industryMap[smartSetup.industry] || industryMap["General Professional"];
   const toneAdjustments = {
-    Friendly: "with a warm, approachable feel",
-    Premium: "with polished premium wording",
+    Friendly: "with warm, approachable wording",
+    Premium: "with more refined premium wording",
     Contractor: "with direct service-first wording",
-    Minimal: "with cleaner, lighter copy",
+    Minimal: "with lighter, cleaner copy",
     Professional: "with clear professional wording"
   };
-
   const goalAdjustments = {
-    "Book calls": "Optimized to make booking the next conversation easy.",
+    "Book calls": "Optimized to make booking the next conversation easier.",
     "Get quotes": "Optimized to encourage quote or estimate requests.",
     "Show credibility": "Optimized to reinforce trust and professionalism.",
     "Drive website visits": "Optimized to send recipients to the website first."
@@ -953,25 +1213,21 @@ function evaluateSignatureHealth(draft) {
   } else {
     tips.push("Add a clear full name so the signature feels credible immediately.");
   }
-
   if (draft.jobTitle?.trim() && draft.companyName?.trim()) {
     score += 18;
   } else {
     tips.push("Include both a title and company so the signature reads more professional.");
   }
-
   if (draft.phone?.trim() && draft.email?.trim()) {
     score += 18;
   } else {
     tips.push("Include both phone and email to make contact easier across devices.");
   }
-
   if (draft.website?.trim() || draft.ctaText?.trim()) {
     score += 14;
   } else {
     tips.push("Add a website or CTA so the signature guides the next action.");
   }
-
   if (draft.logoDataUrl) {
     score += 12;
   } else {
@@ -984,7 +1240,6 @@ function evaluateSignatureHealth(draft) {
   } else {
     tips.push("Shorten the title/company line to keep the signature cleaner on mobile.");
   }
-
   if (draft.layout === "mobile-compact" || titleLength < 42) {
     score += 10;
   } else {
@@ -1019,9 +1274,10 @@ function buildPolishRecommendation(draft) {
     ctaText: polishCta(draft.ctaText),
     disclaimer: shortenCopy(draft.disclaimer, 82),
     layout: compactTitleLength > 44 ? "mobile-compact" : draft.layout === "classic" ? "minimal" : draft.layout,
-    note: compactTitleLength > 44
-      ? "This pass shortens the top line and recommends Mobile Compact for cleaner phone rendering."
-      : "This pass tightens the title, CTA, and disclaimer while keeping the signature clean."
+    note:
+      compactTitleLength > 44
+        ? "This pass shortens the top line and recommends Mobile Compact for cleaner phone rendering."
+        : "This pass tightens the title, CTA, and disclaimer while keeping the signature clean."
   };
 }
 
@@ -1030,19 +1286,15 @@ function polishCta(value) {
   if (!raw) {
     return "Book a quick call";
   }
-
   if (/schedule|book/i.test(raw)) {
     return "Book a quick call";
   }
-
   if (/quote|estimate/i.test(raw)) {
     return "Request a quote";
   }
-
   if (/website|visit|work/i.test(raw)) {
     return "See our latest work";
   }
-
   return shortenCopy(raw, 28);
 }
 
@@ -1050,12 +1302,10 @@ function shortenCopy(value, limit) {
   const normalized = String(value || "")
     .replace(/\s+/g, " ")
     .trim();
-
   if (normalized.length <= limit) {
     return normalized;
   }
-
-  return `${normalized.slice(0, Math.max(0, limit - 1)).trim()}…`;
+  return `${normalized.slice(0, Math.max(0, limit - 1)).trim()}...`;
 }
 
 function loadInitialDraft() {

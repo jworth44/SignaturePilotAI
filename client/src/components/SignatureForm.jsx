@@ -32,11 +32,8 @@ export default function SignatureForm({
   onApplySampleProfile,
   onApplySmartSetup,
   onFieldChange,
-  onColorChange,
   onGenerateSmartSetup,
   onTierChange,
-  onFileSelect,
-  onFileRemove,
   onSmartSetupChange
 }) {
   const isFree = draft.tier === "free";
@@ -157,33 +154,6 @@ export default function SignatureForm({
         <div className="form-section">
           <div className="form-section-heading">
             <div>
-              <h3>Upload your logo</h3>
-              <p className="support-copy">Make the signature feel branded immediately. Upload, replace, or remove the current logo here.</p>
-            </div>
-          </div>
-          <div className="upload-grid">
-            <AssetUploader
-              label="Upload your logo"
-              value={draft.logoDataUrl}
-              inputId="logo-upload"
-              onFileSelect={(file) => onFileSelect("logoDataUrl", file)}
-              onFileRemove={() => onFileRemove("logoDataUrl")}
-            />
-            <div className="asset-uploader cross-sell-card">
-              <div className="asset-uploader-header">
-                <strong>Logo Pilot AI</strong>
-              </div>
-              <p className="support-copy">Need a logo? Try Logo Pilot AI for concept creation, refinement, and blending.</p>
-              <a className="button button-secondary" href="#">
-                Explore Logo Pilot AI
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="form-section">
-          <div className="form-section-heading">
-            <div>
               <h3>Start faster</h3>
               <p className="support-copy">Load polished sample data, then tailor it to your brand.</p>
             </div>
@@ -256,54 +226,8 @@ export default function SignatureForm({
             ))}
           </div>
         </div>
-
-        <div className="form-section">
-          <div className="form-section-heading">
-            <div>
-              <h3>Base brand colour</h3>
-              <p className="support-copy">Set the base colour here, then fine-tune layout and presentation in the Style tab.</p>
-            </div>
-          </div>
-          <div className="field-grid">
-            <label className="field">
-              <span>Brand colour</span>
-              <input type="color" value={draft.brandColor} onChange={(event) => onColorChange(event.target.value)} />
-            </label>
-          </div>
-          {isFree ? <p className="locked-banner">Free Mode includes Signature Pilot AI branding and locks advanced customization until upgrade.</p> : null}
-        </div>
+        {isFree ? <p className="locked-banner">Free Mode includes Signature Pilot AI branding and locks advanced customization until upgrade.</p> : null}
       </section>
-    </div>
-  );
-}
-
-function AssetUploader({ label, value, inputId, disabled = false, onFileSelect, onFileRemove }) {
-  return (
-    <div className="asset-uploader">
-      <div className="asset-uploader-header">
-        <strong>{label}</strong>
-      </div>
-      {value ? <img alt={label} className="asset-preview" src={value} /> : <div className="asset-preview asset-preview-empty">No logo uploaded yet.</div>}
-      <div className="button-row">
-        <label className={`button button-secondary workspace-upload-button ${disabled ? "button-locked" : ""}`} htmlFor={inputId}>
-          Upload Logo
-        </label>
-        {value ? (
-          <button className="button button-danger" disabled={disabled} type="button" onClick={onFileRemove}>
-            Remove Logo
-          </button>
-        ) : null}
-      </div>
-      <input
-        key={`${inputId}-${value ? "filled" : "empty"}`}
-        id={inputId}
-        accept="image/*"
-        disabled={disabled}
-        hidden
-        type="file"
-        onChange={(event) => onFileSelect(event.target.files?.[0] || null)}
-      />
-      {!value ? <p className="support-copy">PNG, JPG, or SVG works well.</p> : null}
     </div>
   );
 }
