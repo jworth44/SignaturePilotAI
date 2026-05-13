@@ -50,6 +50,8 @@ export function getDefaultDraft() {
     logoDataUrl: "",
     photoDataUrl: "",
     ctaText: "Book a quick call",
+    ctaDestinationType: "none",
+    ctaUrl: "",
     disclaimer: "Please consider the environment before printing this email.",
     brandDirection: "Clean electric blue with subtle premium contrast.",
     renderMode: "desktop"
@@ -72,6 +74,7 @@ export function generateSignatureArtifacts(draft) {
     includeBranding
   });
 
+  const ctaHref = resolveCtaHref(effectiveDraft);
   const plainText = [
     effectiveDraft.fullName,
     buildTitleLine(effectiveDraft),
@@ -79,7 +82,7 @@ export function generateSignatureArtifacts(draft) {
     effectiveDraft.email,
     effectiveDraft.website,
     effectiveDraft.location,
-    effectiveDraft.ctaText,
+    ctaHref && effectiveDraft.ctaText ? `${effectiveDraft.ctaText}: ${ctaHref}` : "",
     effectiveDraft.disclaimer
   ]
     .filter(Boolean)
@@ -180,6 +183,8 @@ function applyTierRules(draft) {
     customLogoWidth: normalizeCustomLogoWidth(draft.customLogoWidth),
     showDivider: tier === "free" ? false : Boolean(draft.showDivider),
     showTemplateTags: Boolean(draft.showTemplateTags),
+    ctaDestinationType: normalizeCtaDestinationType(draft.ctaDestinationType, tier),
+    ctaUrl: String(draft.ctaUrl || "").trim(),
     photoDataUrl: tier === "free" ? "" : draft.photoDataUrl,
     linkedinUrl: tier === "free" ? "" : draft.linkedinUrl,
     facebookUrl: tier === "free" ? "" : draft.facebookUrl,
@@ -239,6 +244,16 @@ function normalizeVariant(value) {
     return 1;
   }
   return Math.min(12, Math.max(1, Math.round(parsed)));
+}
+
+function normalizeCtaDestinationType(value, tier) {
+  const normalized = String(value || "none").trim().toLowerCase();
+  const supported = new Set(["none", "custom", "calendly", "teams", "google-meet", "zoom", "microsoft-bookings"]);
+  const safeValue = supported.has(normalized) ? normalized : "none";
+  if (tier !== "pro" && safeValue !== "none" && safeValue !== "custom") {
+    return "custom";
+  }
+  return safeValue;
 }
 
 function buildTitleLine(draft) {
@@ -345,7 +360,7 @@ function renderStackedLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, 
     brandColor,
     ctaStyle: variantConfig.ctaStyle,
     text: sanitized.ctaText || familyMeta.label,
-    url: ensureProtocol(sanitized.website)
+    url: resolveCtaHref(sanitized)
   });
 
   const badgeMarkup = sanitized.showTemplateTags && variantConfig.topBadge
@@ -384,7 +399,7 @@ function renderCardLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, san
     brandColor,
     ctaStyle: variantConfig.ctaStyle,
     text: sanitized.ctaText || familyMeta.label,
-    url: ensureProtocol(sanitized.website)
+    url: resolveCtaHref(sanitized)
   });
 
   const badgeMarkup = sanitized.showTemplateTags
@@ -431,7 +446,7 @@ function buildInfoBlock({ brandColor, familyMeta, sanitized, variantConfig }) {
     brandColor,
     ctaStyle: variantConfig.ctaStyle,
     text: sanitized.ctaText || familyMeta.label,
-    url: ensureProtocol(sanitized.website)
+    url: resolveCtaHref(sanitized)
   });
   const badgeMarkup = sanitized.showTemplateTags && variantConfig.topBadge
     ? `<tr><td style="${cellResetStyle()}padding:0 0 8px 0;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background:${fadeColor(brandColor, 0.12)};color:${brandColor};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;">${familyMeta.name}</span></td></tr>`
@@ -530,13 +545,16 @@ function buildSocialRows(draft, brandColor, centered = false) {
 }
 
 function buildCtaMarkup({ align, brandColor, ctaStyle, text, url }) {
+  if (!url || !text) {
+    return "";
+  }
   if (ctaStyle === "button") {
-    return `<tr><td ${align === "center" ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:12px;"><a href="${url}" style="display:inline-block;padding:8px 14px;border-radius:999px;background:${brandColor};color:#ffffff;text-decoration:none;font-size:12px;font-weight:700;">${escapeHtml(text)}</a></td></tr>`;
+    return `<tr><td ${align === "center" ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:12px;"><a href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(url)}" style="display:inline-block;padding:8px 14px;border-radius:999px;background:${brandColor};color:#ffffff;text-decoration:none;font-size:12px;font-weight:700;">${escapeHtml(text)}</a></td></tr>`;
   }
   if (ctaStyle === "pill") {
-    return `<tr><td ${align === "center" ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:12px;"><a href="${url}" style="display:inline-block;padding:6px 12px;border-radius:999px;background:${fadeColor(brandColor, 0.12)};color:${brandColor};text-decoration:none;font-size:12px;font-weight:700;">${escapeHtml(text)}</a></td></tr>`;
+    return `<tr><td ${align === "center" ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:12px;"><a href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(url)}" style="display:inline-block;padding:6px 12px;border-radius:999px;background:${fadeColor(brandColor, 0.12)};color:${brandColor};text-decoration:none;font-size:12px;font-weight:700;">${escapeHtml(text)}</a></td></tr>`;
   }
-  return `<tr><td ${align === "center" ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:12px;font-size:12px;line-height:18px;color:#374151;"><a href="${url}" style="color:${brandColor};text-decoration:none;font-weight:700;">${escapeHtml(text)}</a></td></tr>`;
+  return `<tr><td ${align === "center" ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:12px;font-size:12px;line-height:18px;color:#374151;"><a href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(url)}" style="color:${brandColor};text-decoration:none;font-weight:700;">${escapeHtml(text)}</a></td></tr>`;
 }
 
 function buildBrandingBlock({ align, brandColor, insideCard }) {
@@ -628,6 +646,30 @@ function ensureProtocol(value) {
     return "https://signature-forge-ai.vercel.app";
   }
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+function resolveCtaHref(draft) {
+  const destinationType = normalizeCtaDestinationType(draft.ctaDestinationType, draft.tier);
+  if (destinationType === "none") {
+    return "";
+  }
+
+  const trimmed = String(draft.ctaUrl || "").trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  const normalized = ensureProtocol(trimmed);
+  return isValidSchedulingUrl(normalized) ? normalized : "";
+}
+
+function isValidSchedulingUrl(value) {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
 }
 
 function sanitizePhoneHref(value) {

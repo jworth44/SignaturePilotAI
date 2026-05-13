@@ -31,6 +31,8 @@ test.describe("Signature Pilot AI step studio smoke tests", () => {
     await expect(page.locator('label:has-text("Website URL") input')).toHaveValue("customsite.com");
     await expect(page.locator('label:has-text("Job title*") input')).toHaveValue("Operations Lead");
     await expect(page.getByText("Starter applied without replacing your existing contact details.")).toBeVisible();
+    await page.getByRole("button", { name: /Styles/ }).click();
+    await expect(page.locator('label:has-text("CTA text") input')).toHaveValue("Request site walkthrough");
   });
 
   test("Preview device buttons and zoom change the live preview state", async ({ page }) => {
@@ -101,6 +103,44 @@ test.describe("Signature Pilot AI step studio smoke tests", () => {
 
     await page.getByRole("button", { name: "Copy Signature" }).click();
     await expect(page.getByRole("button", { name: "Copied!" })).toBeVisible();
+  });
+
+  test("CTA destination validation and export preserve real scheduling links", async ({ page }) => {
+    await page.locator(".generator-mode-field select").selectOption("pro");
+    await page.getByRole("button", { name: /Styles/ }).click();
+
+    await page.locator('label:has-text("CTA Destination Type") select').selectOption("teams");
+    await expect(page.getByText("CTA URL is required when a destination type is selected.")).toBeVisible();
+
+    await page.locator('label:has-text("CTA text") input').fill("Book Teams meeting");
+    await page.locator('label:has-text("CTA URL") input').fill("teams.microsoft.com/l/meetup-join/example");
+    await expect(page.getByText("CTA URL is required when a destination type is selected.")).toHaveCount(0);
+
+    await expect(page.locator(".signature-preview-surface a", { hasText: "Book Teams meeting" })).toHaveAttribute(
+      "href",
+      /https:\/\/teams\.microsoft\.com\/l\/meetup-join\/example/
+    );
+
+    await page.getByRole("button", { name: /Export/ }).click();
+    await page.getByRole("button", { name: "Copy Raw HTML" }).click();
+    const teamsHtml = await page.evaluate(() => navigator.clipboard.readText());
+    expect(teamsHtml).toContain('href="https://teams.microsoft.com/l/meetup-join/example"');
+    expect(teamsHtml).toContain('title="https://teams.microsoft.com/l/meetup-join/example"');
+
+    await page.getByRole("button", { name: "Copy Plain Text" }).click();
+    const plainText = await page.evaluate(() => navigator.clipboard.readText());
+    expect(plainText).toContain("Book Teams meeting: https://teams.microsoft.com/l/meetup-join/example");
+
+    await page.getByRole("button", { name: /Styles/ }).click();
+    await page.locator('label:has-text("CTA Destination Type") select').selectOption("calendly");
+    await page.locator('label:has-text("CTA URL") input').fill("https://calendly.com/yourname");
+    await expect(page.locator(".signature-preview-surface a", { hasText: "Book Teams meeting" })).toHaveAttribute(
+      "href",
+      "https://calendly.com/yourname"
+    );
+
+    await page.locator('label:has-text("CTA Destination Type") select').selectOption("none");
+    await expect(page.locator(".signature-preview-surface a", { hasText: "Book Teams meeting" })).toHaveCount(0);
   });
 
   test("Template tag decorations disappear fully when tags are off and return when enabled", async ({ page }) => {

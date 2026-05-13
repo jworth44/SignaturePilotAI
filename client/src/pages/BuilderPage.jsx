@@ -13,7 +13,7 @@ const STARTER_PROFILES = {
     jobTitle: "Client Services Lead",
     companyName: "Northlight Studio",
     website: "northlightstudio.com",
-    ctaText: "Book a quick call",
+    ctaText: "Schedule consultation",
     disclaimer: "Please let me know the best time to follow up with next steps.",
     layout: "professional-classic",
     tone: "Professional",
@@ -37,7 +37,7 @@ const STARTER_PROFILES = {
     jobTitle: "Office Administration Coordinator",
     companyName: "Atlas Business Support",
     website: "atlasbusinesssupport.com",
-    ctaText: "Send your request",
+    ctaText: "Book Teams meeting",
     disclaimer: "Response times may vary depending on current office support volume.",
     layout: "minimal-clean",
     tone: "Professional",
@@ -49,7 +49,7 @@ const STARTER_PROFILES = {
     jobTitle: "Licensed General Contractor",
     companyName: "Ortiz Build Co.",
     website: "ortizbuildco.com",
-    ctaText: "Request a project quote",
+    ctaText: "Request site walkthrough",
     disclaimer: "Estimates and scope recommendations are confirmed after a project review.",
     layout: "contractor-bold",
     tone: "Contractor",
@@ -61,7 +61,7 @@ const STARTER_PROFILES = {
     jobTitle: "Founder & Operator",
     companyName: "Northlight Venture Lab",
     website: "northlightventurelab.com",
-    ctaText: "See what we're building",
+    ctaText: "Let's connect",
     disclaimer: "Partnership timelines and availability may change as the business evolves.",
     layout: "tech-saas",
     tone: "Friendly",
@@ -155,6 +155,15 @@ const INDUSTRY_OPTIONS = [
 
 const GOAL_OPTIONS = ["Book calls", "Get quotes", "Show credibility", "Drive website visits"];
 const TONE_OPTIONS = ["Professional", "Friendly", "Premium", "Contractor", "Minimal"];
+const CTA_DESTINATION_OPTIONS = [
+  { value: "none", label: "None", pro: false },
+  { value: "custom", label: "Custom URL", pro: false },
+  { value: "calendly", label: "Calendly", pro: true },
+  { value: "teams", label: "Microsoft Teams", pro: true },
+  { value: "google-meet", label: "Google Meet", pro: true },
+  { value: "zoom", label: "Zoom", pro: true },
+  { value: "microsoft-bookings", label: "Microsoft Bookings", pro: true }
+];
 
 export default function BuilderPage() {
   const initialDraft = useMemo(() => loadInitialDraft(), []);
@@ -228,6 +237,7 @@ export default function BuilderPage() {
 
   const artifacts = useMemo(() => generateSignatureArtifacts({ ...draft, renderMode: previewDevice }), [draft, previewDevice]);
   const isFree = artifacts.effectiveDraft.tier === "free";
+  const ctaValidation = useMemo(() => validateCtaDestination(artifacts.effectiveDraft), [artifacts.effectiveDraft]);
   const healthScore = useMemo(() => evaluateSignatureHealth(artifacts.effectiveDraft), [artifacts.effectiveDraft]);
   const compatibilityChecklist = useMemo(() => buildCompatibilityChecklist(artifacts.effectiveDraft), [artifacts.effectiveDraft]);
   const templatePreviewMap = useMemo(
@@ -255,6 +265,14 @@ export default function BuilderPage() {
 
   function updateField(key, value) {
     setDraft((current) => ({ ...current, [key]: value }));
+  }
+
+  function handleCtaDestinationTypeChange(value) {
+    setDraft((current) => ({
+      ...current,
+      ctaDestinationType: value,
+      ctaUrl: value === "none" ? "" : current.ctaUrl
+    }));
   }
 
   function saveCurrentVersion(reason = "Saved version") {
@@ -786,6 +804,29 @@ export default function BuilderPage() {
               <input value={draft.ctaText} onChange={(event) => updateField("ctaText", event.target.value)} />
             </label>
 
+            <label className="field">
+              <span>CTA Destination Type</span>
+              <select value={artifacts.effectiveDraft.ctaDestinationType} onChange={(event) => handleCtaDestinationTypeChange(event.target.value)}>
+                {CTA_DESTINATION_OPTIONS.map((option) => (
+                  <option key={option.value} disabled={isFree && option.pro} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <small className="support-copy">Most business users use Teams or Calendly scheduling links.</small>
+            </label>
+
+            <label className="field">
+              <span>CTA URL</span>
+              <input
+                placeholder={getCtaPlaceholder(artifacts.effectiveDraft.ctaDestinationType)}
+                value={draft.ctaUrl}
+                onChange={(event) => updateField("ctaUrl", event.target.value)}
+              />
+              <small className="support-copy">{getCtaHelpText(artifacts.effectiveDraft.ctaDestinationType, isFree)}</small>
+              {ctaValidation.error ? <small className="locked-copy">{ctaValidation.error}</small> : null}
+            </label>
+
             <label className="field field-full">
               <span>Disclaimer</span>
               <textarea rows="3" value={draft.disclaimer} onChange={(event) => updateField("disclaimer", event.target.value)} />
@@ -1298,6 +1339,71 @@ function buildSmartSetupRecommendation(draft, smartSetup) {
     note: `${toneAdjustments[smartSetup.tone]} ${goalAdjustments[smartSetup.goal]}`,
     templateLabel: lookupTemplateLabel(base.layout)
   };
+}
+
+function getCtaPlaceholder(type) {
+  switch (type) {
+    case "calendly":
+      return "https://calendly.com/yourname";
+    case "teams":
+      return "https://teams.microsoft.com/l/meetup-join/...";
+    case "google-meet":
+      return "https://meet.google.com/...";
+    case "zoom":
+      return "https://zoom.us/j/...";
+    case "microsoft-bookings":
+      return "https://outlook.office.com/book/...";
+    case "custom":
+      return "https://your-company.com/book";
+    default:
+      return "No CTA destination selected";
+  }
+}
+
+function getCtaHelpText(type, isFree) {
+  if (type === "none") {
+    return "Choose a destination type to attach a real scheduling link to your CTA.";
+  }
+  if (isFree && type === "custom") {
+    return "Free Mode supports custom CTA URLs. Upgrade to Pro for Teams, Calendly, Zoom, Meet, and Bookings helpers.";
+  }
+
+  const labels = {
+    custom: "Paste any meeting, quote, or scheduling URL you want recipients to open.",
+    calendly: "Paste your public Calendly booking link.",
+    teams: "Paste your Microsoft Teams meeting or scheduling URL.",
+    "google-meet": "Paste your Google Meet invite URL.",
+    zoom: "Paste your Zoom meeting URL.",
+    "microsoft-bookings": "Paste your Microsoft Bookings scheduling page."
+  };
+
+  return labels[type] || "Paste a valid scheduling or meeting URL.";
+}
+
+function validateCtaDestination(draft) {
+  const destinationType = String(draft.ctaDestinationType || "none");
+  const url = String(draft.ctaUrl || "").trim();
+
+  if (destinationType === "none") {
+    return { valid: true, error: "", normalizedUrl: "" };
+  }
+
+  if (!url) {
+    return { valid: false, error: "CTA URL is required when a destination type is selected.", normalizedUrl: "" };
+  }
+
+  const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+
+  try {
+    const parsed = new URL(normalizedUrl);
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      return { valid: false, error: "CTA URL must start with http:// or https://.", normalizedUrl: "" };
+    }
+  } catch {
+    return { valid: false, error: "Enter a valid CTA URL for the selected destination type.", normalizedUrl: "" };
+  }
+
+  return { valid: true, error: "", normalizedUrl };
 }
 
 function evaluateSignatureHealth(draft) {
