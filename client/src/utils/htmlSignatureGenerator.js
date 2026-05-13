@@ -1,3 +1,18 @@
+// TEMPLATE LAYOUT MATRIX
+// Professional Classic    -> renderSplitLayout
+// Executive Corporate     -> renderBannerLayout
+// Minimal Clean           -> renderMinimalLayout
+// Premium Consultant      -> renderTwoColumnSplitLayout
+// Contractor Bold         -> renderBannerLayout
+// Real Estate             -> renderSplitLayout
+// Legal / Finance         -> renderTwoColumnSplitLayout
+// Health / Medical        -> renderBorderedCardLayout
+// Creative / Designer     -> renderBorderedCardLayout
+// Tech / SaaS             -> renderSplitLayout
+// Mobile Compact          -> renderStackedLayout
+// Signature Card          -> renderCardLayout
+// Corporate Card          -> renderBorderedCardLayout
+
 const TEMPLATE_META = {
   "professional-classic": { name: "Professional Classic", accentWeight: 600, label: "Book a quick call", pro: false },
   "executive-corporate": { name: "Executive Corporate", accentWeight: 700, label: "Schedule a leadership call", pro: true },
@@ -10,7 +25,8 @@ const TEMPLATE_META = {
   "creative-designer": { name: "Creative / Designer", accentWeight: 600, label: "See our latest work", pro: true },
   "tech-saas": { name: "Tech / SaaS", accentWeight: 600, label: "See the platform", pro: true },
   "mobile-compact": { name: "Mobile Compact", accentWeight: 600, label: "Tap to connect", pro: false },
-  "signature-card": { name: "Signature Card", accentWeight: 700, label: "Open profile", pro: true }
+  "signature-card": { name: "Signature Card", accentWeight: 700, label: "Open profile", pro: true },
+  "corporate-card": { name: "Corporate Card", accentWeight: 700, label: "Open profile", pro: true }
 };
 
 const FREE_FAMILIES = new Set(["professional-classic", "minimal-clean", "contractor-bold", "mobile-compact"]);
@@ -227,11 +243,15 @@ function normalizeLayoutValue(value) {
       return "mobile-compact";
     case "signature-card":
       return "signature-card";
+    case "corporate-card":
+    case "corporate card":
+      return "corporate-card";
     case "professional-classic":
     case "executive-corporate":
     case "minimal-clean":
     case "premium-consultant":
     case "contractor-bold":
+    case "corporate-card":
       return normalized;
     default:
       return "professional-classic";
@@ -279,27 +299,29 @@ function resolveVariantConfig(draft) {
 
   switch (family) {
     case "executive-corporate":
-      return { ...shared, structure: "split", logoSide: "right", supportsDivider: true, topBadge: true, nameSize: 22, titleSize: 13, ctaStyle: "button" };
+      return { ...shared, structure: "banner", logoSide: "right", supportsDivider: false, topBadge: true, nameSize: 22, titleSize: 13, ctaStyle: "button" };
     case "minimal-clean":
-      return { ...shared, structure: "split", logoSide: "left", supportsDivider: false, topBadge: false, nameSize: 19, titleSize: 12, ctaStyle: "link", dense: true };
+      return { ...shared, structure: "minimal", logoSide: "left", supportsDivider: false, topBadge: false, nameSize: 19, titleSize: 12, ctaStyle: "link", dense: true };
     case "premium-consultant":
-      return { ...shared, structure: "split-card", logoSide: variantIndex % 2 === 0 ? "left" : "right", supportsDivider: true, topBadge: true, nameSize: 23, titleSize: 13, ctaStyle: "pill", wrapInCard: true };
+      return { ...shared, structure: "two-column-split", logoSide: "left", supportsDivider: false, topBadge: true, nameSize: 23, titleSize: 13, ctaStyle: "pill", wrapInCard: true };
     case "contractor-bold":
-      return { ...shared, structure: "split-strong", logoSide: "left", supportsDivider: false, topBadge: true, accentBar: true, nameSize: 21, titleSize: 13, ctaStyle: "button" };
+      return { ...shared, structure: "banner", logoSide: "right", supportsDivider: false, topBadge: true, accentBar: true, nameSize: 21, titleSize: 13, ctaStyle: "button" };
     case "real-estate":
       return { ...shared, structure: "split-right", logoSide: "right", supportsDivider: true, topBadge: true, nameSize: 22, titleSize: 13, ctaStyle: "button" };
     case "legal-finance":
-      return { ...shared, structure: "structured", logoSide: "left", supportsDivider: true, topBadge: true, nameSize: 21, titleSize: 12, ctaStyle: "pill" };
+      return { ...shared, structure: "two-column-split", logoSide: "left", supportsDivider: false, topBadge: true, nameSize: 21, titleSize: 12, ctaStyle: "pill" };
     case "health-medical":
-      return { ...shared, structure: "stacked", isStacked: true, supportsDivider: false, topBadge: false, nameSize: 20, titleSize: 12, ctaStyle: "button" };
+      return { ...shared, structure: "bordered-card", isStacked: false, supportsDivider: false, topBadge: false, nameSize: 20, titleSize: 12, ctaStyle: "button" };
     case "creative-designer":
-      return { ...shared, structure: "creative", logoSide: variantIndex % 2 === 0 ? "right" : "left", supportsDivider: false, topBadge: true, nameSize: 21, titleSize: 12, ctaStyle: "pill" };
+      return { ...shared, structure: "bordered-card", logoSide: "left", supportsDivider: false, topBadge: true, nameSize: 21, titleSize: 12, ctaStyle: "pill" };
     case "tech-saas":
       return { ...shared, structure: "chip", logoSide: "left", supportsDivider: false, topBadge: true, nameSize: 21, titleSize: 12, ctaStyle: "pill" };
     case "mobile-compact":
       return { ...shared, structure: "mobile", isStacked: true, supportsDivider: false, topBadge: variantIndex % 2 === 0, nameSize: 19, titleSize: 12, ctaStyle: "button" };
     case "signature-card":
       return { ...shared, structure: "card", isStacked: true, supportsDivider: false, topBadge: true, nameSize: 20, titleSize: 12, ctaStyle: "pill", wrapInCard: true };
+    case "corporate-card":
+      return { ...shared, structure: "bordered-card", logoSide: "left", supportsDivider: false, topBadge: true, nameSize: 20, titleSize: 12, ctaStyle: "pill" };
     case "professional-classic":
     default:
       return { ...shared, structure: "split", logoSide: "left", supportsDivider: true, topBadge: variantIndex % 4 === 0, nameSize: 21, titleSize: 13, ctaStyle: "link" };
@@ -308,6 +330,46 @@ function resolveVariantConfig(draft) {
 
 function renderVariantLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, sanitized, showDivider, variantConfig }) {
   switch (variantConfig.structure) {
+    case "banner":
+      return renderBannerLayout(
+        {
+          brandColor,
+          familyMeta,
+          logoMarkup,
+          photoMarkup,
+          sanitized,
+          variantConfig
+        },
+        { showDivider }
+      );
+    case "minimal":
+      return renderMinimalLayout({
+        brandColor,
+        sanitized,
+        variantConfig
+      });
+    case "bordered-card":
+      return renderBorderedCardLayout(
+        {
+          brandColor,
+          familyMeta,
+          sanitized,
+          variantConfig
+        },
+        { showDivider }
+      );
+    case "two-column-split":
+      return renderTwoColumnSplitLayout(
+        {
+          brandColor,
+          familyMeta,
+          logoMarkup,
+          photoMarkup,
+          sanitized,
+          variantConfig
+        },
+        { showDivider }
+      );
     case "stacked":
     case "mobile":
       return renderStackedLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, sanitized, variantConfig });
@@ -347,6 +409,234 @@ function renderSplitLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, sa
       <td valign="top" style="${cellResetStyle()}padding:0;">${firstCell}</td>
       ${dividerMarkup}
       <td valign="top" style="${cellResetStyle()}padding:0 0 0 ${variantConfig.logoSide === "left" ? "12px" : "0"};">${secondCell}</td>
+    </tr>
+  </tbody>
+</table>`.trim();
+}
+
+function renderBannerLayout(data, options = {}) {
+  const {
+    brandColor,
+    familyMeta,
+    sanitized,
+    variantConfig
+  } = data;
+  const { showDivider = false } = options;
+  const bannerLogoMarkup = buildBannerLogoMarkup({
+    source: sanitized.logoDataUrl || sanitized.photoDataUrl,
+    alt: sanitized.companyName || sanitized.fullName,
+    brandColor
+  });
+  const titleLine = buildTitleLine(sanitized);
+  const contactMarkup = buildBannerContactMarkup(sanitized, variantConfig.contactMode, brandColor);
+  const ctaMarkup = buildBannerCtaMarkup({
+    align: variantConfig.structure === "banner" && variantConfig.contactMode === "inline" ? "center" : "left",
+    brandColor,
+    text: sanitized.ctaText || familyMeta.label,
+    url: resolveCtaHref(sanitized)
+  });
+  const bannerPadding = variantConfig.dense ? "10px 14px" : "12px 16px";
+
+  return `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;max-width:620px;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+  <tbody>
+    <tr>
+      <td style="${cellResetStyle()}background-color:${brandColor};padding:${bannerPadding};">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;background-color:${brandColor};">
+          <tbody>
+            <tr>
+              <td valign="middle" style="${cellResetStyle()}padding:0;">
+                <div style="font-size:16px;line-height:20px;font-weight:700;color:#ffffff;">${escapeHtml(sanitized.fullName)}</div>
+                ${titleLine ? `<div style="padding-top:4px;font-size:12px;line-height:16px;font-weight:500;color:#ffffff;">${escapeHtml(titleLine)}</div>` : ""}
+              </td>
+              ${bannerLogoMarkup ? `<td align="right" valign="middle" style="${cellResetStyle()}padding:0 0 0 12px;">${bannerLogoMarkup}</td>` : ""}
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="${cellResetStyle()}padding:12px 0 0 0;">
+        ${contactMarkup}
+      </td>
+    </tr>
+    ${ctaMarkup}
+  </tbody>
+</table>`.trim();
+}
+
+function renderTwoColumnSplitLayout(data, options = {}) {
+  const {
+    brandColor,
+    logoMarkup,
+    sanitized
+  } = data;
+  const { showDivider = false } = options;
+  const leftLogoMarkup = buildSplitColumnLogoMarkup({
+    source: sanitized.logoDataUrl || sanitized.photoDataUrl,
+    alt: sanitized.companyName || sanitized.fullName,
+    brandColor
+  });
+  const ctaMarkup = buildSplitColumnCtaMarkup({
+    brandColor,
+    text: sanitized.ctaText,
+    url: resolveCtaHref(sanitized)
+  });
+  const contactRows = buildSplitColumnContactRows(sanitized, brandColor);
+
+  return `
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:500px;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+  <tbody>
+    <tr>
+      <td width="35%" bgcolor="${brandColor}" valign="middle" style="${cellResetStyle()}background-color:${brandColor};width:35%;padding:16px;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;background-color:${brandColor};">
+          <tbody>
+            <tr>
+              <td align="center" valign="middle" style="${cellResetStyle()}padding:0 0 10px 0;">${leftLogoMarkup}</td>
+            </tr>
+            <tr>
+              <td align="center" style="${cellResetStyle()}font-size:15px;line-height:20px;font-weight:700;color:#ffffff;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+            </tr>
+            ${sanitized.jobTitle ? `<tr><td align="center" style="${cellResetStyle()}font-size:11px;line-height:15px;font-weight:600;color:${fadeColor("#ffffff", 0.82)};padding:0;">${escapeHtml(sanitized.jobTitle)}</td></tr>` : ""}
+          </tbody>
+        </table>
+      </td>
+      <td width="65%" valign="top" style="${cellResetStyle()}background-color:#ffffff;width:65%;padding:16px;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;background-color:#ffffff;">
+          <tbody>
+            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;font-size:11px;line-height:15px;font-weight:700;color:${brandColor};letter-spacing:0.08em;text-transform:uppercase;">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
+            ${contactRows}
+            ${ctaMarkup}
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>`.trim();
+}
+
+function renderBorderedCardLayout(data, options = {}) {
+  const { brandColor, familyMeta, sanitized } = data;
+  const { showDivider = false } = options;
+  const lightTint = tintHexColor(brandColor, 0.92, "#e8f0fe");
+  const borderedLogoMarkup = buildBorderedCardLogoMarkup({
+    source: sanitized.logoDataUrl || sanitized.photoDataUrl,
+    alt: sanitized.companyName || sanitized.fullName
+  });
+  const contactRows = buildBorderedCardContactRows(sanitized, brandColor);
+  const ctaHref = resolveCtaHref(sanitized);
+  const ctaText = sanitized.ctaText || familyMeta.label;
+  const footerMarkup = ctaHref && ctaText
+    ? `
+    <tr>
+      <td bgcolor="${brandColor}" align="center" style="${cellResetStyle()}background-color:${brandColor};padding:10px;">
+        <a href="${ctaHref}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(ctaHref)}" style="display:inline-block;font-size:12px;line-height:16px;font-weight:700;color:#ffffff;text-decoration:none;">${escapeHtml(ctaText)}</a>
+      </td>
+    </tr>`
+    : `
+    <tr>
+      <td bgcolor="${brandColor}" style="${cellResetStyle()}background-color:${brandColor};font-size:0;line-height:0;padding:0;height:4px;">&nbsp;</td>
+    </tr>`;
+
+  return `
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:520px;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+  <tbody>
+    <tr>
+      <td style="${cellResetStyle()}border:1px solid ${brandColor};padding:0;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
+          <tbody>
+            <tr>
+              <td bgcolor="${lightTint}" style="${cellResetStyle()}background-color:${lightTint};font-size:0;line-height:0;height:8px;padding:0;">&nbsp;</td>
+            </tr>
+            <tr>
+              <td style="${cellResetStyle()}padding:20px;">
+                <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
+                  <tbody>
+                    <tr>
+                      <td width="45%" valign="top" style="${cellResetStyle()}width:45%;padding:0 16px 0 0;">
+                        ${borderedLogoMarkup ? `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;"><tbody><tr><td style="${cellResetStyle()}padding:0 0 12px 0;">${borderedLogoMarkup}</td></tr></tbody></table>` : ""}
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
+                          <tbody>
+                            <tr>
+                              <td style="${cellResetStyle()}font-size:16px;line-height:20px;font-weight:700;color:#1a1a2e;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+                            </tr>
+                            ${sanitized.jobTitle ? `<tr><td style="${cellResetStyle()}font-size:12px;line-height:16px;color:#666666;padding:0 0 4px 0;">${escapeHtml(sanitized.jobTitle)}</td></tr>` : ""}
+                            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}font-size:11px;line-height:15px;color:${brandColor};font-weight:700;padding:0;">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
+                          </tbody>
+                        </table>
+                      </td>
+                      <td width="55%" valign="top" style="${cellResetStyle()}width:55%;padding:0;">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
+                          <tbody>
+                            ${contactRows}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            ${footerMarkup}
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>`.trim();
+}
+
+function renderMinimalLayout({ brandColor, sanitized, variantConfig }) {
+  const titleLine = [sanitized.jobTitle, sanitized.companyName].filter(Boolean).join(" | ");
+  const contactRows = [
+    sanitized.phone ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:16px;color:#444444;">${escapeHtml(sanitized.phone)}</td></tr>` : "",
+    sanitized.email ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:16px;color:#444444;">${escapeHtml(sanitized.email)}</td></tr>` : "",
+    sanitized.website ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:16px;color:#444444;">${escapeHtml(stripProtocol(sanitized.website))}</td></tr>` : "",
+    sanitized.location ? `<tr><td style="${cellResetStyle()}padding:0;font-size:11px;line-height:16px;color:#444444;">${escapeHtml(sanitized.location)}</td></tr>` : ""
+  ]
+    .filter(Boolean)
+    .join("");
+  const ctaHref = resolveCtaHref(sanitized);
+  const ctaMarkup = ctaHref && sanitized.ctaText
+    ? `<tr><td style="${cellResetStyle()}padding-top:10px;font-size:11px;line-height:16px;"><a href="${ctaHref}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(ctaHref)}" style="color:${brandColor};text-decoration:none;font-weight:700;">&rarr; ${escapeHtml(sanitized.ctaText)}</a></td></tr>`
+    : "";
+
+  return `
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:480px;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+  <tbody>
+    <tr>
+      <td style="${cellResetStyle()}padding:0;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
+          <tbody>
+            <tr>
+              <td width="3" bgcolor="${brandColor}" style="${cellResetStyle()}width:3px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
+              <td style="${cellResetStyle()}padding:0 0 0 14px;">
+                <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
+                  <tbody>
+                    <tr>
+                      <td style="${cellResetStyle()}font-size:18px;line-height:22px;font-weight:700;color:#1a1a2e;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+                    </tr>
+                    ${titleLine ? `<tr><td style="${cellResetStyle()}font-size:12px;line-height:17px;color:#666666;padding:0 0 8px 0;">${escapeHtml(titleLine)}</td></tr>` : ""}
+                    <tr>
+                      <td style="${cellResetStyle()}padding:6px 0;">
+                        <table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:40px;">
+                          <tbody>
+                            <tr>
+                              <td height="1" bgcolor="${brandColor}" style="${cellResetStyle()}height:1px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    ${contactRows}
+                    ${ctaMarkup}
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
     </tr>
   </tbody>
 </table>`.trim();
@@ -528,6 +818,112 @@ function buildContactRows(draft, mode = "stacked", centered = false) {
     .join("");
 }
 
+function buildBannerContactMarkup(draft, mode = "inline", brandColor) {
+  const items = [];
+  if (draft.phone) {
+    items.push(`<a href="tel:${sanitizePhoneHref(draft.phone)}" style="${linkStyle(brandColor)}">${escapeHtml(draft.phone)}</a>`);
+  }
+  if (draft.email) {
+    items.push(`<a href="mailto:${escapeAttribute(draft.email)}" style="${linkStyle(brandColor)}">${escapeHtml(draft.email)}</a>`);
+  }
+  if (draft.website) {
+    items.push(`<a href="${ensureProtocol(draft.website)}" style="${linkStyle(brandColor)}">${escapeHtml(stripProtocol(draft.website))}</a>`);
+  }
+  if (draft.address) {
+    items.push(escapeHtml(draft.address));
+  }
+  if (draft.location) {
+    items.push(escapeHtml(draft.location));
+  }
+
+  if (!items.length) {
+    return "";
+  }
+
+  if (mode === "stacked" || mode === "compact") {
+    return `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;">
+  <tbody>
+    ${items
+      .map(
+        (item) =>
+          `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:12px;line-height:18px;color:#444444;">${item}</td></tr>`
+      )
+      .join("")}
+  </tbody>
+</table>`.trim();
+  }
+
+  return `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;">
+  <tbody>
+    <tr>
+      <td style="${cellResetStyle()}font-size:12px;line-height:18px;color:#444444;">
+        ${items.join(' <span style="color:#6b7280;">&middot;</span> ')}
+      </td>
+    </tr>
+  </tbody>
+</table>`.trim();
+}
+
+function buildSplitColumnContactRows(draft, brandColor) {
+  const items = [];
+  if (draft.phone) {
+    items.push(["P:", `<a href="tel:${sanitizePhoneHref(draft.phone)}" style="${linkStyle(brandColor)}">${escapeHtml(draft.phone)}</a>`]);
+  }
+  if (draft.email) {
+    items.push(["E:", `<a href="mailto:${escapeAttribute(draft.email)}" style="${linkStyle(brandColor)}">${escapeHtml(draft.email)}</a>`]);
+  }
+  if (draft.website) {
+    items.push(["W:", `<a href="${ensureProtocol(draft.website)}" style="${linkStyle(brandColor)}">${escapeHtml(stripProtocol(draft.website))}</a>`]);
+  }
+  if (draft.location) {
+    items.push(["L:", escapeHtml(draft.location)]);
+  }
+
+  return items
+    .map(
+      ([label, value]) =>
+        `<tr><td style="${cellResetStyle()}padding:0 0 6px 0;font-size:12px;line-height:18px;color:#444444;"><span style="display:inline-block;min-width:22px;font-weight:700;color:${brandColor};">${label}</span> ${value}</td></tr>`
+    )
+    .join("");
+}
+
+function buildBorderedCardContactRows(draft, brandColor) {
+  const items = [];
+  if (draft.phone) {
+    items.push(escapeHtml(draft.phone));
+  }
+  if (draft.email) {
+    items.push(escapeHtml(draft.email));
+  }
+  if (draft.website) {
+    items.push(escapeHtml(stripProtocol(draft.website)));
+  }
+  if (draft.location) {
+    items.push(escapeHtml(draft.location));
+  }
+
+  return items
+    .map(
+      (value) => `
+<tr>
+  <td style="${cellResetStyle()}padding:0 0 7px 0;">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
+      <tbody>
+        <tr>
+          <td width="6" height="6" bgcolor="${brandColor}" valign="middle" style="${cellResetStyle()}width:6px;height:6px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
+          <td width="4" style="${cellResetStyle()}width:4px;font-size:0;line-height:0;">&nbsp;</td>
+          <td valign="middle" style="${cellResetStyle()}font-size:11px;line-height:15px;color:#444444;">${value}</td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+</tr>`
+    )
+    .join("");
+}
+
 function buildSocialRows(draft, brandColor, centered = false) {
   const links = [
     ["LinkedIn", draft.linkedinUrl],
@@ -555,6 +951,48 @@ function buildCtaMarkup({ align, brandColor, ctaStyle, text, url }) {
     return `<tr><td ${align === "center" ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:12px;"><a href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(url)}" style="display:inline-block;padding:6px 12px;border-radius:999px;background:${fadeColor(brandColor, 0.12)};color:${brandColor};text-decoration:none;font-size:12px;font-weight:700;">${escapeHtml(text)}</a></td></tr>`;
   }
   return `<tr><td ${align === "center" ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:12px;font-size:12px;line-height:18px;color:#374151;"><a href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(url)}" style="color:${brandColor};text-decoration:none;font-weight:700;">${escapeHtml(text)}</a></td></tr>`;
+}
+
+function buildBannerCtaMarkup({ align, brandColor, text, url }) {
+  if (!url || !text) {
+    return "";
+  }
+
+  return `
+<tr>
+  <td ${align === "center" ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:12px;">
+    <table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}${align === "center" ? "margin:0 auto;" : ""}">
+      <tbody>
+        <tr>
+          <td bgcolor="${brandColor}" style="${cellResetStyle()}background-color:${brandColor};padding:8px 14px;border-radius:999px;">
+            <a href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(url)}" style="display:inline-block;font-size:12px;line-height:16px;font-weight:700;color:#ffffff;text-decoration:none;">${escapeHtml(text)}</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+</tr>`.trim();
+}
+
+function buildSplitColumnCtaMarkup({ brandColor, text, url }) {
+  if (!url || !text) {
+    return "";
+  }
+
+  return `
+<tr>
+  <td style="${cellResetStyle()}padding-top:10px;">
+    <table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}">
+      <tbody>
+        <tr>
+          <td bgcolor="${brandColor}" style="${cellResetStyle()}background-color:${brandColor};padding:7px 12px;border-radius:999px;">
+            <a href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(url)}" style="display:inline-block;font-size:12px;line-height:16px;font-weight:700;color:#ffffff;text-decoration:none;">${escapeHtml(text)}</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+</tr>`.trim();
 }
 
 function buildBrandingBlock({ align, brandColor, insideCard }) {
@@ -606,6 +1044,50 @@ function buildImageMarkup({ source, alt, size, brandColor, type, fit = "contain"
     </tr>
   </tbody>
 </table>`.trim();
+}
+
+function buildBannerLogoMarkup({ source, alt, brandColor }) {
+  const maxHeight = 40;
+  if (source) {
+    return `<img src="${source}" alt="${escapeAttribute(alt)}" style="display:block;max-height:${maxHeight}px;width:auto;border:0;border:none;outline:none;box-shadow:none;text-decoration:none;vertical-align:middle;background:#ffffff;" />`;
+  }
+
+  return `
+<table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}">
+  <tbody>
+    <tr>
+      <td align="center" valign="middle" width="${maxHeight}" height="${maxHeight}" style="${cellResetStyle()}width:${maxHeight}px;height:${maxHeight}px;background:#ffffff;border-radius:10px;color:${brandColor};font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;vertical-align:middle;">
+        ${escapeHtml(initialsFromAlt(alt))}
+      </td>
+    </tr>
+  </tbody>
+</table>`.trim();
+}
+
+function buildSplitColumnLogoMarkup({ source, alt, brandColor }) {
+  const maxHeight = 48;
+  if (source) {
+    return `<img src="${source}" alt="${escapeAttribute(alt)}" style="display:block;max-height:${maxHeight}px;width:auto;border:0;border:none;outline:none;box-shadow:none;text-decoration:none;vertical-align:middle;background:#ffffff;" />`;
+  }
+
+  return `
+<table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}">
+  <tbody>
+    <tr>
+      <td align="center" valign="middle" width="${maxHeight}" height="${maxHeight}" style="${cellResetStyle()}width:${maxHeight}px;height:${maxHeight}px;background:#ffffff;border-radius:12px;color:${brandColor};font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;vertical-align:middle;">
+        ${escapeHtml(initialsFromAlt(alt))}
+      </td>
+    </tr>
+  </tbody>
+</table>`.trim();
+}
+
+function buildBorderedCardLogoMarkup({ source, alt }) {
+  if (!source) {
+    return "";
+  }
+
+  return `<img src="${source}" alt="${escapeAttribute(alt)}" style="display:block;max-height:52px;max-width:120px;width:auto;height:auto;border:0;border:none;outline:none;box-shadow:none;text-decoration:none;" />`;
 }
 
 function initialsFromAlt(value) {
@@ -682,6 +1164,19 @@ function fadeColor(hex, alpha) {
   const green = Number.parseInt(normalized.slice(2, 4), 16);
   const blue = Number.parseInt(normalized.slice(4, 6), 16);
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+}
+
+function tintHexColor(hex, amount = 0.9, fallback = "#e8f0fe") {
+  const raw = String(hex || "").trim();
+  if (!/^#[0-9a-fA-F]{6}$/.test(raw)) {
+    return fallback;
+  }
+  const normalized = raw.slice(1);
+  const red = Number.parseInt(normalized.slice(0, 2), 16);
+  const green = Number.parseInt(normalized.slice(2, 4), 16);
+  const blue = Number.parseInt(normalized.slice(4, 6), 16);
+  const tint = (channel) => Math.max(0, Math.min(255, Math.round(channel + (255 - channel) * amount)));
+  return `#${[tint(red), tint(green), tint(blue)].map((value) => value.toString(16).padStart(2, "0")).join("")}`;
 }
 
 function normalizeCustomLogoWidth(value) {

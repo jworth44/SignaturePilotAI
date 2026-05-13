@@ -36,7 +36,7 @@ export default function UpgradePage() {
       <section className="section-intro">
         <p className="eyebrow">Upgrade</p>
         <h1>Upgrade when you need premium signatures and AI support.</h1>
-        <p className="hero-subheadline">Stripe-ready routes are wired. If billing credentials are missing, the app stays stable and explains that billing is not configured yet.</p>
+        <p className="hero-subheadline">No commitment. Cancel anytime. Signatures stay yours.</p>
       </section>
 
       <section className="pricing-grid">

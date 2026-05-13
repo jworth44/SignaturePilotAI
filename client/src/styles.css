@@ -99,7 +99,6 @@ img {
 }
 
 .site-shell {
-  min-height: 100vh;
   flex-direction: column;
 }
 
@@ -2819,9 +2818,13 @@ h3 {
 
 .generator-template-preview-frame {
   position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
   width: 100%;
   min-width: 0;
-  height: 236px;
+  height: 160px;
+  max-height: 160px;
   overflow: hidden;
   border-radius: 18px;
   background: #fff;
