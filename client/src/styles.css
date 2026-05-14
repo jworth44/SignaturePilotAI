@@ -3712,6 +3712,7 @@ h3 {
 .product-preview-step p {
   color: #5f6980;
   line-height: 1.55;
+  font-size: 0.92rem;
 }
 
 .public-signature-preview-card {
@@ -3903,6 +3904,16 @@ h3 {
   border: 1px solid rgba(24, 33, 49, 0.06);
 }
 
+.sales-form-panel .field-grid {
+  gap: 0.8rem;
+}
+
+.sales-form-panel .field input,
+.sales-form-panel .field select,
+.sales-form-panel .field textarea {
+  background: rgba(248, 250, 255, 0.94);
+}
+
 .sales-process-step {
   grid-template-columns: 44px 1fr;
   align-items: start;
@@ -4004,6 +4015,36 @@ h3 {
   min-width: 132px;
 }
 
+@media (max-width: 1180px) {
+  .topbar {
+    gap: 0.9rem;
+    padding-inline: 1rem;
+  }
+
+  .topbar-nav {
+    gap: 0.45rem;
+  }
+
+  .topbar-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.88rem;
+  }
+
+  .topbar-actions .button {
+    min-height: 40px;
+    padding: 0.72rem 0.95rem;
+    font-size: 0.9rem;
+  }
+
+  .public-hero {
+    gap: 1.45rem;
+  }
+
+  .public-hero-copy-centered h1 {
+    max-width: 780px;
+  }
+}
+
 @media (max-width: 1199px) {
   .public-feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4026,6 +4067,12 @@ h3 {
     max-width: 100%;
   }
 
+  .public-hero,
+  .public-section,
+  .public-final-cta {
+    padding: 1.35rem;
+  }
+
   .public-final-cta {
     flex-direction: column;
     align-items: flex-start;
@@ -4039,6 +4086,10 @@ h3 {
     grid-column: 1 / -1;
     font-weight: 800;
     color: #172033;
+  }
+
+  .public-signature-preview-frame {
+    min-height: 240px;
   }
 }
 
@@ -4067,7 +4118,7 @@ h3 {
   }
 
   .public-signature-preview-frame {
-    min-height: 220px;
+    min-height: 200px;
     padding: 0.9rem;
   }
 
@@ -4136,6 +4187,10 @@ h3 {
     padding-bottom: 0.1rem;
   }
 
+  .topbar-nav .topbar-link-upgrade {
+    display: none;
+  }
+
   .topbar-link {
     flex: 0 0 auto;
     padding: 0.45rem 0.7rem;
@@ -4144,7 +4199,13 @@ h3 {
     white-space: nowrap;
   }
 
-  .trust-pill,
+  .trust-pill {
+    width: auto;
+    min-height: 32px;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.76rem;
+  }
+
   .generator-builder-badge {
     width: 100%;
     justify-content: center;
@@ -4173,7 +4234,8 @@ h3 {
 
   .plan-matrix-row span {
     padding: 0.8rem 0.85rem;
-    font-size: 0.88rem;
+    font-size: 0.84rem;
+    line-height: 1.35;
   }
 
   .sales-process-step {
@@ -4187,11 +4249,62 @@ h3 {
   }
 
   .generator-builder-topnote {
-    font-size: 0.92rem;
-    line-height: 1.6;
+    font-size: 0.88rem;
+    line-height: 1.5;
   }
 
   .generator-builder-topactions .button {
     min-width: 0;
+  }
+
+  .public-hero-copy-centered h1 {
+    max-width: 320px;
+    font-size: clamp(2rem, 9.8vw, 2.7rem);
+  }
+
+  .public-hero-subheadline {
+    font-size: 0.96rem;
+    line-height: 1.6;
+  }
+
+  .product-preview-flow {
+    gap: 0.7rem;
+  }
+
+  .product-preview-step {
+    padding: 0.85rem 0.9rem;
+  }
+
+  .public-signature-preview-card {
+    padding: 0.8rem;
+  }
+
+  .public-signature-preview-frame {
+    min-height: 176px;
+    padding: 0.75rem;
+  }
+
+  .sales-form-panel .field-grid {
+    gap: 0.65rem;
+  }
+
+  .sales-form-panel .field input,
+  .sales-form-panel .field select,
+  .sales-form-panel .field textarea {
+    min-height: 42px;
+    padding: 0.72rem 0.82rem;
+  }
+
+  .sales-form-panel .field textarea {
+    min-height: 116px;
+  }
+
+  .public-install-panel .tab-row {
+    gap: 0.5rem;
+  }
+
+  .public-install-panel .tab-button {
+    min-height: 38px;
+    padding: 0.62rem 0.8rem;
   }
 }
