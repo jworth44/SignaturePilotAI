@@ -280,6 +280,19 @@ function buildTitleLine(draft) {
   return [draft.jobTitle, draft.companyName].filter(Boolean).join(" | ");
 }
 
+function buildThemedTitleLineMarkup(draft, brandColor) {
+  const parts = [];
+
+  if (draft.jobTitle) {
+    parts.push(`<span style="color:#666666;font-size:12px;font-weight:400;line-height:1.4;">${escapeHtml(draft.jobTitle)}</span>`);
+  }
+  if (draft.companyName) {
+    parts.push(`<span style="color:${brandColor};font-size:11px;font-weight:600;line-height:1.4;">${escapeHtml(draft.companyName)}</span>`);
+  }
+
+  return parts.join(` <span style="color:#9ca3af;">|</span> `);
+}
+
 function resolveVariantConfig(draft) {
   const family = draft.resolvedLayout;
   const variant = normalizeVariant(draft.templateVariant);
@@ -442,7 +455,7 @@ function renderSplitLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, sa
   });
 
   const dividerMarkup = showDivider
-    ? `<td valign="top" style="${cellResetStyle()}width:18px;padding:0 12px;"><div style="width:1px;height:100%;min-height:104px;background:${fadeColor(brandColor, 0.24)};font-size:0;line-height:0;">&nbsp;</div></td>`
+    ? `<td valign="top" style="${cellResetStyle()}width:18px;padding:0 12px;"><div style="width:1px;height:100%;min-height:104px;background:${brandColor};font-size:0;line-height:0;">&nbsp;</div></td>`
     : "";
 
   const firstCell = variantConfig.logoSide === "left" ? visualBlock : infoBlock;
@@ -496,20 +509,26 @@ function renderBannerLayout(data, options = {}) {
     url: resolveCtaHref(sanitized)
   });
   const bannerPadding = variantConfig.dense ? "10px 14px" : "12px 16px";
+  const constrainedBannerLogoMarkup = bannerLogoMarkup
+    ? bannerLogoMarkup.replace(
+        /style="([^"]*)"/,
+        'style="$1max-height:36px;max-width:100px;height:auto;display:block;"'
+      )
+    : "";
 
   return `
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;max-width:620px;font-family:Arial,Helvetica,sans-serif;color:#111827;">
   <tbody>
     <tr>
-      <td style="${cellResetStyle()}background-color:${brandColor};padding:${bannerPadding};">
+      <td style="${cellResetStyle()}background-color:${brandColor};padding:0;height:48px;vertical-align:middle;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;background-color:${brandColor};">
           <tbody>
             <tr>
-              <td valign="middle" style="${cellResetStyle()}padding:0;">
-                <div style="font-size:16px;line-height:20px;font-weight:700;color:#ffffff;">${escapeHtml(sanitized.fullName)}</div>
-                ${titleLine ? `<div style="padding-top:4px;font-size:12px;line-height:16px;font-weight:500;color:#ffffff;${multilineTextStyle()}">${escapeHtml(titleLine)}</div>` : ""}
+              <td valign="middle" style="${cellResetStyle()}padding:0 12px;height:48px;vertical-align:middle;">
+                <div style="font-size:16px;line-height:1.2;font-weight:700;color:#ffffff;">${escapeHtml(sanitized.fullName)}</div>
+                ${titleLine ? `<div style="padding-top:4px;font-size:12px;line-height:1.4;font-weight:400;color:#ffffff;${multilineTextStyle()}">${escapeHtml(titleLine)}</div>` : ""}
               </td>
-              ${bannerLogoMarkup ? `<td align="right" valign="middle" style="${cellResetStyle()}padding:0 0 0 12px;">${bannerLogoMarkup}</td>` : ""}
+              ${constrainedBannerLogoMarkup ? `<td width="110" align="right" valign="middle" style="${cellResetStyle()}width:110px;padding:0 8px;height:48px;vertical-align:middle;">${constrainedBannerLogoMarkup}</td>` : ""}
             </tr>
           </tbody>
         </table>
@@ -555,16 +574,16 @@ function renderTwoColumnSplitLayout(data, options = {}) {
               <td align="center" valign="middle" style="${cellResetStyle()}padding:0 0 10px 0;">${leftLogoMarkup}</td>
             </tr>
             <tr>
-              <td align="center" style="${cellResetStyle()}font-size:15px;line-height:20px;font-weight:700;color:#ffffff;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+              <td align="center" style="${cellResetStyle()}font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:#ffffff;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
             </tr>
-            ${sanitized.jobTitle ? `<tr><td align="center" style="${cellResetStyle()}font-size:11px;line-height:15px;font-weight:600;color:${fadeColor("#ffffff", 0.82)};padding:0;">${escapeHtml(sanitized.jobTitle)}</td></tr>` : ""}
+            ${sanitized.jobTitle ? `<tr><td align="center" style="${cellResetStyle()}font-size:12px;line-height:1.4;font-weight:400;color:${fadeColor("#ffffff", 0.82)};padding:0;">${escapeHtml(sanitized.jobTitle)}</td></tr>` : ""}
           </tbody>
         </table>
       </td>
-      <td width="65%" valign="top" style="${cellResetStyle()}background-color:#ffffff;width:65%;padding:16px;">
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;background-color:#ffffff;">
+      <td width="65%" valign="top" style="${cellResetStyle()}background-color:#fafafa;width:65%;padding:16px;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;background-color:#fafafa;">
           <tbody>
-            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;font-size:11px;line-height:15px;font-weight:700;color:${brandColor};letter-spacing:0.08em;text-transform:uppercase;${multilineTextStyle()}">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
+            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;font-size:11px;line-height:15px;font-weight:600;color:${brandColor};letter-spacing:0.08em;text-transform:uppercase;${multilineTextStyle()}">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
             ${contactRows}
             ${ctaMarkup}
           </tbody>
@@ -613,12 +632,9 @@ function renderBorderedCardLayout(data, options = {}) {
 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:520px;font-family:Arial,Helvetica,sans-serif;color:#111827;">
   <tbody>
     <tr>
-      <td style="${cellResetStyle()}border:1px solid ${resolvedBorderColor};padding:0;">
+      <td style="${cellResetStyle()}border-top:3px solid ${resolvedAccentColor};border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;padding:0;">
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
           <tbody>
-            <tr>
-              <td bgcolor="${resolvedAccentColor}" style="${cellResetStyle()}background-color:${resolvedAccentColor};font-size:0;line-height:0;height:6px;padding:0;">&nbsp;</td>
-            </tr>
             <tr>
               <td style="${cellResetStyle()}padding:20px;">
                 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
@@ -629,10 +645,10 @@ function renderBorderedCardLayout(data, options = {}) {
                         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
                           <tbody>
                             <tr>
-                              <td style="${cellResetStyle()}font-size:16px;line-height:20px;font-weight:700;color:#1a1a2e;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+                              <td style="${cellResetStyle()}font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
                             </tr>
-                            ${sanitized.jobTitle ? `<tr><td style="${cellResetStyle()}font-size:12px;line-height:16px;color:#666666;padding:0 0 4px 0;">${escapeHtml(sanitized.jobTitle)}</td></tr>` : ""}
-                            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}font-size:11px;line-height:15px;color:${resolvedCompanyColor};font-weight:700;padding:0;${multilineTextStyle()}">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
+                            ${sanitized.jobTitle ? `<tr><td style="${cellResetStyle()}font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 0 4px 0;">${escapeHtml(sanitized.jobTitle)}</td></tr>` : ""}
+                            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}font-size:11px;line-height:1.4;color:${resolvedCompanyColor};font-weight:600;padding:0;${multilineTextStyle()}">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
                           </tbody>
                         </table>
                       </td>
@@ -658,12 +674,12 @@ function renderBorderedCardLayout(data, options = {}) {
 }
 
 function renderMinimalLayout({ brandColor, sanitized, variantConfig }) {
-  const titleLine = [sanitized.jobTitle, sanitized.companyName].filter(Boolean).join(" | ");
+  const titleLineMarkup = buildThemedTitleLineMarkup(sanitized, brandColor);
   const contactRows = [
-    sanitized.phone ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:16px;color:#444444;">${escapeHtml(sanitized.phone)}</td></tr>` : "",
-    sanitized.email ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:16px;color:#444444;">${escapeHtml(sanitized.email)}</td></tr>` : "",
-    sanitized.website ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:16px;color:#444444;">${escapeHtml(stripProtocol(sanitized.website))}</td></tr>` : "",
-    sanitized.location ? `<tr><td style="${cellResetStyle()}padding:0;font-size:11px;line-height:16px;color:#444444;">${escapeHtml(sanitized.location)}</td></tr>` : ""
+    sanitized.phone ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${escapeHtml(sanitized.phone)}</td></tr>` : "",
+    sanitized.email ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${escapeHtml(sanitized.email)}</td></tr>` : "",
+    sanitized.website ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${escapeHtml(stripProtocol(sanitized.website))}</td></tr>` : "",
+    sanitized.location ? `<tr><td style="${cellResetStyle()}padding:0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${escapeHtml(sanitized.location)}</td></tr>` : ""
   ]
     .filter(Boolean)
     .join("");
@@ -680,14 +696,14 @@ function renderMinimalLayout({ brandColor, sanitized, variantConfig }) {
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
           <tbody>
             <tr>
-              <td width="3" bgcolor="${brandColor}" style="${cellResetStyle()}width:3px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
-              <td style="${cellResetStyle()}padding:0 0 0 14px;">
+              <td width="4" bgcolor="${brandColor}" style="${cellResetStyle()}width:4px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
+              <td style="${cellResetStyle()}padding:0 0 0 12px;">
                 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
                   <tbody>
                     <tr>
-                      <td style="${cellResetStyle()}font-size:18px;line-height:22px;font-weight:700;color:#1a1a2e;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+                      <td style="${cellResetStyle()}font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
                     </tr>
-                    ${titleLine ? `<tr><td style="${cellResetStyle()}font-size:12px;line-height:17px;color:#666666;padding:0 0 8px 0;${multilineTextStyle()}">${escapeHtml(titleLine)}</td></tr>` : ""}
+                    ${titleLineMarkup ? `<tr><td style="${cellResetStyle()}font-size:12px;line-height:17px;color:#666666;padding:0 0 8px 0;${multilineTextStyle()}">${titleLineMarkup}</td></tr>` : ""}
                     <tr>
                       <td style="${cellResetStyle()}padding:6px 0;">
                         <table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:40px;">
@@ -737,10 +753,10 @@ function renderStackedLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, 
     </tr>
     ${photoMarkup ? `<tr><td align="center" style="${cellResetStyle()}padding:0 0 10px 0;">${photoMarkup}</td></tr>` : ""}
     <tr>
-      <td align="center" style="${cellResetStyle()}font-size:${variantConfig.nameSize}px;line-height:${variantConfig.nameSize + 5}px;font-weight:700;color:#111827;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+      <td align="center" style="${cellResetStyle()}font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
     </tr>
     <tr>
-      <td align="center" style="${cellResetStyle()}font-size:${variantConfig.titleSize}px;line-height:${variantConfig.titleSize + 6}px;font-weight:${familyMeta.accentWeight};color:${brandColor};padding:0 0 10px 0;${multilineTextStyle()}">${escapeHtml(buildTitleLine(sanitized))}</td>
+      <td align="center" style="${cellResetStyle()}font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 0 10px 0;${multilineTextStyle()}">${buildThemedTitleLineMarkup(sanitized, brandColor)}</td>
     </tr>
     ${contactRows}
     ${socialRows}
@@ -800,7 +816,7 @@ function renderCardLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, san
 }
 
 function buildInfoBlock({ brandColor, familyMeta, logoMarkup, sanitized, variantConfig }) {
-  const contactRows = buildContactRows(sanitized, variantConfig.contactMode, false, variantConfig);
+  const contactRows = buildContactRows(sanitized, variantConfig.contactMode, false, { ...variantConfig, unifiedHierarchy: true });
   const socialRows = buildSocialRows(sanitized, brandColor, false);
   const ctaMarkup = buildCtaMarkup({
     align: "left",
@@ -813,12 +829,12 @@ function buildInfoBlock({ brandColor, familyMeta, logoMarkup, sanitized, variant
     ? `<tr><td style="${cellResetStyle()}padding:0 0 8px 0;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background:${fadeColor(brandColor, 0.12)};color:${brandColor};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;">${familyMeta.name}</span></td></tr>`
     : "";
   const companyMarkup = sanitized.companyName
-    ? `<tr><td style="${cellResetStyle()}font-size:11px;line-height:15px;font-weight:700;color:${brandColor};${variantConfig.companySmallCaps ? "font-variant:small-caps;letter-spacing:0.06em;" : ""}${multilineTextStyle()}padding:0 0 4px 0;">${escapeHtml(sanitized.companyName)}</td></tr>`
+    ? `<tr><td style="${cellResetStyle()}font-size:11px;line-height:1.4;font-weight:600;color:${brandColor};${variantConfig.companySmallCaps ? "font-variant:small-caps;letter-spacing:0.06em;" : ""}${multilineTextStyle()}padding:0 0 4px 0;">${escapeHtml(sanitized.companyName)}</td></tr>`
     : "";
   const titleOnlyMarkup = sanitized.jobTitle
-    ? `<tr><td style="${cellResetStyle()}font-size:${variantConfig.titleSize}px;line-height:${variantConfig.titleSize + 6}px;font-weight:${familyMeta.accentWeight};color:${brandColor};padding:0 0 8px 0;">${escapeHtml(sanitized.jobTitle)}</td></tr>`
+    ? `<tr><td style="${cellResetStyle()}font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 0 8px 0;">${escapeHtml(sanitized.jobTitle)}</td></tr>`
     : "";
-  const titleLineMarkup = `<tr><td style="${cellResetStyle()}font-size:${variantConfig.titleSize}px;line-height:${variantConfig.titleSize + 6}px;font-weight:${familyMeta.accentWeight};color:${brandColor};padding:0 0 8px 0;${multilineTextStyle()}">${escapeHtml(buildTitleLine(sanitized))}</td></tr>`;
+  const titleLineMarkup = `<tr><td style="${cellResetStyle()}font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 0 8px 0;${multilineTextStyle()}">${buildThemedTitleLineMarkup(sanitized, brandColor)}</td></tr>`;
   const topLogoMarkup = variantConfig.logoPosition === "top" && logoMarkup
     ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;">${logoMarkup}</td></tr>`
     : "";
@@ -830,7 +846,7 @@ function buildInfoBlock({ brandColor, familyMeta, logoMarkup, sanitized, variant
     ${topLogoMarkup}
     ${variantConfig.companyPlacement === "above-name" ? companyMarkup : ""}
     <tr>
-      <td style="${cellResetStyle()}font-size:${variantConfig.nameSize}px;line-height:${variantConfig.nameSize + 6}px;font-weight:700;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+      <td style="${cellResetStyle()}font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:4px 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
     </tr>
     ${variantConfig.companyPlacement === "above-name" ? titleOnlyMarkup : titleLineMarkup}
     ${variantConfig.companyPlacement === "above-name" ? "" : companyMarkup}
@@ -838,7 +854,7 @@ function buildInfoBlock({ brandColor, familyMeta, logoMarkup, sanitized, variant
     ${socialRows}
     ${ctaMarkup}
     <tr>
-      <td style="${cellResetStyle()}padding-top:8px;font-size:10px;line-height:15px;color:#6b7280;">${escapeHtml(sanitized.disclaimer)}</td>
+      <td style="${cellResetStyle()}padding-top:8px;font-size:10px;line-height:1.4;font-weight:400;font-style:italic;color:#999999;">${escapeHtml(sanitized.disclaimer)}</td>
     </tr>
   </tbody>
 </table>`.trim();
@@ -859,17 +875,20 @@ function buildVisualBlock({ accentBar, badgeText, brandColor, logoMarkup, photoM
 }
 
 function buildContactRows(draft, mode = "stacked", centered = false, variantConfig = {}) {
-  const rows = [];
   const items = [];
   const labelPrefix = variantConfig.contactPrefix || "";
+  const useUnifiedHierarchy = Boolean(variantConfig.unifiedHierarchy);
+  const valueLinkStyle = useUnifiedHierarchy
+    ? "color:#444444;text-decoration:none;font-size:11px;font-weight:400;"
+    : "color:#444444;text-decoration:none;font-weight:400;";
   if (draft.phone) {
-    items.push([`${labelPrefix}Phone`, `<a href="tel:${sanitizePhoneHref(draft.phone)}" style="${linkStyle(draft.brandColor)}">${escapeHtml(draft.phone)}</a>`]);
+    items.push([`${labelPrefix}Phone`, `<a href="tel:${sanitizePhoneHref(draft.phone)}" style="${valueLinkStyle}">${escapeHtml(draft.phone)}</a>`]);
   }
   if (draft.email) {
-    items.push([`${labelPrefix}Email`, `<a href="mailto:${escapeAttribute(draft.email)}" style="${linkStyle(draft.brandColor)}">${escapeHtml(draft.email)}</a>`]);
+    items.push([`${labelPrefix}Email`, `<a href="mailto:${escapeAttribute(draft.email)}" style="${valueLinkStyle}">${escapeHtml(draft.email)}</a>`]);
   }
   if (draft.website) {
-    items.push([`${labelPrefix}Web`, `<a href="${ensureProtocol(draft.website)}" style="${linkStyle(draft.brandColor)}">${escapeHtml(stripProtocol(draft.website))}</a>`]);
+    items.push([`${labelPrefix}Web`, `<a href="${ensureProtocol(draft.website)}" style="${valueLinkStyle}">${escapeHtml(stripProtocol(draft.website))}</a>`]);
   }
   if (draft.location) {
     items.push([`${labelPrefix}Location`, escapeHtml(draft.location)]);
@@ -877,10 +896,14 @@ function buildContactRows(draft, mode = "stacked", centered = false, variantConf
 
   if (mode === "inline") {
     const inlineValue = items
-      .map(([label, value]) => `<span><strong style="color:#111827;">${label}:</strong> ${value}</span>`)
+      .map(([label, value]) =>
+        useUnifiedHierarchy
+          ? `<span><strong style="color:${draft.brandColor};font-size:11px;font-weight:600;">${label}:</strong> <span style="color:#444444;font-size:11px;font-weight:400;">${value}</span></span>`
+          : `<span><strong style="color:${draft.brandColor};font-weight:600;">${label}:</strong> <span style="color:#444444;font-weight:400;">${value}</span></span>`
+      )
       .join(` <span style="color:#9ca3af;">|</span> `);
     return inlineValue
-      ? `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:6px;font-size:12px;line-height:18px;color:#4b5563;">${inlineValue}</td></tr>`
+      ? `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:6px;font-size:11px;line-height:1.4;color:#444444;font-weight:400;">${inlineValue}</td></tr>`
       : "";
   }
 
@@ -888,7 +911,7 @@ function buildContactRows(draft, mode = "stacked", centered = false, variantConf
     return items
       .map(
         ([label, value]) =>
-          `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:4px;font-size:12px;line-height:17px;color:#4b5563;"><strong style="color:#111827;">${label}:</strong> ${value}</td></tr>`
+          `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:4px;font-size:11px;line-height:1.4;color:#444444;font-weight:400;"><strong style="color:${draft.brandColor};font-size:11px;font-weight:600;">${label}:</strong> <span style="color:#444444;font-size:11px;font-weight:400;">${value}</span></td></tr>`
       )
       .join("");
   }
@@ -896,7 +919,7 @@ function buildContactRows(draft, mode = "stacked", centered = false, variantConf
   return items
     .map(
       ([label, value]) =>
-        `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:4px;font-size:12px;line-height:18px;color:#4b5563;"><span style="display:inline-block;min-width:${centered ? "0" : "62px"};font-weight:700;color:#111827;">${label}:</span> ${value}</td></tr>`
+        `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:4px;font-size:11px;line-height:1.4;color:#444444;font-weight:400;"><span style="display:inline-block;min-width:${centered ? "0" : "62px"};font-size:11px;font-weight:600;color:${draft.brandColor};">${label}:</span> <span style="color:#444444;font-size:11px;font-weight:400;">${value}</span></td></tr>`
     )
     .join("");
 }
@@ -930,7 +953,7 @@ function buildBannerContactMarkup(draft, mode = "inline", brandColor) {
     ${items
       .map(
         (item) =>
-          `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:12px;line-height:18px;color:#444444;">${item}</td></tr>`
+          `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${item}</td></tr>`
       )
       .join("")}
   </tbody>
@@ -941,7 +964,7 @@ function buildBannerContactMarkup(draft, mode = "inline", brandColor) {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;">
   <tbody>
     <tr>
-      <td style="${cellResetStyle()}font-size:12px;line-height:18px;color:#444444;">
+      <td style="${cellResetStyle()}font-size:11px;line-height:1.4;font-weight:400;color:#444444;">
         ${items.join(' <span style="color:#6b7280;">&middot;</span> ')}
       </td>
     </tr>
@@ -951,14 +974,15 @@ function buildBannerContactMarkup(draft, mode = "inline", brandColor) {
 
 function buildSplitColumnContactRows(draft, brandColor) {
   const items = [];
+  const valueLinkStyle = "color:#444444;text-decoration:none;font-weight:400;";
   if (draft.phone) {
-    items.push(["P:", `<a href="tel:${sanitizePhoneHref(draft.phone)}" style="${linkStyle(brandColor)}">${escapeHtml(draft.phone)}</a>`]);
+    items.push(["P:", `<a href="tel:${sanitizePhoneHref(draft.phone)}" style="${valueLinkStyle}">${escapeHtml(draft.phone)}</a>`]);
   }
   if (draft.email) {
-    items.push(["E:", `<a href="mailto:${escapeAttribute(draft.email)}" style="${linkStyle(brandColor)}">${escapeHtml(draft.email)}</a>`]);
+    items.push(["E:", `<a href="mailto:${escapeAttribute(draft.email)}" style="${valueLinkStyle}">${escapeHtml(draft.email)}</a>`]);
   }
   if (draft.website) {
-    items.push(["W:", `<a href="${ensureProtocol(draft.website)}" style="${linkStyle(brandColor)}">${escapeHtml(stripProtocol(draft.website))}</a>`]);
+    items.push(["W:", `<a href="${ensureProtocol(draft.website)}" style="${valueLinkStyle}">${escapeHtml(stripProtocol(draft.website))}</a>`]);
   }
   if (draft.location) {
     items.push(["L:", escapeHtml(draft.location)]);
@@ -967,7 +991,7 @@ function buildSplitColumnContactRows(draft, brandColor) {
   return items
     .map(
       ([label, value]) =>
-        `<tr><td style="${cellResetStyle()}padding:0 0 6px 0;font-size:12px;line-height:18px;color:#444444;"><span style="display:inline-block;min-width:22px;font-weight:700;color:${brandColor};">${label}</span> ${value}</td></tr>`
+        `<tr><td style="${cellResetStyle()}padding:0 0 6px 0;font-size:11px;line-height:1.4;color:#444444;font-weight:400;"><span style="display:inline-block;min-width:22px;font-size:11px;font-weight:600;color:${brandColor};">${label}</span> <span style="color:#444444;font-size:11px;font-weight:400;">${value}</span></td></tr>`
     )
     .join("");
 }
@@ -997,7 +1021,7 @@ function buildBorderedCardContactRows(draft, brandColor) {
         <tr>
           <td width="6" height="6" bgcolor="${brandColor}" valign="middle" style="${cellResetStyle()}width:6px;height:6px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
           <td width="4" style="${cellResetStyle()}width:4px;font-size:0;line-height:0;">&nbsp;</td>
-          <td valign="middle" style="${cellResetStyle()}font-size:11px;line-height:15px;color:#444444;">${value}</td>
+          <td valign="middle" style="${cellResetStyle()}font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${value}</td>
         </tr>
       </tbody>
     </table>
