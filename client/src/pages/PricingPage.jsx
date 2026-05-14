@@ -96,7 +96,10 @@ export default function PricingPage() {
                 <li key={feature}>{feature}</li>
               ))}
             </ul>
-            <Link className={`button ${plan.featured ? "button-primary" : "button-secondary"}`} to={plan.to}>
+            <Link
+              className={`button ${plan.featured ? "button-primary" : "button-secondary"}`}
+              to={plan.name === "Business" ? "/contact-sales?plan=business" : plan.name === "Enterprise" ? "/contact-sales?plan=enterprise" : plan.to}
+            >
               {plan.cta}
             </Link>
           </article>
@@ -109,7 +112,7 @@ export default function PricingPage() {
           <h2>Do not pay just to make a basic signature work.</h2>
           <p className="hero-subheadline">
             Free covers the basics people expect: logo upload, core templates, rendered copy, and a compatibility-safe export path. Pro unlocks cleaner
-            branding, more layout control, and advanced export tools. Business is the recurring team plan.
+            branding, more layout control, and advanced export tools. Business is the request-a-rollout team plan.
           </p>
         </div>
 

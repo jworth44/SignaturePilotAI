@@ -10,6 +10,7 @@ Scripts:
 - `npm run test:smoke`
 
 Billing environment variables:
+- `VITE_BUSINESS_CONTACT_EMAIL`
 - `STRIPE_SECRET_KEY`
 - `STRIPE_PRO_MONTHLY_PRICE_ID`
 - `STRIPE_BUSINESS_MONTHLY_PRICE_ID` (optional; business self-serve is not live without this)

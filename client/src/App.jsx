@@ -6,6 +6,7 @@ import BuilderPage from "./pages/BuilderPage";
 import PricingPage from "./pages/PricingPage";
 import InstallGuidePage from "./pages/InstallGuidePage";
 import UpgradePage from "./pages/UpgradePage";
+import ContactSalesPage from "./pages/ContactSalesPage";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/builder" element={<BuilderPage />} />
         <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/contact-sales" element={<ContactSalesPage />} />
         <Route path="/install-guide" element={<InstallGuidePage />} />
         <Route path="/install" element={<InstallGuidePage />} />
         <Route path="/upgrade" element={<UpgradePage />} />

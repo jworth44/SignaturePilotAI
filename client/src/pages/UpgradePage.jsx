@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const PAID_PLANS = [
   {
@@ -26,6 +26,7 @@ const PAID_PLANS = [
 ];
 
 export default function UpgradePage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("");
   const [loadingPlan, setLoadingPlan] = useState("");
@@ -63,11 +64,11 @@ export default function UpgradePage() {
   }
 
   function handleBusinessInterest() {
-    setStatus("Business self-serve billing is not live yet. Use Pro today, and reach out when you want centralized team rollout planning.");
+    navigate("/contact-sales?plan=business");
   }
 
   function handleEnterpriseInterest() {
-    setStatus("Enterprise is contact-led only right now. Reach out when you need larger rollout planning or future governance support.");
+    navigate("/contact-sales?plan=enterprise");
   }
 
   return (
@@ -87,7 +88,7 @@ export default function UpgradePage() {
               <p className="pricing-name">{plan.title}</p>
               <h2>{plan.price}</h2>
               <p>{plan.copy}</p>
-              {plan.action !== "checkout" ? <p className="support-copy">Self-serve checkout is not live for this plan yet.</p> : null}
+              {plan.action !== "checkout" ? <p className="support-copy">Use the contact form to request rollout planning for this plan.</p> : null}
             </div>
             <button
               className={`button ${plan.plan === "pro" ? "button-primary" : "button-secondary"}`}
@@ -110,8 +111,8 @@ export default function UpgradePage() {
                 : plan.action === "checkout"
                   ? "Upgrade to Pro"
                   : plan.action === "interest"
-                    ? "Business waitlist"
-                    : "Contact us"}
+                    ? "Request Business rollout"
+                    : "Contact sales"}
             </button>
           </article>
         ))}
