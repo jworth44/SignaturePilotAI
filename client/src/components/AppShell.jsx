@@ -14,7 +14,21 @@ export default function AppShell({ children }) {
     <div className="site-shell" style={{ width: "100%", minHeight: "100vh" }}>
       <header className="topbar">
         <NavLink className="brand-lockup" to="/">
-          <img className="brand-logo" src="/brand/signature-pilot-ai-header-logo.png" alt="Signature Pilot AI" />
+          <img
+            className="brand-logo-icon"
+            src="/signature-pilot-ai-icon.png"
+            alt="Signature Pilot AI"
+            style={{ height: "36px", width: "36px", display: "block", objectFit: "contain" }}
+            onError={(e) => {
+              e.target.style.display = "none";
+            }}
+          />
+          <div className="brand-text">
+            <span className="brand-name">
+              Signature Pilot <strong>AI</strong>
+            </span>
+            <span className="brand-tagline">Smart email signatures</span>
+          </div>
         </NavLink>
 
         <nav className="topbar-nav" aria-label="Primary">
