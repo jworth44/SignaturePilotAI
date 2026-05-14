@@ -834,6 +834,7 @@ function renderBorderedCardLayout(data, options = {}) {
 function renderMinimalLayout({ brandColor, photoMarkup, sanitized, variantConfig }) {
   const fontConfig = getTemplateFontConfig(sanitized.resolvedLayout);
   const titleLineMarkup = buildThemedTitleLineMarkup(sanitized, brandColor, fontConfig);
+  const descriptor = getTemplateDescriptor(sanitized.resolvedLayout);
   const contactRows = [
     sanitized.phone ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${escapeHtml(sanitized.phone)}</td></tr>` : "",
     sanitized.email ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${escapeHtml(sanitized.email)}</td></tr>` : "",
@@ -849,17 +850,18 @@ function renderMinimalLayout({ brandColor, photoMarkup, sanitized, variantConfig
   const socialRows = buildSocialRows(sanitized, brandColor, false);
 
   return `
-<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:480px;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:500px;font-family:Arial,Helvetica,sans-serif;color:#111827;background:#fbfcfe;border:1px solid ${fadeColor(brandColor, 0.12)};border-radius:20px;">
   <tbody>
     <tr>
-      <td style="${cellResetStyle()}padding:0;">
+      <td style="${cellResetStyle()}padding:16px;">
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
           <tbody>
             <tr>
               <td width="4" bgcolor="${brandColor}" style="${cellResetStyle()}width:4px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
-              <td style="${cellResetStyle()}padding:0 0 0 12px;">
+              <td style="${cellResetStyle()}padding:0 0 0 14px;">
                 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
                   <tbody>
+                    ${descriptor ? `<tr><td style="${cellResetStyle()}padding:0 0 8px 0;font-family:${fontConfig.identity};font-size:10px;line-height:1.4;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${brandColor};">${escapeHtml(descriptor)}</td></tr>` : ""}
                     ${photoMarkup ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;">${photoMarkup}</td></tr>` : ""}
                     <tr>
                       <td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
@@ -895,6 +897,8 @@ function renderStackedLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, 
   const fontConfig = getTemplateFontConfig(sanitized.resolvedLayout);
   const contactRows = buildContactRows(sanitized, variantConfig.contactMode, true);
   const socialRows = buildSocialRows(sanitized, brandColor, true);
+  const descriptor = getTemplateDescriptor(sanitized.resolvedLayout);
+  const isMobileCompact = sanitized.resolvedLayout === "mobile-compact";
   const ctaMarkup = buildCtaMarkup({
     align: "center",
     brandColor,
@@ -908,24 +912,25 @@ function renderStackedLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, 
     : "";
 
   return `
-<table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;max-width:${variantConfig.structure === "mobile" ? "340px" : "400px"};font-family:Arial,Helvetica,sans-serif;color:#111827;">
+<table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;max-width:${variantConfig.structure === "mobile" ? "340px" : "400px"};font-family:Arial,Helvetica,sans-serif;color:#111827;${isMobileCompact ? `background:#f8fbff;border:1px solid ${fadeColor(brandColor, 0.14)};border-radius:22px;` : ""}">
   <tbody>
     ${badgeMarkup}
     <tr>
-      <td align="center" style="${cellResetStyle()}padding:0 0 12px 0;">${logoMarkup}</td>
+      <td align="center" style="${cellResetStyle()}padding:${isMobileCompact ? "16px 16px 12px 16px" : "0 0 12px 0"};">${logoMarkup}</td>
     </tr>
-    ${photoMarkup ? `<tr><td align="center" style="${cellResetStyle()}padding:0 0 10px 0;">${photoMarkup}</td></tr>` : ""}
+    ${descriptor ? `<tr><td align="center" style="${cellResetStyle()}padding:0 16px 8px 16px;font-family:${fontConfig.identity};font-size:10px;line-height:1.4;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${brandColor};">${escapeHtml(descriptor)}</td></tr>` : ""}
+    ${photoMarkup ? `<tr><td align="center" style="${cellResetStyle()}padding:0 16px 10px 16px;">${photoMarkup}</td></tr>` : ""}
     <tr>
-      <td align="center" style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+      <td align="center" style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 16px 4px 16px;">${escapeHtml(sanitized.fullName)}</td>
     </tr>
     <tr>
-      <td align="center" style="${cellResetStyle()}font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 0 10px 0;${multilineTextStyle()}">${buildThemedTitleLineMarkup(sanitized, brandColor, fontConfig)}</td>
+      <td align="center" style="${cellResetStyle()}font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 16px 10px 16px;${multilineTextStyle()}">${buildThemedTitleLineMarkup(sanitized, brandColor, fontConfig)}</td>
     </tr>
     ${contactRows}
     ${socialRows}
     ${ctaMarkup}
     <tr>
-      <td align="center" style="${cellResetStyle()}padding-top:8px;font-size:10px;line-height:15px;color:#6b7280;">${escapeHtml(sanitized.disclaimer)}</td>
+      <td align="center" style="${cellResetStyle()}padding:${isMobileCompact ? "8px 16px 16px 16px" : "8px 0 0 0"};font-size:10px;line-height:15px;color:#6b7280;">${escapeHtml(sanitized.disclaimer)}</td>
     </tr>
   </tbody>
 </table>`.trim();
@@ -935,6 +940,8 @@ function renderCardLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, san
   const fontConfig = getTemplateFontConfig(sanitized.resolvedLayout);
   const contactRows = buildContactRows(sanitized, variantConfig.contactMode, true);
   const socialRows = buildSocialRows(sanitized, brandColor, true);
+  const descriptor = getTemplateDescriptor(sanitized.resolvedLayout);
+  const isSignatureCard = sanitized.resolvedLayout === "signature-card";
   const ctaMarkup = buildCtaMarkup({
     align: "center",
     brandColor,
@@ -948,10 +955,10 @@ function renderCardLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, san
     : "";
 
   return `
-<table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;max-width:420px;font-family:Arial,Helvetica,sans-serif;color:#111827;background:${fadeColor(brandColor, 0.05)};border-radius:18px;">
+<table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;max-width:420px;font-family:Arial,Helvetica,sans-serif;color:#111827;background:${isSignatureCard ? "#faf8ff" : fadeColor(brandColor, 0.05)};border-radius:20px;border:${isSignatureCard ? `1px solid ${fadeColor(brandColor, 0.14)}` : "0"};">
   <tbody>
     <tr>
-      <td style="${cellResetStyle()}padding:16px;">
+      <td style="${cellResetStyle()}padding:${isSignatureCard ? "18px" : "16px"};">
         <table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;">
           <tbody>
             <tr>
@@ -959,6 +966,7 @@ function renderCardLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, san
             </tr>
             ${photoMarkup ? `<tr><td align="center" style="${cellResetStyle()}padding:0 0 10px 0;">${photoMarkup}</td></tr>` : ""}
             ${badgeMarkup}
+            ${descriptor ? `<tr><td align="center" style="${cellResetStyle()}padding:0 0 8px 0;font-family:${fontConfig.identity};font-size:10px;line-height:1.4;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${brandColor};">${escapeHtml(descriptor)}</td></tr>` : ""}
             <tr>
               <td align="center" style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
             </tr>
@@ -983,6 +991,7 @@ function buildInfoBlock({ brandColor, familyMeta, logoMarkup, sanitized, variant
   const fontConfig = getTemplateFontConfig(sanitized.resolvedLayout);
   const contactRows = buildContactRows(sanitized, variantConfig.contactMode, false, { ...variantConfig, unifiedHierarchy: true });
   const socialRows = buildSocialRows(sanitized, brandColor, false);
+  const descriptor = getTemplateDescriptor(sanitized.resolvedLayout);
   const ctaMarkup = buildCtaMarkup({
     align: "left",
     brandColor,
@@ -1017,6 +1026,7 @@ function buildInfoBlock({ brandColor, familyMeta, logoMarkup, sanitized, variant
   const titleBlockMarkup = `
     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
       <tbody>
+        ${descriptor ? `<tr><td style="${cellResetStyle()}padding:0 0 8px 0;font-family:${fontConfig.identity};font-size:10px;line-height:1.4;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${brandColor};">${escapeHtml(descriptor)}</td></tr>` : ""}
         ${variantConfig.companyPlacement === "above-name" ? companyMarkup : ""}
         <tr>
           <td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:4px 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
@@ -1066,6 +1076,31 @@ function buildVisualBlock({ accentBar, badgeText, brandColor, logoMarkup, photoM
     ${logoMarkup ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;">${logoMarkup}</td></tr>` : ""}
   </tbody>
 </table>`.trim();
+}
+
+function getTemplateDescriptor(layout) {
+  switch (layout) {
+    case "professional-classic":
+      return "Client advisory";
+    case "minimal-clean":
+      return "Editorial format";
+    case "contractor-bold":
+      return "Field service";
+    case "real-estate":
+      return "Property advisory";
+    case "legal-finance":
+      return "Confidential planning";
+    case "health-medical":
+      return "Patient care";
+    case "tech-saas":
+      return "Product growth";
+    case "mobile-compact":
+      return "Mobile-first";
+    case "signature-card":
+      return "Founder profile";
+    default:
+      return "";
+  }
 }
 
 function buildContactRows(draft, mode = "stacked", centered = false, variantConfig = {}) {

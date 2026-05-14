@@ -219,10 +219,10 @@ const TEMPLATE_PREVIEW_PROFILES = {
     ctaText: "Reply with next steps",
     ctaUrl: "https://ledgerlane.ca/contact",
     disclaimer: "I am happy to coordinate timing and materials for your next follow-up.",
-    galleryNote: "Quiet, editorial spacing for teams that want restraint instead of decoration.",
+    galleryNote: "Quiet, editorial spacing with a more refined premium office feel.",
     fit: "Operations / Admin",
     previewTag: "Editorial minimal",
-    templateVariant: 1
+    templateVariant: 3
   },
   "premium-consultant": {
     fullName: "Elena Marlowe",
@@ -267,10 +267,10 @@ const TEMPLATE_PREVIEW_PROFILES = {
     ctaText: "View current listings",
     ctaUrl: "https://bluehavenproperties.com/listings",
     disclaimer: "Showing availability changes with active listing schedules and client bookings.",
-    galleryNote: "Property-focused hierarchy with a cleaner listing-ready split layout.",
+    galleryNote: "Property-focused hierarchy with a stronger luxury-listing presentation.",
     fit: "Real estate / Listings",
-    previewTag: "Listing-ready split",
-    templateVariant: 6
+    previewTag: "Luxury listing split",
+    templateVariant: 8
   },
   "legal-finance": {
     fullName: "Nathan Clarke",
@@ -283,10 +283,10 @@ const TEMPLATE_PREVIEW_PROFILES = {
     ctaText: "Schedule consultation",
     ctaUrl: "https://clarkeroweadvisory.com/consult",
     disclaimer: "Availability for advisory reviews and planning sessions may vary by engagement schedule.",
-    galleryNote: "Formal financial styling with controlled contrast and a more elevated advisory presence.",
+    galleryNote: "Formal financial styling with calmer authority and a more private-advisory feel.",
     fit: "Legal / Finance",
-    previewTag: "Advisory authority",
-    templateVariant: 3
+    previewTag: "Private advisory",
+    templateVariant: 10
   },
   "health-medical": {
     fullName: "Dr. Maya Patel",
@@ -299,10 +299,10 @@ const TEMPLATE_PREVIEW_PROFILES = {
     ctaText: "Book appointment",
     ctaUrl: "https://northviewwellness.ca/book",
     disclaimer: "Please use the booking link for appointment requests and care coordination.",
-    galleryNote: "Calm card treatment with medical trust cues and cleaner breathing room.",
+    galleryNote: "Calm care-first treatment with clearer trust cues and better clinical balance.",
     fit: "Health / Medical",
-    previewTag: "Calm clinical card",
-    templateVariant: 2
+    previewTag: "Care-first card",
+    templateVariant: 5
   },
   "creative-designer": {
     fullName: "Jules Mercer",
@@ -331,10 +331,10 @@ const TEMPLATE_PREVIEW_PROFILES = {
     ctaText: "See the platform",
     ctaUrl: "https://signalstackcloud.com/demo",
     disclaimer: "Platform walkthroughs are best scheduled around your current evaluation timeline.",
-    galleryNote: "Sharper product-led layout with darker hierarchy and cleaner signal-driven typography.",
+    galleryNote: "Sharper product-led layout with stronger contrast and a cleaner operator feel.",
     fit: "Tech / SaaS",
     previewTag: "Product-led modern",
-    templateVariant: 9
+    templateVariant: 11
   },
   "mobile-compact": {
     fullName: "Lauren Price",
@@ -347,10 +347,10 @@ const TEMPLATE_PREVIEW_PROFILES = {
     ctaText: "Tap to connect",
     ctaUrl: "https://cedarpointservices.com/connect",
     disclaimer: "For the fastest response, use the direct contact links above.",
-    galleryNote: "Compact mobile-safe presentation for narrow inboxes and lighter signatures.",
+    galleryNote: "Compact mobile-safe presentation that still feels polished instead of stripped down.",
     fit: "Mobile-first teams",
     previewTag: "Mobile-ready",
-    templateVariant: 4
+    templateVariant: 7
   },
   "signature-card": {
     fullName: "Camille Hart",
@@ -363,10 +363,10 @@ const TEMPLATE_PREVIEW_PROFILES = {
     ctaText: "Open profile",
     ctaUrl: "https://atelierhart.com/profile",
     disclaimer: "Please share any project timing or launch targets when you reach out.",
-    galleryNote: "Contained personal-brand card with a more elevated boutique presentation.",
+    galleryNote: "Contained boutique card with a stronger founder-profile presentation.",
     fit: "Personal brand / Founder",
-    previewTag: "Boutique card",
-    templateVariant: 6
+    previewTag: "Founder profile card",
+    templateVariant: 9
   }
 };
 
