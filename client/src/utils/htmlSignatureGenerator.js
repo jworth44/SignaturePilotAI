@@ -537,9 +537,15 @@ function renderSplitLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, sa
 
   const firstCell = variantConfig.logoSide === "left" ? visualBlock : infoBlock;
   const secondCell = variantConfig.logoSide === "left" ? infoBlock : visualBlock;
-  const wrapperStyle = variantConfig.wrapInCard
-    ? `width:100%;max-width:620px;padding:16px;border-radius:20px;background:${fadeColor(brandColor, 0.05)};`
-    : "width:100%;max-width:620px;";
+  const isTechSaas = sanitized.resolvedLayout === "tech-saas";
+  const isRealEstate = sanitized.resolvedLayout === "real-estate";
+  const wrapperStyle = isTechSaas
+    ? `width:100%;max-width:620px;padding:18px;border-radius:24px;border:1px solid ${fadeColor(brandColor, 0.16)};background:#f6f9ff;`
+    : isRealEstate
+      ? `width:100%;max-width:620px;padding:18px;border-radius:24px;border:1px solid ${fadeColor(brandColor, 0.14)};background:#f7fcfa;`
+      : variantConfig.wrapInCard
+        ? `width:100%;max-width:620px;padding:16px;border-radius:20px;background:${fadeColor(brandColor, 0.05)};`
+        : "width:100%;max-width:620px;";
 
   if (variantConfig.logoPosition === "top") {
     return `
@@ -598,8 +604,21 @@ function renderBannerLayout(data, options = {}) {
   const accentBarMarkup = sanitized.showTemplateTags && variantConfig.accentBar
     ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;"><div style="width:100%;max-width:120px;height:6px;border-radius:999px;background:${brandColor};font-size:0;line-height:0;">&nbsp;</div></td></tr>`
     : "";
+  const isExecutive = sanitized.resolvedLayout === "executive-corporate";
+  const isContractor = sanitized.resolvedLayout === "contractor-bold";
+  const shellBorderColor = isExecutive
+    ? fadeColor(brandColor, 0.18)
+    : isContractor
+      ? fadeColor(brandColor, 0.2)
+      : "transparent";
+  const bodySurface = isExecutive
+    ? "#f8fbff"
+    : isContractor
+      ? "#fffbf5"
+      : "#ffffff";
+  const bodyPadding = isExecutive ? "16px 18px 18px 18px" : isContractor ? "14px 16px 18px 16px" : "12px 0 0 0";
   return `
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;max-width:620px;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;max-width:620px;font-family:Arial,Helvetica,sans-serif;color:#111827;${isExecutive || isContractor ? `border:1px solid ${shellBorderColor};border-radius:22px;overflow:hidden;` : ""}">
   <tbody>
     ${badgeMarkup}
     ${accentBarMarkup}
@@ -628,12 +647,20 @@ function renderBannerLayout(data, options = {}) {
       </td>
     </tr>
     <tr>
-      <td style="${cellResetStyle()}padding:12px 0 0 0;">
-        ${contactMarkup}
+      <td style="${cellResetStyle()}padding:0;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;background-color:${bodySurface};">
+          <tbody>
+            <tr>
+              <td style="${cellResetStyle()}padding:${bodyPadding};background-color:${bodySurface};">
+                ${contactMarkup}
+                ${socialRows}
+                ${ctaMarkup}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </td>
     </tr>
-    ${socialRows}
-    ${ctaMarkup}
   </tbody>
 </table>`.trim();
 }
@@ -659,12 +686,21 @@ function renderTwoColumnSplitLayout(data, options = {}) {
   });
   const contactRows = buildSplitColumnContactRows(sanitized, brandColor);
   const socialRows = buildSocialRows(sanitized, brandColor, false);
+  const isPremiumConsultant = sanitized.resolvedLayout === "premium-consultant";
+  const isLegalFinance = sanitized.resolvedLayout === "legal-finance";
+  const rightColumnBackground = isPremiumConsultant ? "#f7f5ff" : isLegalFinance ? "#f7f9fc" : "#fafafa";
+  const shellBorder = isPremiumConsultant || isLegalFinance ? `border:1px solid ${fadeColor(brandColor, 0.14)};border-radius:22px;overflow:hidden;` : "";
+  const introRule = isPremiumConsultant
+    ? `<tr><td style="${cellResetStyle()}padding:0 0 12px 0;"><div style="width:48px;height:3px;border-radius:999px;background:${brandColor};font-size:0;line-height:0;">&nbsp;</div></td></tr>`
+    : isLegalFinance
+      ? `<tr><td style="${cellResetStyle()}padding:0 0 12px 0;"><div style="width:38px;height:1px;background:${brandColor};font-size:0;line-height:0;">&nbsp;</div></td></tr>`
+      : "";
 
   return `
-<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:500px;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:${isPremiumConsultant ? "540px" : "500px"};font-family:Arial,Helvetica,sans-serif;color:#111827;${shellBorder}">
   <tbody>
     <tr>
-      <td width="35%" bgcolor="${brandColor}" valign="middle" style="${cellResetStyle()}background-color:${brandColor};width:35%;padding:16px;">
+      <td width="35%" bgcolor="${brandColor}" valign="middle" style="${cellResetStyle()}background-color:${brandColor};width:35%;padding:${isPremiumConsultant ? "18px" : "16px"};">
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;background-color:${brandColor};">
           <tbody>
             <tr>
@@ -678,10 +714,11 @@ function renderTwoColumnSplitLayout(data, options = {}) {
           </tbody>
         </table>
       </td>
-      <td width="65%" valign="top" style="${cellResetStyle()}background-color:#fafafa;width:65%;padding:16px;">
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;background-color:#fafafa;">
+      <td width="65%" valign="top" style="${cellResetStyle()}background-color:${rightColumnBackground};width:65%;padding:${isPremiumConsultant ? "18px" : "16px"};">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;background-color:${rightColumnBackground};">
           <tbody>
-            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;font-family:${fontConfig.identity};font-size:11px;line-height:15px;font-weight:600;color:${brandColor};letter-spacing:0.08em;text-transform:uppercase;${multilineTextStyle()}">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
+            ${introRule}
+            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;font-family:${fontConfig.identity};font-size:11px;line-height:15px;font-weight:600;color:${brandColor};letter-spacing:${isPremiumConsultant ? "0.14em" : "0.08em"};text-transform:uppercase;${multilineTextStyle()}">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
             ${contactRows}
             ${socialRows}
             ${ctaMarkup}
@@ -717,6 +754,23 @@ function renderBorderedCardLayout(data, options = {}) {
   const socialRows = buildSocialRows(sanitized, resolvedBulletColor, false);
   const ctaHref = resolveCtaHref(sanitized);
   const ctaText = sanitized.ctaText || familyMeta.label;
+  const isCreativeDesigner = sanitized.resolvedLayout === "creative-designer";
+  const isHealthMedical = sanitized.resolvedLayout === "health-medical";
+  const leftColumnSurface = isCreativeDesigner
+    ? "#faf5ff"
+    : isHealthMedical
+      ? "#f7fffb"
+      : "#ffffff";
+  const rightColumnSurface = isCreativeDesigner
+    ? "#fcfbff"
+    : isHealthMedical
+      ? "#fbfffd"
+      : "#ffffff";
+  const descriptorMarkup = isCreativeDesigner
+    ? `<tr><td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:10px;line-height:1.4;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${resolvedAccentColor};padding:0 0 8px 0;">Brand identity studio</td></tr>`
+    : isHealthMedical
+      ? `<tr><td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:10px;line-height:1.4;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${resolvedAccentColor};padding:0 0 8px 0;">Care coordination</td></tr>`
+      : "";
   const footerMarkup = ctaHref && ctaText
     ? `
     <tr>
@@ -741,11 +795,12 @@ function renderBorderedCardLayout(data, options = {}) {
                 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
                   <tbody>
                     <tr>
-                      <td width="45%" valign="top" style="${cellResetStyle()}width:45%;padding:0 16px 0 0;">
+                      <td width="45%" valign="top" style="${cellResetStyle()}width:45%;padding:0 16px 0 0;background:${leftColumnSurface};">
                         ${borderedLogoMarkup ? `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;"><tbody><tr><td style="${cellResetStyle()}padding:0 0 12px 0;">${borderedLogoMarkup}</td></tr></tbody></table>` : ""}
                         ${photoMarkup ? `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;"><tbody><tr><td style="${cellResetStyle()}padding:0 0 12px 0;">${photoMarkup}</td></tr></tbody></table>` : ""}
                         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
                           <tbody>
+                            ${descriptorMarkup}
                             <tr>
                               <td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
                             </tr>
@@ -754,8 +809,8 @@ function renderBorderedCardLayout(data, options = {}) {
                           </tbody>
                         </table>
                       </td>
-                      <td width="55%" valign="top" style="${cellResetStyle()}width:55%;padding:0;">
-                        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
+                      <td width="55%" valign="top" style="${cellResetStyle()}width:55%;padding:0;background:${rightColumnSurface};">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;background:${rightColumnSurface};">
                           <tbody>
                             ${contactRows}
                             ${socialRows}

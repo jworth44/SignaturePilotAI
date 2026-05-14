@@ -175,6 +175,201 @@ const TEMPLATE_DEFAULT_COLORS = {
   "corporate-card": "#334155"
 };
 
+const TEMPLATE_PREVIEW_PROFILES = {
+  "professional-classic": {
+    fullName: "Amelia Stone",
+    jobTitle: "Client Services Director",
+    companyName: "Northlight Advisory",
+    phone: "+1 (204) 555-0148",
+    email: "amelia@northlightadvisory.com",
+    website: "northlightadvisory.com",
+    location: "Winnipeg, MB",
+    ctaText: "Book a review call",
+    ctaUrl: "https://northlightadvisory.com/review",
+    disclaimer: "Please let me know if there is anything you would like me to prepare in advance.",
+    galleryNote: "Traditional, polished, and safest for broad client paste scenarios.",
+    fit: "Consulting / Professional services",
+    previewTag: "Outlook-safe classic",
+    templateVariant: 2
+  },
+  "executive-corporate": {
+    fullName: "Darius Cole",
+    jobTitle: "Managing Partner",
+    companyName: "Harbor Crest Capital",
+    phone: "+1 (204) 555-0182",
+    email: "darius@harborcrestcapital.com",
+    website: "harborcrestcapital.com",
+    location: "Toronto, ON",
+    ctaText: "Schedule leadership call",
+    ctaUrl: "https://harborcrestcapital.com/intro",
+    disclaimer: "Confidential planning discussions are scheduled based on current advisory availability.",
+    galleryNote: "Boardroom-ready hierarchy with a stronger executive header and cleaner prestige cues.",
+    fit: "Executive / Corporate",
+    previewTag: "Executive header",
+    templateVariant: 5
+  },
+  "minimal-clean": {
+    fullName: "Sophie Bennett",
+    jobTitle: "Office Administration Lead",
+    companyName: "Ledger Lane Support",
+    phone: "+1 (204) 555-0195",
+    email: "sophie@ledgerlane.ca",
+    website: "ledgerlane.ca",
+    location: "Calgary, AB",
+    ctaText: "Reply with next steps",
+    ctaUrl: "https://ledgerlane.ca/contact",
+    disclaimer: "I am happy to coordinate timing and materials for your next follow-up.",
+    galleryNote: "Quiet, editorial spacing for teams that want restraint instead of decoration.",
+    fit: "Operations / Admin",
+    previewTag: "Editorial minimal",
+    templateVariant: 1
+  },
+  "premium-consultant": {
+    fullName: "Elena Marlowe",
+    jobTitle: "Principal Consultant",
+    companyName: "Altitude Strategy Group",
+    phone: "+1 (204) 555-0131",
+    email: "elena@altitudestrategygroup.com",
+    website: "altitudestrategygroup.com",
+    location: "Vancouver, BC",
+    ctaText: "Book strategy session",
+    ctaUrl: "https://altitudestrategygroup.com/session",
+    disclaimer: "Strategy sessions are tailored around current growth priorities and rollout timing.",
+    galleryNote: "Premium advisory styling with richer contrast and a more composed two-column feel.",
+    fit: "Consulting / Advisory",
+    previewTag: "Premium two-column",
+    templateVariant: 7
+  },
+  "contractor-bold": {
+    fullName: "Marcus Ortiz",
+    jobTitle: "Lead Project Estimator",
+    companyName: "ForgePoint Build Co.",
+    phone: "+1 (204) 555-0177",
+    email: "marcus@forgepointbuild.com",
+    website: "forgepointbuild.com",
+    location: "Edmonton, AB",
+    ctaText: "Request site walkthrough",
+    ctaUrl: "https://forgepointbuild.com/quote",
+    disclaimer: "Final scope and timing are confirmed after an on-site review and materials check.",
+    galleryNote: "Bolder service-led layout with stronger CTA posture and higher-energy color use.",
+    fit: "Trades / Contractor",
+    previewTag: "Service-first bold",
+    templateVariant: 4
+  },
+  "real-estate": {
+    fullName: "Ava Sinclair",
+    jobTitle: "Senior Realtor",
+    companyName: "Bluehaven Properties",
+    phone: "+1 (204) 555-0122",
+    email: "ava@bluehavenproperties.com",
+    website: "bluehavenproperties.com",
+    location: "Kelowna, BC",
+    ctaText: "View current listings",
+    ctaUrl: "https://bluehavenproperties.com/listings",
+    disclaimer: "Showing availability changes with active listing schedules and client bookings.",
+    galleryNote: "Property-focused hierarchy with a cleaner listing-ready split layout.",
+    fit: "Real estate / Listings",
+    previewTag: "Listing-ready split",
+    templateVariant: 6
+  },
+  "legal-finance": {
+    fullName: "Nathan Clarke",
+    jobTitle: "Private Wealth Advisor",
+    companyName: "Clarke & Rowe Advisory",
+    phone: "+1 (204) 555-0166",
+    email: "nathan@clarkeroweadvisory.com",
+    website: "clarkeroweadvisory.com",
+    location: "Toronto, ON",
+    ctaText: "Schedule consultation",
+    ctaUrl: "https://clarkeroweadvisory.com/consult",
+    disclaimer: "Availability for advisory reviews and planning sessions may vary by engagement schedule.",
+    galleryNote: "Formal financial styling with controlled contrast and a more elevated advisory presence.",
+    fit: "Legal / Finance",
+    previewTag: "Advisory authority",
+    templateVariant: 3
+  },
+  "health-medical": {
+    fullName: "Dr. Maya Patel",
+    jobTitle: "Clinic Director",
+    companyName: "Northview Wellness Clinic",
+    phone: "+1 (204) 555-0113",
+    email: "maya@northviewwellness.ca",
+    website: "northviewwellness.ca",
+    location: "Winnipeg, MB",
+    ctaText: "Book appointment",
+    ctaUrl: "https://northviewwellness.ca/book",
+    disclaimer: "Please use the booking link for appointment requests and care coordination.",
+    galleryNote: "Calm card treatment with medical trust cues and cleaner breathing room.",
+    fit: "Health / Medical",
+    previewTag: "Calm clinical card",
+    templateVariant: 2
+  },
+  "creative-designer": {
+    fullName: "Jules Mercer",
+    jobTitle: "Brand Designer",
+    companyName: "Mercer Atelier",
+    phone: "+1 (204) 555-0141",
+    email: "jules@merceratelier.com",
+    website: "merceratelier.com",
+    location: "Montreal, QC",
+    ctaText: "See latest work",
+    ctaUrl: "https://merceratelier.com/work",
+    disclaimer: "Project availability and lead times depend on current production windows.",
+    galleryNote: "Portfolio-ready personality with richer contrast and more expressive card composition.",
+    fit: "Creative / Design",
+    previewTag: "Portfolio-forward",
+    templateVariant: 8
+  },
+  "tech-saas": {
+    fullName: "Owen Park",
+    jobTitle: "Product Growth Lead",
+    companyName: "SignalStack Cloud",
+    phone: "+1 (204) 555-0189",
+    email: "owen@signalstackcloud.com",
+    website: "signalstackcloud.com",
+    location: "Seattle, WA",
+    ctaText: "See the platform",
+    ctaUrl: "https://signalstackcloud.com/demo",
+    disclaimer: "Platform walkthroughs are best scheduled around your current evaluation timeline.",
+    galleryNote: "Sharper product-led layout with darker hierarchy and cleaner signal-driven typography.",
+    fit: "Tech / SaaS",
+    previewTag: "Product-led modern",
+    templateVariant: 9
+  },
+  "mobile-compact": {
+    fullName: "Lauren Price",
+    jobTitle: "Operations Manager",
+    companyName: "Cedar Point Services",
+    phone: "+1 (204) 555-0109",
+    email: "lauren@cedarpointservices.com",
+    website: "cedarpointservices.com",
+    location: "Regina, SK",
+    ctaText: "Tap to connect",
+    ctaUrl: "https://cedarpointservices.com/connect",
+    disclaimer: "For the fastest response, use the direct contact links above.",
+    galleryNote: "Compact mobile-safe presentation for narrow inboxes and lighter signatures.",
+    fit: "Mobile-first teams",
+    previewTag: "Mobile-ready",
+    templateVariant: 4
+  },
+  "signature-card": {
+    fullName: "Camille Hart",
+    jobTitle: "Founder",
+    companyName: "Atelier Hart",
+    phone: "+1 (204) 555-0154",
+    email: "camille@atelierhart.com",
+    website: "atelierhart.com",
+    location: "Vancouver, BC",
+    ctaText: "Open profile",
+    ctaUrl: "https://atelierhart.com/profile",
+    disclaimer: "Please share any project timing or launch targets when you reach out.",
+    galleryNote: "Contained personal-brand card with a more elevated boutique presentation.",
+    fit: "Personal brand / Founder",
+    previewTag: "Boutique card",
+    templateVariant: 6
+  }
+};
+
 const DETAILS_FIELDS = [
   ["fullName", "Full name", true],
   ["jobTitle", "Job title", true],
@@ -984,29 +1179,42 @@ export default function BuilderPage() {
               const locked = isFree && template.pro;
               const active = artifacts.effectiveDraft.layout === template.value;
               const templatePreview = templatePreviewMap[template.value];
+              const previewProfile = TEMPLATE_PREVIEW_PROFILES[template.value];
 
               return (
                 <article
                   key={template.value}
-                  className={`generator-template-card ${active ? "generator-template-card-active" : ""} ${locked ? "generator-template-card-locked" : ""}`}
+                  className={`generator-template-card generator-template-card-${template.value} ${active ? "generator-template-card-active" : ""} ${locked ? "generator-template-card-locked" : ""}`}
                 >
                   <div className="generator-template-heading">
-                    <strong>{template.label}</strong>
-                    <span
-                      className={`generator-mini-badge ${
-                        template.compatibility === "universal" ? "generator-mini-badge-universal" : "generator-mini-badge-modern"
-                      }`}
-                    >
-                      {template.compatibility === "universal" ? "Universal" : "Modern"}
-                    </span>
+                    <div className="generator-template-title-group">
+                      <strong>{template.label}</strong>
+                      <span className="generator-template-personality">{previewProfile?.galleryNote || template.description}</span>
+                    </div>
+                    <div className="generator-template-badge-stack">
+                      <span
+                        className={`generator-mini-badge ${
+                          template.compatibility === "universal" ? "generator-mini-badge-universal" : "generator-mini-badge-modern"
+                        }`}
+                      >
+                        {template.compatibility === "universal" ? "Universal" : "Modern"}
+                      </span>
+                    </div>
                   </div>
                   <div className="generator-template-preview-frame">
                     <span className={`generator-mini-badge ${template.pro ? "generator-mini-badge-pro" : "generator-mini-badge-free"}`}>
                       {template.pro ? "Pro" : "Free"}
                     </span>
-                    <div className="generator-template-preview-canvas">
-                      <div dangerouslySetInnerHTML={{ __html: templatePreview.previewHtml }} />
+                    <div className="generator-template-preview-scene">
+                      <span className="generator-template-preview-kicker">{previewProfile?.previewTag || previewProfile?.fit || "Signature layout"}</span>
+                      <div className="generator-template-preview-canvas">
+                        <div dangerouslySetInnerHTML={{ __html: templatePreview.previewHtml }} />
+                      </div>
                     </div>
+                  </div>
+                  <div className="generator-template-meta-row">
+                    <span>{previewProfile?.fit || "Professional communication"}</span>
+                    <span>{template.compatibility === "universal" ? "Compatibility-first" : "Higher visual polish"}</span>
                   </div>
                   <p className="support-copy">{template.description}</p>
                   <p className="support-copy generator-template-compatibility-note">
@@ -1659,6 +1867,7 @@ function UploadAssetCard({ description, disabled = false, inputId, label, onFile
 
 function buildTemplatePreviewDraft(template, draft) {
   const fallback = getDefaultDraft();
+  const previewProfile = TEMPLATE_PREVIEW_PROFILES[template.value] || {};
   const previewBase = {
     "professional-classic": { brandColor: TEMPLATE_DEFAULT_COLORS["professional-classic"], logoSize: "medium", showDivider: false, includeBranding: false, templateVariant: 1 },
     "executive-corporate": { brandColor: TEMPLATE_DEFAULT_COLORS["executive-corporate"], logoSize: "medium", showDivider: true, includeBranding: false, templateVariant: 1 },
@@ -1677,10 +1886,13 @@ function buildTemplatePreviewDraft(template, draft) {
   return {
     ...fallback,
     ...draft,
+    ...previewProfile,
     ...(previewBase[template.value] || {}),
-    tier: template.pro ? "pro" : draft.tier,
+    tier: "pro",
     layout: template.value,
-    templateVariant: 1,
+    showTemplateTags: true,
+    ctaDestinationType: "custom",
+    templateVariant: previewProfile.templateVariant || 1,
     renderMode: "desktop"
   };
 }
