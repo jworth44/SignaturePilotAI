@@ -843,8 +843,8 @@ export default function BuilderPage() {
     const showTransparencyBanner = Boolean(logoPanelState.transparencyStatus);
     const showToolBanner = Boolean(logoPanelState.toolStatus);
     const canConvertToPng = logoPanelState.fileType === "image/jpeg";
-    const freeToolTitle = "Pro feature — upgrade to remove logo backgrounds automatically";
-    const freeOptimizeTitle = "Pro feature — upgrade to optimize your logo for email";
+    const freeToolTitle = "Pro feature - upgrade to remove logo backgrounds automatically";
+    const freeOptimizeTitle = "Pro feature - upgrade to optimize your logo for email";
     const noLogoTitle = "Upload a logo first";
 
     return (
@@ -956,9 +956,7 @@ export default function BuilderPage() {
               <h3>Need a logo?</h3>
               <p className="support-copy">Logo Pilot AI is our separate logo app for concept creation and refinement.</p>
             </div>
-            <a className="button button-secondary" href="#">
-              Explore Logo Pilot AI
-            </a>
+            <p className="support-copy">Ask us about logo support if you need help refining brand assets before rollout.</p>
           </div>
         </section>
       </div>
@@ -1167,7 +1165,7 @@ export default function BuilderPage() {
               onClick={() => setAdvancedOptionsOpen((current) => !current)}
             >
               <span className="generator-disclosure-chevron" aria-hidden="true">
-                {advancedOptionsOpen ? "?" : "▸"}
+                {advancedOptionsOpen ? "[-]" : "[+]"}
               </span>
               <span>Advanced options</span>
             </button>
@@ -1384,7 +1382,7 @@ export default function BuilderPage() {
             >
               <span className="button-feedback-label">
                 <span className="button-feedback-icon" aria-hidden="true">
-                  {exportCopySuccessTarget === "signature" ? "?" : ""}
+                  {exportCopySuccessTarget === "signature" ? "OK" : ""}
                 </span>
                 <span>{exportCopySuccessTarget === "signature" ? "Copied!" : "Copy Signature"}</span>
               </span>
@@ -1404,7 +1402,7 @@ export default function BuilderPage() {
               type="button"
               onClick={() => setMoreExportOptionsOpen((current) => !current)}
             >
-              More export options {moreExportOptionsOpen ? "?" : "?"}
+              More export options {moreExportOptionsOpen ? "[-]" : "[+]"}
             </button>
 
             {moreExportOptionsOpen ? (
@@ -1429,7 +1427,7 @@ export default function BuilderPage() {
                     >
                       <span className="button-feedback-label">
                         <span className="button-feedback-icon" aria-hidden="true">
-                          {exportCopySuccessTarget === "raw-html" ? "?" : ""}
+                          {exportCopySuccessTarget === "raw-html" ? "OK" : ""}
                         </span>
                         <span>{exportCopySuccessTarget === "raw-html" ? "Copied!" : "Copy Raw HTML"}</span>
                       </span>
@@ -1445,7 +1443,7 @@ export default function BuilderPage() {
                     >
                       <span className="button-feedback-label">
                         <span className="button-feedback-icon" aria-hidden="true">
-                          {exportCopySuccessTarget === "plain-text" ? "?" : ""}
+                          {exportCopySuccessTarget === "plain-text" ? "OK" : ""}
                         </span>
                         <span>{exportCopySuccessTarget === "plain-text" ? "Copied!" : "Copy Plain Text"}</span>
                       </span>
@@ -2233,4 +2231,7 @@ function applySuggestedFields(current, suggestions, mode = "Apply Suggestions") 
       };
   }
 }
+
+
+
 
