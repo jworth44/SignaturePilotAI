@@ -16,7 +16,7 @@ export default function AppShell({ children }) {
         <NavLink className="brand-lockup" to="/">
           <img
             className="brand-logo-icon"
-            src="/brand/signature-pilot-ai-header-logo_2_-removebg-preview.png"
+            src="/brand/signature-pilot-ai-header-logo.png"
             alt="Signature Pilot AI"
             style={{ height: "36px", width: "36px", display: "block", objectFit: "contain" }}
             onError={(e) => {
