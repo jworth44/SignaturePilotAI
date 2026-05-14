@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const PLANS = [
@@ -82,6 +82,29 @@ const MATRIX_ROWS = [
 ];
 
 export default function PricingPage() {
+  const [proSelfServe, setProSelfServe] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/health")
+      .then((response) => response.json())
+      .then((payload) => {
+        if (!cancelled) {
+          setProSelfServe(Boolean(payload?.integrations?.billingPlans?.proSelfServe));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProSelfServe(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="page-stack public-page-stack">
       <section className="public-hero public-hero-compact">
@@ -112,8 +135,11 @@ export default function PricingPage() {
                 <li key={feature}>{feature}</li>
               ))}
             </ul>
-            <Link className={`button ${plan.featured ? "button-primary" : "button-secondary"}`} to={plan.to}>
-              {plan.cta}
+            <Link
+              className={`button ${plan.featured ? "button-primary" : "button-secondary"}`}
+              to={plan.name === "Pro Individual" && !proSelfServe ? "/contact-sales?plan=pro" : plan.to}
+            >
+              {plan.name === "Pro Individual" && !proSelfServe ? "Contact us about Pro" : plan.cta}
             </Link>
           </article>
         ))}

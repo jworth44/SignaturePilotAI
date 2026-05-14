@@ -30,13 +30,14 @@ export default function ContactSalesPage() {
   }
 
   const isEnterprise = form.plan === "enterprise";
+  const isPro = form.plan === "pro";
 
   return (
     <div className="page-stack public-page-stack">
       <section className="public-hero public-hero-compact">
         <div className="public-hero-copy public-hero-copy-centered">
           <p className="eyebrow">Contact sales</p>
-          <h1>{isEnterprise ? "Plan your Enterprise rollout." : "Request your Business rollout."}</h1>
+          <h1>{isEnterprise ? "Plan your Enterprise rollout." : isPro ? "Request your Pro activation." : "Request your Business rollout."}</h1>
           <p className="hero-subheadline public-hero-subheadline">
             Tell us about your team, rollout goals, and support needs. We will open a prefilled email so you can send a complete request without losing the
             details you already entered.
@@ -47,26 +48,35 @@ export default function ContactSalesPage() {
       <section className="sales-page-grid">
         <article className="panel sales-benefits-panel">
           <div className="panel-header">
-            <p className="pricing-name">{isEnterprise ? "Enterprise support" : "Business rollout"}</p>
-            <h2>{isEnterprise ? "Custom rollout and support" : "Team signature management by request"}</h2>
+            <p className="pricing-name">{isEnterprise ? "Enterprise support" : isPro ? "Pro activation" : "Business rollout"}</p>
+            <h2>{isEnterprise ? "Custom rollout and support" : isPro ? "Personal upgrade help" : "Team signature management by request"}</h2>
             <p className="support-copy">
-              Signature Pilot AI can help with shared template setup, brand consistency, and guided rollout planning when your team needs more than a solo
-              builder workflow.
+              {isPro
+                ? "If self-serve billing is unavailable, use this contact flow for manual Pro activation and upgrade support."
+                : "Signature Pilot AI can help with shared template setup, brand consistency, and guided rollout planning when your team needs more than a solo builder workflow."}
             </p>
           </div>
 
           <div className="sales-benefits-list">
             <div className="sales-benefit-item">
-              <strong>Shared brand control</strong>
-              <p>Keep the same logo, color direction, and signature standards across your team.</p>
+              <strong>{isPro ? "Personal upgrade support" : "Shared brand control"}</strong>
+              <p>
+                {isPro
+                  ? "Get help activating premium templates, branding removal, and advanced export controls."
+                  : "Keep the same logo, color direction, and signature standards across your team."}
+              </p>
             </div>
             <div className="sales-benefit-item">
-              <strong>Employee rollout planning</strong>
-              <p>Tell us your team size, structure, and what level of setup support you expect.</p>
+              <strong>{isPro ? "Clear next steps" : "Employee rollout planning"}</strong>
+              <p>
+                {isPro
+                  ? "Tell us what you need and we can help you move from Free to Pro cleanly."
+                  : "Tell us your team size, structure, and what level of setup support you expect."}
+              </p>
             </div>
             <div className="sales-benefit-item">
-              <strong>Clear next steps</strong>
-              <p>We review your request, confirm what you need, and reply with rollout guidance.</p>
+              <strong>{isPro ? "Direct reply" : "Rollout guidance"}</strong>
+              <p>{isPro ? "We reply with the best activation path for your account." : "We review your request, confirm what you need, and reply with rollout guidance."}</p>
             </div>
           </div>
 
@@ -124,6 +134,7 @@ export default function ContactSalesPage() {
             <label className="field">
               <span>Plan interest</span>
               <select value={form.plan} onChange={(event) => updateField("plan", event.target.value)}>
+                <option value="pro">Pro Individual</option>
                 <option value="business">Business</option>
                 <option value="enterprise">Enterprise</option>
               </select>
@@ -141,7 +152,7 @@ export default function ContactSalesPage() {
 
           <div className="contact-lead-actions">
             <a className="button button-primary" href={mailtoHref}>
-              {isEnterprise ? "Contact sales" : "Request Business rollout"}
+              {isEnterprise ? "Contact sales" : isPro ? "Request Pro activation" : "Request Business rollout"}
             </a>
             <Link className="button button-secondary" to="/pricing">
               Back to pricing
@@ -158,18 +169,25 @@ export default function ContactSalesPage() {
 }
 
 function normalizePlan(value) {
-  return String(value || "").trim().toLowerCase() === "enterprise" ? "enterprise" : "business";
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "enterprise") {
+    return "enterprise";
+  }
+  if (normalized === "pro") {
+    return "pro";
+  }
+  return "business";
 }
 
 function buildSubject(form) {
-  const planLabel = form.plan === "enterprise" ? "Enterprise" : "Business";
+  const planLabel = form.plan === "enterprise" ? "Enterprise" : form.plan === "pro" ? "Pro Individual" : "Business";
   const company = form.company?.trim() || "Unknown company";
   return `${planLabel} rollout request - ${company}`;
 }
 
 function buildBody(form) {
   const lines = [
-    `Plan interest: ${form.plan === "enterprise" ? "Enterprise" : "Business"}`,
+    `Plan interest: ${form.plan === "enterprise" ? "Enterprise" : form.plan === "pro" ? "Pro Individual" : "Business"}`,
     `Name: ${form.name || "-"}`,
     `Email: ${form.email || "-"}`,
     `Company: ${form.company || "-"}`,

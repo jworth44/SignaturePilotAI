@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 const PAID_PLANS = [
@@ -30,6 +30,7 @@ export default function UpgradePage() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("");
   const [loadingPlan, setLoadingPlan] = useState("");
+  const [proSelfServe, setProSelfServe] = useState(true);
   const checkoutStatus = searchParams.get("checkout");
   const checkoutNotice = useMemo(() => {
     if (checkoutStatus === "success") {
@@ -40,6 +41,27 @@ export default function UpgradePage() {
     }
     return "";
   }, [checkoutStatus]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/health")
+      .then((response) => response.json())
+      .then((payload) => {
+        if (!cancelled) {
+          setProSelfServe(Boolean(payload?.integrations?.billingPlans?.proSelfServe));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProSelfServe(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleUpgrade(plan) {
     setLoadingPlan(plan);
@@ -91,17 +113,19 @@ export default function UpgradePage() {
               disabled={loadingPlan === plan.plan}
               type="button"
               onClick={() => {
-                if (plan.action === "checkout") {
+                if (plan.action === "checkout" && proSelfServe) {
                   handleUpgrade(plan.plan);
                   return;
                 }
-                navigate(`/contact-sales?plan=${plan.plan === "enterprise" ? "enterprise" : "business"}`);
+                navigate(`/contact-sales?plan=${plan.plan === "enterprise" ? "enterprise" : plan.plan === "business" ? "business" : "pro"}`);
               }}
             >
               {loadingPlan === plan.plan
                 ? "Opening..."
-                : plan.action === "checkout"
+                : plan.action === "checkout" && proSelfServe
                   ? "Upgrade to Pro"
+                  : plan.action === "checkout"
+                    ? "Contact us about Pro"
                   : plan.action === "interest"
                     ? "Request Business rollout"
                     : "Contact sales"}
@@ -147,6 +171,12 @@ export default function UpgradePage() {
           </Link>
         </div>
       </section>
+
+      {!proSelfServe ? (
+        <section className="panel inline-banner">
+          Pro self-serve checkout is unavailable right now. Use the contact path and we will help you activate the right plan.
+        </section>
+      ) : null}
 
       {status ? <section className="panel inline-banner">{status}</section> : null}
     </div>
