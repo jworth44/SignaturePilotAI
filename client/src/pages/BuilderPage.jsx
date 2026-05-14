@@ -1423,7 +1423,18 @@ export default function BuilderPage() {
   }
 
   return (
-    <div className="generator-builder-page">
+    <div
+      className="generator-builder-page"
+      style={{
+        width: "100%",
+        maxWidth: "100%",
+        margin: "0",
+        padding: "0",
+        boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column"
+      }}
+    >
       <section className="generator-builder-topbar">
         <div className="generator-builder-topcopy">
           <p className="eyebrow">Signature Generator</p>
@@ -1439,7 +1450,7 @@ export default function BuilderPage() {
         </div>
       </section>
 
-      <section className="generator-builder-shell">
+      <section className="generator-builder-shell" style={{ width: "100%", display: "flex", flexDirection: "row" }}>
         <aside className="generator-step-rail">
           {STEP_ITEMS.map((step) => {
             const active = step.key === activeStep;
