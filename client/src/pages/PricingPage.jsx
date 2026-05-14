@@ -5,16 +5,16 @@ const PLANS = [
   {
     name: "Free",
     price: "$0",
-    copy: "Build one professional signature, add your logo, and copy it safely into major email clients.",
+    copy: "Build and copy a branded signature with the core builder, logo upload, and universal-safe export.",
     cta: "Start Free",
     to: "/builder",
     features: [
-      "1 active signature draft",
+      "1 saved signature",
       "Core signature builder",
       "Logo upload",
       "Basic templates with limited variants",
       "Basic CTA links",
-      "Copy rendered signature",
+      "Copy Signature export",
       "Universal Outlook-safe export",
       "Basic compatibility checklist",
       "Signature Pilot AI branding included"
@@ -23,69 +23,85 @@ const PLANS = [
   {
     name: "Pro Individual",
     price: "From $9/month",
-    copy: "For professionals who want cleaner exports, stronger styling control, unbranded signatures, and the full template set.",
+    copy: "For solo professionals who want cleaner branding, premium templates, advanced styling, and richer export control.",
     cta: "Upgrade to Pro",
     to: "/upgrade",
     featured: true,
     features: [
       "Remove Signature Pilot AI branding",
-      "All template families",
-      "All 12 built-in variants",
+      "All template families and variants",
+      "Unlimited saved signatures",
+      "Modern and premium layouts",
+      "Advanced CTA destinations",
       "Raw HTML export",
       "Download HTML",
-      "Advanced CTA destinations",
-      "Advanced styling controls",
-      "Premium typography and layout controls",
-      "One-click polish and smart recommendations"
+      "Premium typography and styling controls",
+      "Version history and smart recommendations"
     ]
   },
   {
     name: "Business",
     price: "$49/month base",
-    copy: "Positioned for teams who need centralized signature control, consistent branding, and shared rollout standards.",
-    cta: "Team rollout info",
-    to: "/upgrade",
+    copy: "Request rollout for team signature management, centralized brand control, and shared setup support.",
+    cta: "Request rollout",
+    to: "/contact-sales?plan=business",
     features: [
       "Up to 10 users",
-      "Team signature management",
+      "Shared template planning",
       "Centralized brand control",
-      "Shared templates",
-      "Employee profile planning",
-      "Team-wide CTA and disclaimer control",
-      "Role and department template support",
-      "Campaigns, analytics, and workspace sync on the roadmap"
+      "Employee and department profile setup",
+      "Team-wide CTA and disclaimer planning",
+      "Rollout guidance by request"
     ]
   },
   {
     name: "Enterprise",
     price: "Custom",
-    copy: "For larger organizations planning future rollout, governance, and deployment workflows.",
-    cta: "Contact us",
-    to: "/upgrade",
+    copy: "Custom rollout support for larger organizations that need guided deployment and structured onboarding.",
+    cta: "Contact sales",
+    to: "/contact-sales?plan=enterprise",
     features: [
       "Custom rollout planning",
-      "Priority migration support",
-      "Future Microsoft 365 and Google Workspace sync planning",
-      "Future advanced governance and deployment options"
+      "Larger team consultation",
+      "Priority support path",
+      "Advanced setup guidance",
+      "Deployment review and migration help"
     ]
   }
 ];
 
+const MATRIX_ROWS = [
+  ["Core builder", "Included", "Included", "Included by rollout", "Included by rollout"],
+  ["Logo upload", "Included", "Included", "Included", "Included"],
+  ["Universal templates", "Included", "Included", "Included", "Included"],
+  ["Modern templates", "Limited", "Full access", "Planned for shared rollout", "Custom rollout"],
+  ["Branding removal", "No", "Yes", "Yes", "Yes"],
+  ["Raw HTML / file export", "No", "Yes", "By setup needs", "By setup needs"],
+  ["Shared templates", "No", "No", "Yes", "Yes"],
+  ["Team rollout support", "No", "No", "Request rollout", "Custom rollout"]
+];
+
 export default function PricingPage() {
   return (
-    <div className="page-stack">
-      <section className="section-intro">
-        <p className="eyebrow">Pricing</p>
-        <h1>Choose the plan that fits how you manage email signatures.</h1>
-        <p className="hero-subheadline">
-          Signature Pilot AI is built for one thing: professional signatures that paste cleanly into Gmail, Outlook, Apple Mail, Yahoo, and other major
-          email clients without broken formatting.
-        </p>
+    <div className="page-stack public-page-stack">
+      <section className="public-hero public-hero-compact">
+        <div className="public-hero-copy public-hero-copy-centered">
+          <p className="eyebrow">Pricing</p>
+          <h1>Clear pricing for clean email signatures.</h1>
+          <p className="hero-subheadline public-hero-subheadline">
+            Start free for branded signature creation. Upgrade to Pro Individual for premium control, or request a Business rollout when you need shared
+            team standards.
+          </p>
+          <div className="trust-pill-row">
+            <span className="trust-pill">Best for Gmail, Outlook, Apple Mail, and Yahoo</span>
+            <span className="trust-pill">Universal templates stay compatibility-first</span>
+          </div>
+        </div>
       </section>
 
-      <section className="pricing-grid">
+      <section className="pricing-grid public-pricing-grid">
         {PLANS.map((plan) => (
-          <article key={plan.name} className={`pricing-card ${plan.featured ? "pricing-card-featured" : ""}`}>
+          <article key={plan.name} className={`pricing-card public-pricing-card ${plan.featured ? "pricing-card-featured" : ""}`}>
             <div className="pricing-card-copy">
               <p className="pricing-name">{plan.name}</p>
               <h2>{plan.price}</h2>
@@ -96,47 +112,48 @@ export default function PricingPage() {
                 <li key={feature}>{feature}</li>
               ))}
             </ul>
-            <Link
-              className={`button ${plan.featured ? "button-primary" : "button-secondary"}`}
-              to={plan.name === "Business" ? "/contact-sales?plan=business" : plan.name === "Enterprise" ? "/contact-sales?plan=enterprise" : plan.to}
-            >
+            <Link className={`button ${plan.featured ? "button-primary" : "button-secondary"}`} to={plan.to}>
               {plan.cta}
             </Link>
           </article>
         ))}
       </section>
 
-      <section className="panel">
-        <div className="section-intro">
-          <p className="eyebrow">Compatibility First</p>
-          <h2>Do not pay just to make a basic signature work.</h2>
-          <p className="hero-subheadline">
-            Free covers the basics people expect: logo upload, core templates, rendered copy, and a compatibility-safe export path. Pro unlocks cleaner
-            branding, more layout control, and advanced export tools. Business is the request-a-rollout team plan.
-          </p>
+      <section className="panel public-matrix-panel">
+        <div className="section-intro public-section-intro">
+          <p className="eyebrow">Compare plans</p>
+          <h2>Free handles the basics. Paid plans unlock polish or rollout support.</h2>
         </div>
+        <div className="plan-matrix">
+          <div className="plan-matrix-row plan-matrix-head">
+            <span>Feature</span>
+            <span>Free</span>
+            <span>Pro</span>
+            <span>Business</span>
+            <span>Enterprise</span>
+          </div>
+          {MATRIX_ROWS.map((row) => (
+            <div key={row[0]} className="plan-matrix-row">
+              {row.map((cell) => (
+                <span key={cell}>{cell}</span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </section>
 
-        <div className="comparison-grid">
-          <div className="comparison-card">
-            <strong>What stays free</strong>
-            <ul className="feature-list">
-              <li>Basic signature creation</li>
-              <li>Logo upload</li>
-              <li>Core templates</li>
-              <li>Copy Signature export</li>
-              <li>Universal compatibility checklist</li>
-            </ul>
-          </div>
-          <div className="comparison-card comparison-card-accent">
-            <strong>What upgrades</strong>
-            <ul className="feature-list">
-              <li>Branding removal</li>
-              <li>Premium families and variants</li>
-              <li>Raw HTML and file export</li>
-              <li>Advanced styling and CTA destinations</li>
-              <li>Saved-history and team features</li>
-            </ul>
-          </div>
+      <section className="public-final-cta public-final-cta-tight">
+        <div className="public-final-cta-copy">
+          <p className="eyebrow">Need help choosing?</p>
+          <h2>Start with Free for personal use, Pro for premium control, and Business when your team needs shared rollout standards.</h2>
+        </div>
+        <div className="hero-actions">
+          <Link className="button button-primary" to="/upgrade">
+            Upgrade to Pro
+          </Link>
+          <Link className="button button-secondary" to="/contact-sales?plan=business">
+            Request Business rollout
+          </Link>
         </div>
       </section>
     </div>

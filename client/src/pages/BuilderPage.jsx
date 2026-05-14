@@ -1167,7 +1167,7 @@ export default function BuilderPage() {
               onClick={() => setAdvancedOptionsOpen((current) => !current)}
             >
               <span className="generator-disclosure-chevron" aria-hidden="true">
-                {advancedOptionsOpen ? "▾" : "▸"}
+                {advancedOptionsOpen ? "?" : "▸"}
               </span>
               <span>Advanced options</span>
             </button>
@@ -1384,7 +1384,7 @@ export default function BuilderPage() {
             >
               <span className="button-feedback-label">
                 <span className="button-feedback-icon" aria-hidden="true">
-                  {exportCopySuccessTarget === "signature" ? "✓" : ""}
+                  {exportCopySuccessTarget === "signature" ? "?" : ""}
                 </span>
                 <span>{exportCopySuccessTarget === "signature" ? "Copied!" : "Copy Signature"}</span>
               </span>
@@ -1404,7 +1404,7 @@ export default function BuilderPage() {
               type="button"
               onClick={() => setMoreExportOptionsOpen((current) => !current)}
             >
-              More export options {moreExportOptionsOpen ? "▴" : "▾"}
+              More export options {moreExportOptionsOpen ? "?" : "?"}
             </button>
 
             {moreExportOptionsOpen ? (
@@ -1429,7 +1429,7 @@ export default function BuilderPage() {
                     >
                       <span className="button-feedback-label">
                         <span className="button-feedback-icon" aria-hidden="true">
-                          {exportCopySuccessTarget === "raw-html" ? "✓" : ""}
+                          {exportCopySuccessTarget === "raw-html" ? "?" : ""}
                         </span>
                         <span>{exportCopySuccessTarget === "raw-html" ? "Copied!" : "Copy Raw HTML"}</span>
                       </span>
@@ -1445,7 +1445,7 @@ export default function BuilderPage() {
                     >
                       <span className="button-feedback-label">
                         <span className="button-feedback-icon" aria-hidden="true">
-                          {exportCopySuccessTarget === "plain-text" ? "✓" : ""}
+                          {exportCopySuccessTarget === "plain-text" ? "?" : ""}
                         </span>
                         <span>{exportCopySuccessTarget === "plain-text" ? "Copied!" : "Copy Plain Text"}</span>
                       </span>
@@ -1539,6 +1539,13 @@ export default function BuilderPage() {
         <div className="generator-builder-topcopy">
           <p className="eyebrow">Signature Generator</p>
           <h1>Build once, paste anywhere.</h1>
+          <p className="support-copy generator-builder-topnote">
+            Create a clean signature, copy it safely, and install it in Gmail, Outlook, Apple Mail, or Yahoo without broken formatting or messy HTML.
+          </p>
+          <div className="generator-builder-badges">
+            <span className="generator-builder-badge">Copy Signature is the safest default</span>
+            <span className="generator-builder-badge">Universal templates are Outlook-safer</span>
+          </div>
         </div>
         <div className="generator-builder-topactions">
           <Link className="button button-secondary" to="/install-guide">
@@ -2226,3 +2233,4 @@ function applySuggestedFields(current, suggestions, mode = "Apply Suggestions") 
       };
   }
 }
+

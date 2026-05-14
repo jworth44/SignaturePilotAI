@@ -18,7 +18,7 @@ export default function AppShell({ children }) {
             className="brand-logo-icon"
             src="/brand/signature-pilot-ai-header-logo.png"
             alt="Signature Pilot AI"
-            style={{ height: "36px", width: "36px", display: "block", objectFit: "contain" }}
+            style={{ height: "42px", width: "42px", display: "block", objectFit: "contain" }}
             onError={(e) => {
               e.target.style.display = "none";
             }}
@@ -27,7 +27,7 @@ export default function AppShell({ children }) {
             <span className="brand-name">
               Signature Pilot <strong>AI</strong>
             </span>
-            <span className="brand-tagline">Smart email signatures</span>
+            <span className="brand-tagline">Compatibility-first signatures</span>
           </div>
         </NavLink>
 

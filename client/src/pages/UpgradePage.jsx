@@ -1,26 +1,26 @@
 import React, { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 const PAID_PLANS = [
   {
     plan: "pro",
     title: "Pro Individual",
     price: "From $9/month",
-    copy: "Available now for solo professionals who want unbranded signatures, raw HTML export, premium templates, and stronger compatibility controls.",
+    copy: "Unlock unbranded signatures, premium template families, advanced styling, raw HTML, and file export.",
     action: "checkout"
   },
   {
     plan: "business",
     title: "Business",
     price: "$49/month base",
-    copy: "Reserved for the recurring team plan: centralized brand control, shared templates, employee profile planning, and future workspace sync.",
+    copy: "Request rollout for team signature management, shared templates, centralized branding, and guided setup.",
     action: "interest"
   },
   {
     plan: "enterprise",
     title: "Enterprise",
     price: "Custom",
-    copy: "For larger organizations that want rollout planning, governance review, and future deployment support.",
+    copy: "Contact sales for larger rollout planning, custom support, and more structured onboarding needs.",
     action: "contact"
   }
 ];
@@ -33,7 +33,7 @@ export default function UpgradePage() {
   const checkoutStatus = searchParams.get("checkout");
   const checkoutNotice = useMemo(() => {
     if (checkoutStatus === "success") {
-      return "Checkout completed. If Stripe returned you here, your Pro upgrade flow finished and your confirmation email should be on the way.";
+      return "Checkout completed. Your Pro upgrade flow finished and your confirmation email should be on the way.";
     }
     if (checkoutStatus === "cancel") {
       return "Checkout was canceled. You can keep using the free builder and return to upgrade any time.";
@@ -55,40 +55,36 @@ export default function UpgradePage() {
         window.location.assign(payload.url);
         return;
       }
-      setStatus(payload.message || "Billing not configured yet. Add Stripe keys to enable upgrades.");
+      setStatus(payload.message || "Billing is not configured yet. Add Stripe settings to enable self-serve checkout.");
     } catch {
-      setStatus("Billing not configured yet. Add Stripe keys to enable upgrades.");
+      setStatus("Billing is not configured yet. Add Stripe settings to enable self-serve checkout.");
     } finally {
       setLoadingPlan("");
     }
   }
 
-  function handleBusinessInterest() {
-    navigate("/contact-sales?plan=business");
-  }
-
-  function handleEnterpriseInterest() {
-    navigate("/contact-sales?plan=enterprise");
-  }
-
   return (
-    <div className="page-stack">
-      <section className="section-intro">
-        <p className="eyebrow">Upgrade</p>
-        <h1>Upgrade when you need cleaner exports, stronger control, or team rollout support.</h1>
-        <p className="hero-subheadline">No commitment. Cancel anytime. Signatures stay yours.</p>
+    <div className="page-stack public-page-stack">
+      <section className="public-hero public-hero-compact">
+        <div className="public-hero-copy public-hero-copy-centered">
+          <p className="eyebrow">Upgrade</p>
+          <h1>Upgrade when you want cleaner control, sharper layouts, or team rollout support.</h1>
+          <p className="hero-subheadline public-hero-subheadline">
+            Keep the core builder free. Move to Pro Individual for advanced export and styling, or request Business and Enterprise rollout help when your
+            signature setup needs to scale.
+          </p>
+        </div>
       </section>
 
       {checkoutNotice ? <section className="panel inline-banner">{checkoutNotice}</section> : null}
 
-      <section className="pricing-grid">
+      <section className="pricing-grid public-pricing-grid">
         {PAID_PLANS.map((plan) => (
-          <article key={plan.plan} className={`pricing-card ${plan.plan === "pro" ? "pricing-card-featured" : ""}`}>
+          <article key={plan.plan} className={`pricing-card public-pricing-card ${plan.plan === "pro" ? "pricing-card-featured" : ""}`}>
             <div>
               <p className="pricing-name">{plan.title}</p>
               <h2>{plan.price}</h2>
               <p>{plan.copy}</p>
-              {plan.action !== "checkout" ? <p className="support-copy">Use the contact form to request rollout planning for this plan.</p> : null}
             </div>
             <button
               className={`button ${plan.plan === "pro" ? "button-primary" : "button-secondary"}`}
@@ -99,11 +95,7 @@ export default function UpgradePage() {
                   handleUpgrade(plan.plan);
                   return;
                 }
-                if (plan.action === "interest") {
-                  handleBusinessInterest();
-                  return;
-                }
-                handleEnterpriseInterest();
+                navigate(`/contact-sales?plan=${plan.plan === "enterprise" ? "enterprise" : "business"}`);
               }}
             >
               {loadingPlan === plan.plan
@@ -118,30 +110,41 @@ export default function UpgradePage() {
         ))}
       </section>
 
-      <section className="panel">
-        <div className="section-intro">
-          <p className="eyebrow">What upgrades now</p>
-          <h2>Keep the core builder free. Pay for cleaner control and recurring team value.</h2>
+      <section className="comparison-grid public-upgrade-comparison-grid">
+        <article className="comparison-card">
+          <p className="pricing-name">Free users keep</p>
+          <ul className="feature-list">
+            <li>Core signature builder</li>
+            <li>Logo upload</li>
+            <li>Basic templates</li>
+            <li>Copy Signature export</li>
+            <li>Universal compatibility checklist</li>
+          </ul>
+        </article>
+        <article className="comparison-card comparison-card-accent">
+          <p className="pricing-name">Paid plans unlock</p>
+          <ul className="feature-list">
+            <li>Branding removal</li>
+            <li>All template families and variants</li>
+            <li>Advanced styling controls</li>
+            <li>Raw HTML and download export</li>
+            <li>Business rollout support for team management</li>
+          </ul>
+        </article>
+      </section>
+
+      <section className="public-final-cta public-final-cta-tight">
+        <div className="public-final-cta-copy">
+          <p className="eyebrow">Need rollout guidance?</p>
+          <h2>Business and Enterprise requests go through a direct sales contact flow so rollout questions get handled before checkout is forced.</h2>
         </div>
-        <div className="comparison-grid">
-          <div className="comparison-card">
-            <strong>Free users keep</strong>
-            <ul className="feature-list">
-              <li>Logo upload</li>
-              <li>Core templates</li>
-              <li>Copy Signature export</li>
-              <li>Universal compatibility-safe workflow</li>
-            </ul>
-          </div>
-          <div className="comparison-card comparison-card-accent">
-            <strong>Paid plans unlock</strong>
-            <ul className="feature-list">
-              <li>Branding removal</li>
-              <li>Premium families and variants</li>
-              <li>Raw HTML and file export</li>
-              <li>Advanced styling and future team rollout support</li>
-            </ul>
-          </div>
+        <div className="hero-actions">
+          <Link className="button button-secondary" to="/contact-sales?plan=business">
+            Request Business rollout
+          </Link>
+          <Link className="button button-secondary" to="/contact-sales?plan=enterprise">
+            Contact sales
+          </Link>
         </div>
       </section>
 

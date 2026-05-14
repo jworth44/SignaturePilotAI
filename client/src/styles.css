@@ -3549,3 +3549,532 @@ h3 {
     transform: scale(0.48);
   }
 }
+
+/* Public page refresh */
+
+.site-main:has(.public-page-stack) {
+  padding: 1.25rem 1.5rem 3rem;
+}
+
+.topbar {
+  min-height: 76px;
+  gap: 1.25rem;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(24, 33, 49, 0.08);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+}
+
+.brand-lockup {
+  gap: 12px;
+}
+
+.brand-logo-icon {
+  width: 42px;
+  height: 42px;
+}
+
+.brand-name {
+  color: #172033;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.brand-tagline {
+  color: #5b6478;
+  font-size: 11px;
+}
+
+.topbar-link {
+  color: #42506a;
+  font-weight: 600;
+}
+
+.topbar-link-upgrade,
+.topbar-link-upgrade:hover,
+.topbar-link-upgrade.active {
+  color: var(--blue);
+  border-color: rgba(38, 99, 255, 0.18);
+  background: rgba(38, 99, 255, 0.05);
+}
+
+.public-page-stack {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  gap: 1.75rem;
+}
+
+.public-hero,
+.public-section,
+.public-final-cta,
+.public-matrix-panel,
+.sales-benefits-panel,
+.sales-form-panel,
+.public-install-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 255, 0.96)),
+    radial-gradient(circle at top left, rgba(38, 99, 255, 0.08), transparent 38%);
+  border: 1px solid rgba(24, 33, 49, 0.08);
+  box-shadow: 0 24px 60px rgba(17, 24, 39, 0.08);
+  border-radius: 30px;
+}
+
+.public-hero,
+.public-section,
+.public-final-cta {
+  padding: clamp(1.5rem, 3.5vw, 3rem);
+}
+
+.public-hero {
+  display: grid;
+  gap: 2rem;
+}
+
+.public-hero-compact {
+  padding-block: clamp(1.4rem, 3vw, 2.5rem);
+}
+
+.public-hero-copy-centered,
+.public-section-intro {
+  max-width: 880px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.public-hero-subheadline {
+  color: #536178;
+  font-size: 1.06rem;
+  line-height: 1.7;
+}
+
+.public-hero-actions-centered {
+  justify-content: center;
+}
+
+.trust-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.trust-pill,
+.generator-builder-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(38, 99, 255, 0.08);
+  border: 1px solid rgba(38, 99, 255, 0.12);
+  color: #254ca8;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.product-preview-shell {
+  display: grid;
+  gap: 1.2rem;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.product-preview-flow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.product-preview-step {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(24, 33, 49, 0.08);
+}
+
+.product-preview-number {
+  color: var(--blue);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.product-preview-step p {
+  color: #5f6980;
+  line-height: 1.55;
+}
+
+.public-signature-preview-card {
+  padding: 1rem;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #f5f8ff, #ffffff);
+  border: 1px solid rgba(24, 33, 49, 0.08);
+}
+
+.public-signature-preview-frame {
+  min-height: 280px;
+  padding: 1.25rem;
+  border-radius: 22px;
+  background: #fff;
+  border: 1px solid rgba(24, 33, 49, 0.06);
+  overflow: hidden;
+}
+
+.public-signature-preview-frame > div {
+  transform: scale(1.02);
+  transform-origin: top left;
+}
+
+.public-feature-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.public-feature-card {
+  min-height: 220px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(24, 33, 49, 0.08);
+  box-shadow: 0 16px 34px rgba(17, 24, 39, 0.05);
+}
+
+.public-feature-card h3,
+.public-plan-mini-card strong,
+.sales-benefit-item strong,
+.sales-process-step strong {
+  font-size: 1.02rem;
+  color: #172033;
+}
+
+.public-feature-card p,
+.public-plan-mini-card p,
+.sales-benefit-item p,
+.sales-process-step p {
+  color: #566176;
+}
+
+.public-feature-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 18px;
+}
+
+.public-compatibility-grid,
+.sales-page-grid,
+.install-guide-content {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.public-compatibility-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.public-compatibility-card {
+  min-height: 100%;
+}
+
+.public-compatibility-card-safe {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 247, 255, 0.96));
+}
+
+.public-compatibility-card-modern {
+  background: linear-gradient(180deg, rgba(245, 241, 255, 0.98), rgba(255, 255, 255, 0.96));
+}
+
+.public-pricing-grid {
+  align-items: stretch;
+}
+
+.public-pricing-card {
+  min-height: 100%;
+  gap: 1.2rem;
+  border: 1px solid rgba(24, 33, 49, 0.08);
+}
+
+.public-plan-mini-card {
+  display: grid;
+  gap: 0.55rem;
+  min-height: 170px;
+  padding: 1.35rem;
+  border-radius: 24px;
+}
+
+.public-section-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.plan-matrix {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.plan-matrix-row {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.plan-matrix-row span {
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(24, 33, 49, 0.06);
+  color: #334155;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.plan-matrix-head span {
+  background: rgba(38, 99, 255, 0.08);
+  color: #1f3f95;
+  font-weight: 800;
+}
+
+.public-upgrade-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.public-final-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: linear-gradient(135deg, rgba(18, 28, 49, 0.98), rgba(37, 62, 133, 0.96));
+  color: #fff;
+}
+
+.public-final-cta-tight {
+  padding-block: 1.5rem;
+}
+
+.public-final-cta-copy {
+  max-width: 760px;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.public-final-cta .hero-subheadline,
+.public-final-cta p,
+.public-final-cta li {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.sales-page-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+  align-items: start;
+}
+
+.sales-benefits-list,
+.sales-process-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.sales-benefit-item,
+.sales-process-step {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.05rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(24, 33, 49, 0.06);
+}
+
+.sales-process-step {
+  grid-template-columns: 44px 1fr;
+  align-items: start;
+}
+
+.sales-process-step span {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: #fff;
+  font-weight: 800;
+}
+
+.install-guide-layout {
+  display: grid;
+}
+
+.install-guide-content {
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  align-items: start;
+}
+
+.install-guide-main {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.install-guide-side {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.public-tab-row {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tab-button {
+  min-height: 42px;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(24, 33, 49, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  color: #475569;
+  font-weight: 700;
+}
+
+.tab-button-active {
+  background: linear-gradient(135deg, rgba(38, 99, 255, 0.95), rgba(80, 86, 216, 0.95));
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(38, 99, 255, 0.2);
+}
+
+.inline-banner {
+  color: #324360;
+  border: 1px solid rgba(38, 99, 255, 0.12);
+  background: linear-gradient(180deg, rgba(241, 246, 255, 0.96), rgba(255, 255, 255, 0.96));
+}
+
+.generator-builder-topbar {
+  padding: 1.1rem 1.25rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.94)),
+    radial-gradient(circle at top left, rgba(38, 99, 255, 0.08), transparent 40%);
+}
+
+.generator-builder-topcopy {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.generator-builder-topcopy h1 {
+  color: #172033;
+}
+
+.generator-builder-topnote {
+  max-width: 720px;
+  color: #566176;
+}
+
+.generator-builder-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.generator-builder-topactions {
+  align-items: center;
+}
+
+@media (max-width: 1199px) {
+  .public-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sales-page-grid,
+  .install-guide-content,
+  .public-compatibility-grid,
+  .public-upgrade-comparison-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-preview-flow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .public-page-stack {
+    max-width: 100%;
+  }
+
+  .public-final-cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .plan-matrix-row {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-matrix-row span {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-main:has(.public-page-stack) {
+    padding: 0.85rem 0.85rem 2rem;
+  }
+
+  .public-hero,
+  .public-section,
+  .public-final-cta,
+  .public-matrix-panel,
+  .sales-benefits-panel,
+  .sales-form-panel,
+  .public-install-panel {
+    padding: 1.15rem;
+    border-radius: 24px;
+  }
+
+  .public-feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .public-signature-preview-frame {
+    min-height: 220px;
+    padding: 0.9rem;
+  }
+
+  .generator-builder-topbar {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .topbar-link,
+  .topbar-actions .button {
+    font-size: 0.92rem;
+  }
+
+  .brand-tagline {
+    display: none;
+  }
+
+  .trust-pill,
+  .generator-builder-badge {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-actions,
+  .public-final-cta .hero-actions,
+  .contact-lead-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .button,
+  .public-final-cta .button,
+  .contact-lead-actions .button {
+    width: 100%;
+  }
+}
