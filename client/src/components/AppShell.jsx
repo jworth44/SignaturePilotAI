@@ -15,10 +15,6 @@ export default function AppShell({ children }) {
       <header className="topbar">
         <NavLink className="brand-lockup" to="/">
           <img className="brand-logo" src="/brand/signature-pilot-ai-header-logo.png" alt="Signature Pilot AI" />
-          <span>
-            <strong>Signature Pilot AI</strong>
-            <small>Smart signatures. Built in minutes.</small>
-          </span>
         </NavLink>
 
         <nav className="topbar-nav" aria-label="Primary">
