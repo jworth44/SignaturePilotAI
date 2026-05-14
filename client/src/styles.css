@@ -2583,9 +2583,9 @@ h3 {
 
 .generator-editor-pane {
   display: grid;
-  flex: 0 0 356px;
+  flex: 0 0 460px;
   grid-template-rows: minmax(0, 1fr) auto;
-  min-width: 256px;
+  min-width: 380px;
   min-height: 0;
   height: 100%;
   overflow: hidden;
@@ -3156,7 +3156,7 @@ h3 {
 
 .generator-preview-pane .workspace-email-shell {
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   margin-left: 0;
   margin-right: auto;
   margin-left: auto;
@@ -3207,7 +3207,7 @@ h3 {
   }
 
   .generator-editor-pane {
-    flex-basis: 340px;
+    flex-basis: 420px;
   }
 
   .generator-template-preview-frame {
@@ -3221,7 +3221,17 @@ h3 {
 
 @media (min-width: 1400px) {
   .generator-editor-pane {
-    flex-basis: 436px;
+    flex-basis: 540px;
+  }
+}
+
+@media (min-width: 1800px) {
+  .generator-editor-pane {
+    flex-basis: 600px;
+  }
+
+  .generator-preview-pane .workspace-email-shell {
+    max-width: 1100px;
   }
 }
 

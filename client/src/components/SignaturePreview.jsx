@@ -14,7 +14,7 @@ export default function SignaturePreview({
   const artifacts = useMemo(() => generateSignatureArtifacts({ ...draft, renderMode: previewDevice }), [draft, previewDevice]);
   const layoutMeta = getLayoutMeta(artifacts.effectiveDraft.layout);
   const zoomFactor = Number(previewZoom) / 100;
-  const previewShellMaxWidth = previewDevice === "mobile" ? Math.round(360 * zoomFactor) : Math.round(960 * zoomFactor);
+  const previewShellMaxWidth = previewDevice === "mobile" ? Math.round(360 * zoomFactor) : Math.round(1100 * zoomFactor);
   const previewScaleStyle = {
     transform: `scale(${zoomFactor})`,
     transformOrigin: previewDevice === "mobile" ? "top center" : "top left",
