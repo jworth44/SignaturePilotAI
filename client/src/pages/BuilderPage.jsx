@@ -487,6 +487,7 @@ export default function BuilderPage() {
   const [moreExportOptionsOpen, setMoreExportOptionsOpen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState("desktop");
   const [previewZoom, setPreviewZoom] = useState("100");
+  const [templateFilter, setTemplateFilter] = useState("all");
   const [logoPanelState, setLogoPanelState] = useState(LOGO_PANEL_DEFAULT);
   const [smartSetup, setSmartSetup] = useState({
     industry: "General Professional",
@@ -1161,6 +1162,7 @@ export default function BuilderPage() {
   function renderTemplatesStep() {
     const selectedTemplate = lookupTemplateOption(artifacts.effectiveDraft.layout);
     const selectedTemplateLabel = selectedTemplate.label;
+    const visibleTemplates = TEMPLATE_OPTIONS.filter((template) => templateFilter === "all" || template.compatibility === templateFilter);
     return (
       <div className="generator-step-stack">
         <section className="generator-card">
@@ -1174,8 +1176,20 @@ export default function BuilderPage() {
             </div>
           </div>
 
+          <div className="template-filter-bar" role="tablist" aria-label="Template compatibility filter">
+            <button className={templateFilter === "all" ? "active" : ""} type="button" onClick={() => setTemplateFilter("all")}>
+              All
+            </button>
+            <button className={templateFilter === "universal" ? "active" : ""} type="button" onClick={() => setTemplateFilter("universal")}>
+              Universal ✓
+            </button>
+            <button className={templateFilter === "modern" ? "active" : ""} type="button" onClick={() => setTemplateFilter("modern")}>
+              Modern ✦
+            </button>
+          </div>
+
           <div className="generator-template-grid">
-            {TEMPLATE_OPTIONS.map((template) => {
+            {visibleTemplates.map((template) => {
               const locked = isFree && template.pro;
               const active = artifacts.effectiveDraft.layout === template.value;
               const templatePreview = templatePreviewMap[template.value];
@@ -1191,30 +1205,26 @@ export default function BuilderPage() {
                       <strong>{template.label}</strong>
                       <span className="generator-template-fit">{previewProfile?.fit || "Professional communication"}</span>
                     </div>
-                    <div className="generator-template-badge-stack">
-                      <span
-                        className={`generator-mini-badge ${
-                          template.compatibility === "universal" ? "generator-mini-badge-universal" : "generator-mini-badge-modern"
-                        }`}
-                      >
-                        {template.compatibility === "universal" ? "Universal" : "Modern"}
-                      </span>
-                    </div>
                   </div>
                   <div className="generator-template-preview-frame">
+                    <span
+                      className={`generator-mini-badge generator-template-compatibility-badge ${
+                        template.compatibility === "universal" ? "generator-mini-badge-universal" : "generator-mini-badge-modern"
+                      }`}
+                    >
+                      {template.compatibility === "universal" ? "Universal" : "Modern"}
+                    </span>
                     <span className={`generator-mini-badge ${template.pro ? "generator-mini-badge-pro" : "generator-mini-badge-free"}`}>
                       {template.pro ? "Pro" : "Free"}
                     </span>
                     <div className="generator-template-preview-scene">
                       <span className="generator-template-preview-kicker">{previewProfile?.previewTag || previewProfile?.fit || "Signature layout"}</span>
-                      <div className="generator-template-preview-canvas">
-                        <div dangerouslySetInnerHTML={{ __html: templatePreview.previewHtml }} />
+                      <div className="generator-template-preview-viewport">
+                        <div className="generator-template-preview-canvas">
+                          <div dangerouslySetInnerHTML={{ __html: templatePreview.previewHtml }} />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="generator-template-meta-row">
-                    <span>{template.compatibility === "universal" ? "Outlook-safer" : "Richer visual style"}</span>
-                    {active ? <span>Matches live preview</span> : null}
                   </div>
                   <div className="generator-button-row">
                     <button
@@ -1758,7 +1768,7 @@ export default function BuilderPage() {
       </section>
 
       <section
-        className={`generator-builder-shell ${activeStep === "templates" ? "generator-builder-shell-templates" : ""}`}
+        className={`generator-builder-shell ${activeStep === "templates" ? "generator-builder-shell-templates builder-step-3-layout" : ""}`}
         style={{ width: "100%", display: "flex", flexDirection: "row" }}
       >
         <aside className="generator-step-rail">
@@ -1780,7 +1790,7 @@ export default function BuilderPage() {
           })}
         </aside>
 
-        <section className="generator-editor-pane">
+        <section className={`generator-editor-pane ${activeStep === "templates" ? "template-gallery-panel" : ""}`}>
           <div className="generator-editor-scroll">{renderActiveStep()}</div>
 
           <div className="generator-editor-footer">
@@ -1803,7 +1813,7 @@ export default function BuilderPage() {
           </div>
         </section>
 
-        <aside className="generator-preview-pane">
+        <aside className={`generator-preview-pane ${activeStep === "templates" ? "template-preview-panel" : ""}`}>
           <div className="generator-preview-scroll">
             <SignaturePreview
               draft={draft}

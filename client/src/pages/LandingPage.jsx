@@ -1,52 +1,89 @@
 import React from "react";
-import { ArrowRight, CheckCircle2, Copy, Download, ShieldCheck, Sparkles, Upload, Wand2 } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { generateSignatureArtifacts } from "../utils/htmlSignatureGenerator";
+
+const HERO_CLIENTS = ["Gmail", "Outlook", "Apple Mail", "Yahoo", "Thunderbird"];
+
+const HOW_IT_WORKS_STEPS = [
+  {
+    number: "1",
+    title: "Fill in your details",
+    description: "Add your contact info, company, logo, and CTA without touching raw code."
+  },
+  {
+    number: "2",
+    title: "Pick a template",
+    description: "Choose a compatibility-safe layout or a richer modern design you can test first."
+  },
+  {
+    number: "3",
+    title: "Copy and paste anywhere",
+    description: "Use Copy Signature for the safest install path in the clients you already use."
+  }
+];
+
+const CLIENT_PILLS = [
+  { label: "Gmail", tone: "gmail" },
+  { label: "Outlook", tone: "outlook" },
+  { label: "Apple Mail", tone: "apple" },
+  { label: "Yahoo", tone: "yahoo" },
+  { label: "Thunderbird", tone: "thunderbird" },
+  { label: "Office 365", tone: "office" }
+];
+
+const CORE_FEATURES = [
+  {
+    icon: "🔒",
+    title: "Paste-safe HTML",
+    description: "Table-based layout that survives Outlook, Gmail, and Apple Mail without breaking."
+  },
+  {
+    icon: "🏷",
+    title: "Universal vs Modern labels",
+    description: "Know which templates are Outlook-safe before you pick."
+  },
+  {
+    icon: "📊",
+    title: "Signature Health Score",
+    description: "Export with a compatibility checklist so nothing surprises you."
+  }
+];
 
 const FEATURE_GROUPS = [
   {
     title: "Universal templates",
-    description: "Built for maximum Gmail, Outlook, Apple Mail, and Yahoo compatibility.",
-    Icon: ShieldCheck
+    description: "Built for maximum Gmail, Outlook, Apple Mail, and Yahoo compatibility."
   },
   {
     title: "Modern templates",
-    description: "Use richer visual structure when you want a sharper look and can test Outlook first.",
-    Icon: Sparkles
+    description: "Use richer visual structure when you want a sharper look and can test Outlook first."
   },
   {
     title: "Logo upload",
-    description: "Upload a logo or profile photo directly without relying on externally hosted image URLs.",
-    Icon: Upload
+    description: "Upload a logo or profile photo directly without relying on externally hosted image URLs."
   },
   {
     title: "CTA destination links",
-    description: "Add click-ready website, scheduling, or booking links without breaking the signature layout.",
-    Icon: ArrowRight
+    description: "Add click-ready website, scheduling, or booking links without breaking the signature layout."
   },
   {
     title: "Signature Health Score",
-    description: "Get a quick read on compatibility, link coverage, and rollout readiness before you export.",
-    Icon: CheckCircle2
+    description: "Get a quick read on compatibility, link coverage, and rollout readiness before you export."
   },
   {
     title: "Compatibility checklist",
-    description: "Keep Outlook-safe copy and client guidance visible while you build.",
-    Icon: ShieldCheck
+    description: "Keep Outlook-safe copy and client guidance visible while you build."
   },
   {
     title: "Raw HTML and file export",
-    description: "Upgrade when you need direct HTML, download files, or handoff-ready export options.",
-    Icon: Download
+    description: "Upgrade when you need direct HTML, download files, or handoff-ready export options."
   },
   {
     title: "Team rollout option",
-    description: "Business rollout is available by request when you need shared brand control and team setup.",
-    Icon: Wand2
+    description: "Business rollout is available by request when you need shared brand control and team setup."
   }
 ];
-
-const TRUST_POINTS = ["Gmail-ready", "Outlook-safe universal templates", "Apple Mail-ready", "Mobile-aware"];
 
 const TEMPLATE_SHOWCASE_SAMPLE = {
   fullName: "James Worthing",
@@ -74,8 +111,9 @@ const HERO_SIGNATURE = generateSignatureArtifacts({
 export default function LandingPage() {
   return (
     <div className="page-stack public-page-stack">
-      <section className="public-hero">
-        <div className="public-hero-copy public-hero-copy-centered">
+      <section className="public-hero public-hero-upgraded">
+        <div className="public-hero-copy public-hero-copy-centered public-hero-copy-upgraded">
+          <p className="public-hero-rating">★★★★★ Rated 4.7 by professionals</p>
           <p className="eyebrow">Compatibility-first email signatures</p>
           <h1>Professional email signatures that work where you paste them.</h1>
           <p className="hero-subheadline public-hero-subheadline">
@@ -90,44 +128,86 @@ export default function LandingPage() {
               View Pricing
             </Link>
           </div>
-          <div className="trust-pill-row">
-            {TRUST_POINTS.map((point) => (
-              <span key={point} className="trust-pill">
-                {point}
+          <div className="public-client-strip" aria-label="Supported email clients">
+            {HERO_CLIENTS.map((client) => (
+              <span key={client} className="public-client-chip">
+                {client}
               </span>
             ))}
           </div>
         </div>
 
-        <div className="product-preview-shell">
-          <div className="product-preview-flow">
-            <div className="product-preview-step">
-              <span className="product-preview-number">01</span>
-              <strong>Preview</strong>
-              <p>Choose a compatibility-safe layout.</p>
+        <div className="public-hero-window-shell">
+          <div className="public-hero-window">
+            <div className="public-hero-window-bar">
+              <span />
+              <span />
+              <span />
             </div>
-            <div className="product-preview-step">
-              <span className="product-preview-number">02</span>
-              <strong>Copy</strong>
-              <p>Use Copy Signature for the safest paste path.</p>
-            </div>
-            <div className="product-preview-step">
-              <span className="product-preview-number">03</span>
-              <strong>Paste</strong>
-              <p>Install cleanly in Gmail, Outlook, Apple Mail, or Yahoo.</p>
-            </div>
-          </div>
-          <div className="public-signature-preview-card">
-            <div className="public-signature-preview-frame">
-              <div dangerouslySetInnerHTML={{ __html: HERO_SIGNATURE }} />
+            <div className="public-hero-window-body">
+              <div className="public-hero-window-meta">
+                <div>
+                  <strong>From</strong>
+                  <span>James Worthing &lt;James@signaturepilotai.com&gt;</span>
+                </div>
+                <div>
+                  <strong>Subject</strong>
+                  <span>Quick follow-up and next steps</span>
+                </div>
+              </div>
+              <div className="public-hero-live-signature" dangerouslySetInnerHTML={{ __html: HERO_SIGNATURE }} />
             </div>
           </div>
+        </div>
+
+        <div className="public-how-it-works">
+          {HOW_IT_WORKS_STEPS.map((step) => (
+            <article key={step.number} className="public-how-step">
+              <span className="public-how-step-number">{step.number}</span>
+              <div>
+                <strong>{step.title}</strong>
+                <p>{step.description}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="public-section public-proof-strip">
+        <div className="section-intro public-section-intro">
+          <p className="eyebrow">Compatibility coverage</p>
+          <h2>Works with every major email client</h2>
+        </div>
+        <div className="public-client-pill-row">
+          {CLIENT_PILLS.map((client) => (
+            <span key={client.label} className={`public-client-pill public-client-pill-${client.tone}`}>
+              {client.label}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <section className="public-section public-core-feature-section">
+        <div className="section-intro public-section-intro">
+          <p className="eyebrow">Built for real-world paste behavior</p>
+          <h2>Everything important is visible before you export.</h2>
+        </div>
+        <div className="public-core-feature-grid">
+          {CORE_FEATURES.map((feature) => (
+            <article key={feature.title} className="public-core-feature-card">
+              <span className="public-core-feature-icon" aria-hidden="true">
+                {feature.icon}
+              </span>
+              <h3>{feature.title}</h3>
+              <p>{feature.description}</p>
+            </article>
+          ))}
         </div>
       </section>
 
       <section className="public-section">
         <div className="section-intro public-section-intro">
-          <p className="eyebrow">Why it feels better</p>
+          <p className="eyebrow">What you actually get</p>
           <h2>A focused builder for signatures that need to survive real email clients.</h2>
           <p className="hero-subheadline">
             Signature Pilot AI is intentionally narrow: fewer broken layouts, cleaner exports, and better compatibility guidance instead of generic design
@@ -137,8 +217,8 @@ export default function LandingPage() {
         <div className="feature-grid public-feature-grid">
           {FEATURE_GROUPS.map((feature) => (
             <article key={feature.title} className="feature-card public-feature-card">
-              <span className="feature-icon public-feature-icon">
-                <feature.Icon aria-hidden="true" size={20} strokeWidth={2.15} />
+              <span className="feature-icon public-feature-icon" aria-hidden="true">
+                <ShieldCheck size={20} strokeWidth={2.15} />
               </span>
               <h3>{feature.title}</h3>
               <p>{feature.description}</p>

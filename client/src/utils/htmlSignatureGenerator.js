@@ -349,20 +349,20 @@ function buildTitleLine(draft) {
 
 function buildThemedTitleLineMarkup(draft, brandColor, fontConfig, options = {}) {
   const {
-    companyColor = brandColor,
+    companyColor = "#374151",
     separatorColor = "#9ca3af",
-    titleColor = "#666666"
+    titleColor = "#6B7280"
   } = options;
   const parts = [];
 
   if (draft.jobTitle) {
     parts.push(
-      `<span style="color:${titleColor};font-family:${fontConfig.identity};font-size:12px;font-weight:400;line-height:1.4;">${escapeHtml(draft.jobTitle)}</span>`
+      `<span style="color:${titleColor};font-family:${fontConfig.identity};font-size:13px;font-weight:400;line-height:1.4;">${escapeHtml(draft.jobTitle)}</span>`
     );
   }
   if (draft.companyName) {
     parts.push(
-      `<span style="color:${companyColor};font-family:${fontConfig.identity};font-size:11px;font-weight:600;line-height:1.4;">${escapeHtml(draft.companyName)}</span>`
+      `<span style="color:${companyColor};font-family:${fontConfig.identity};font-size:14px;font-weight:600;line-height:1.4;">${escapeHtml(draft.companyName)}</span>`
     );
   }
 
@@ -531,8 +531,9 @@ function renderSplitLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, sa
     showDivider
   });
 
+  const isProfessionalClassic = sanitized.resolvedLayout === "professional-classic";
   const dividerMarkup = showDivider
-    ? `<td valign="top" style="${cellResetStyle()}width:18px;padding:0 12px;"><div style="width:1px;height:100%;min-height:104px;background:${brandColor};font-size:0;line-height:0;">&nbsp;</div></td>`
+    ? `<td valign="top" style="${cellResetStyle()}width:18px;padding:0 12px;"><div style="width:1px;height:100%;min-height:104px;background:${isProfessionalClassic ? "#E5E7EB" : brandColor};font-size:0;line-height:0;">&nbsp;</div></td>`
     : "";
 
   const firstCell = variantConfig.logoSide === "left" ? visualBlock : infoBlock;
@@ -543,7 +544,9 @@ function renderSplitLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, sa
     ? `width:100%;max-width:620px;padding:18px;border-radius:24px;border:1px solid ${fadeColor(brandColor, 0.16)};background:#f6f9ff;`
     : isRealEstate
       ? `width:100%;max-width:620px;padding:18px;border-radius:24px;border:1px solid ${fadeColor(brandColor, 0.14)};background:#f7fcfa;`
-      : variantConfig.wrapInCard
+      : isProfessionalClassic
+        ? `width:100%;max-width:620px;padding:16px 18px;border-left:4px solid ${brandColor};border-radius:18px;background:#ffffff;box-shadow:0 12px 24px rgba(15,23,42,0.05);`
+        : variantConfig.wrapInCard
         ? `width:100%;max-width:620px;padding:16px;border-radius:20px;background:${fadeColor(brandColor, 0.05)};`
         : "width:100%;max-width:620px;";
 
@@ -612,11 +615,11 @@ function renderBannerLayout(data, options = {}) {
       ? fadeColor(brandColor, 0.2)
       : "transparent";
   const bodySurface = isExecutive
-    ? "#f8fbff"
+    ? "#ffffff"
     : isContractor
       ? "#fffbf5"
       : "#ffffff";
-  const bodyPadding = isExecutive ? "16px 18px 18px 18px" : isContractor ? "14px 16px 18px 16px" : "12px 0 0 0";
+  const bodyPadding = isExecutive ? "16px 20px" : isContractor ? "14px 16px 18px 16px" : "12px 0 0 0";
   return `
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;max-width:620px;font-family:Arial,Helvetica,sans-serif;color:#111827;${isExecutive || isContractor ? `border:1px solid ${shellBorderColor};border-radius:22px;overflow:hidden;` : ""}">
   <tbody>
@@ -633,8 +636,8 @@ function renderBannerLayout(data, options = {}) {
                     <tr>
                       ${photoMarkup ? `<td valign="middle" style="${cellResetStyle()}padding:0 10px 0 0;vertical-align:middle;background-color:${brandColor};width:48px;">${photoMarkup}</td>` : ""}
                       <td valign="middle" style="${cellResetStyle()}vertical-align:middle;background-color:${brandColor};">
-                        <div style="font-family:${fontConfig.identity};font-size:16px;line-height:1.2;font-weight:700;color:#ffffff;">${escapeHtml(sanitized.fullName)}</div>
-                        ${titleLine ? `<div style="padding-top:4px;font-size:12px;line-height:1.4;font-weight:400;color:#ffffff;${multilineTextStyle()}">${titleLine}</div>` : ""}
+                        <div style="font-family:${fontConfig.identity};font-size:${isExecutive ? "20px" : "17px"};line-height:1.2;font-weight:700;color:#ffffff;">${escapeHtml(sanitized.fullName)}</div>
+                        ${titleLine ? `<div style="padding-top:4px;font-size:13px;line-height:1.4;font-weight:400;color:#ffffff;${multilineTextStyle()}">${titleLine}</div>` : ""}
                       </td>
                     </tr>
                   </tbody>
@@ -688,7 +691,7 @@ function renderTwoColumnSplitLayout(data, options = {}) {
   const socialRows = buildSocialRows(sanitized, brandColor, false);
   const isPremiumConsultant = sanitized.resolvedLayout === "premium-consultant";
   const isLegalFinance = sanitized.resolvedLayout === "legal-finance";
-  const rightColumnBackground = isPremiumConsultant ? "#f7f5ff" : isLegalFinance ? "#f7f9fc" : "#fafafa";
+  const rightColumnBackground = isPremiumConsultant ? "#ffffff" : isLegalFinance ? "#f7f9fc" : "#fafafa";
   const shellBorder = isPremiumConsultant || isLegalFinance ? `border:1px solid ${fadeColor(brandColor, 0.14)};border-radius:22px;overflow:hidden;` : "";
   const introRule = isPremiumConsultant
     ? `<tr><td style="${cellResetStyle()}padding:0 0 12px 0;"><div style="width:48px;height:3px;border-radius:999px;background:${brandColor};font-size:0;line-height:0;">&nbsp;</div></td></tr>`
@@ -700,7 +703,7 @@ function renderTwoColumnSplitLayout(data, options = {}) {
 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:${isPremiumConsultant ? "540px" : "500px"};font-family:Arial,Helvetica,sans-serif;color:#111827;${shellBorder}">
   <tbody>
     <tr>
-      <td width="35%" bgcolor="${brandColor}" valign="middle" style="${cellResetStyle()}background-color:${brandColor};width:35%;padding:${isPremiumConsultant ? "18px" : "16px"};">
+      <td ${isPremiumConsultant ? 'width="140"' : 'width="35%"'} bgcolor="${brandColor}" valign="middle" style="${cellResetStyle()}background-color:${brandColor};${isPremiumConsultant ? "width:140px;" : "width:35%;"}padding:${isPremiumConsultant ? "20px 16px" : "16px"};">
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;background-color:${brandColor};">
           <tbody>
             <tr>
@@ -710,7 +713,7 @@ function renderTwoColumnSplitLayout(data, options = {}) {
             <tr>
               <td align="center" style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:#ffffff;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
             </tr>
-            ${sanitized.jobTitle ? `<tr><td align="center" style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:12px;line-height:1.4;font-weight:400;color:${fadeColor("#ffffff", 0.82)};padding:0;">${escapeHtml(sanitized.jobTitle)}</td></tr>` : ""}
+            ${sanitized.jobTitle ? `<tr><td align="center" style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:13px;line-height:1.4;font-weight:400;color:${fadeColor("#ffffff", 0.82)};padding:0;">${escapeHtml(sanitized.jobTitle)}</td></tr>` : ""}
           </tbody>
         </table>
       </td>
@@ -718,7 +721,7 @@ function renderTwoColumnSplitLayout(data, options = {}) {
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;background-color:${rightColumnBackground};">
           <tbody>
             ${introRule}
-            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;font-family:${fontConfig.identity};font-size:11px;line-height:15px;font-weight:600;color:${brandColor};letter-spacing:${isPremiumConsultant ? "0.14em" : "0.08em"};text-transform:uppercase;${multilineTextStyle()}">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
+            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;font-family:${fontConfig.identity};font-size:14px;line-height:1.4;font-weight:600;color:#374151;${isLegalFinance ? "letter-spacing:0.04em;text-transform:uppercase;" : ""}${multilineTextStyle()}">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
             ${contactRows}
             ${socialRows}
             ${ctaMarkup}
@@ -804,8 +807,8 @@ function renderBorderedCardLayout(data, options = {}) {
                             <tr>
                               <td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
                             </tr>
-                            ${sanitized.jobTitle ? `<tr><td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 0 4px 0;">${escapeHtml(sanitized.jobTitle)}</td></tr>` : ""}
-                            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:11px;line-height:1.4;color:${resolvedCompanyColor};font-weight:600;padding:0;${multilineTextStyle()}">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
+                            ${sanitized.jobTitle ? `<tr><td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:13px;line-height:1.4;font-weight:400;color:#6B7280;padding:0 0 4px 0;">${escapeHtml(sanitized.jobTitle)}</td></tr>` : ""}
+                            ${sanitized.companyName ? `<tr><td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:14px;line-height:1.4;color:${resolvedCompanyColor};font-weight:600;padding:0;${multilineTextStyle()}">${escapeHtml(sanitized.companyName)}</td></tr>` : ""}
                           </tbody>
                         </table>
                       </td>
@@ -835,49 +838,39 @@ function renderMinimalLayout({ brandColor, photoMarkup, sanitized, variantConfig
   const fontConfig = getTemplateFontConfig(sanitized.resolvedLayout);
   const titleLineMarkup = buildThemedTitleLineMarkup(sanitized, brandColor, fontConfig);
   const descriptor = getTemplateDescriptor(sanitized.resolvedLayout);
-  const contactRows = [
-    sanitized.phone ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${escapeHtml(sanitized.phone)}</td></tr>` : "",
-    sanitized.email ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${escapeHtml(sanitized.email)}</td></tr>` : "",
-    sanitized.website ? `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${escapeHtml(stripProtocol(sanitized.website))}</td></tr>` : "",
-    sanitized.location ? `<tr><td style="${cellResetStyle()}padding:0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${escapeHtml(sanitized.location)}</td></tr>` : ""
-  ]
-    .filter(Boolean)
-    .join("");
+  const contactItems = [
+    sanitized.phone ? `<span>${escapeHtml(sanitized.phone)}</span>` : "",
+    sanitized.email ? `<span>${escapeHtml(sanitized.email)}</span>` : "",
+    sanitized.website ? `<span>${escapeHtml(stripProtocol(sanitized.website))}</span>` : "",
+    sanitized.location ? `<span>${escapeHtml(sanitized.location)}</span>` : ""
+  ].filter(Boolean);
+  const contactRows = contactItems.length
+    ? `<tr><td style="${cellResetStyle()}padding:8px 0 0 0;font-size:13px;line-height:1.6;font-weight:400;color:#374151;">${contactItems.join(' <span style="color:#9ca3af;">&middot;</span> ')}</td></tr>`
+    : "";
   const ctaHref = resolveCtaHref(sanitized);
   const ctaMarkup = ctaHref && sanitized.ctaText
-    ? `<tr><td style="${cellResetStyle()}padding-top:10px;font-size:11px;line-height:16px;"><a href="${ctaHref}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(ctaHref)}" style="color:${brandColor};text-decoration:none;font-weight:700;">&rarr; ${escapeHtml(sanitized.ctaText)}</a></td></tr>`
+    ? `<tr><td style="${cellResetStyle()}padding-top:10px;font-size:13px;line-height:16px;"><a href="${ctaHref}" target="_blank" rel="noopener noreferrer" title="${escapeAttribute(ctaHref)}" style="color:${brandColor};text-decoration:none;font-weight:700;">&rarr; ${escapeHtml(sanitized.ctaText)}</a></td></tr>`
     : "";
   const socialRows = buildSocialRows(sanitized, brandColor, false);
 
   return `
-<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:500px;font-family:Arial,Helvetica,sans-serif;color:#111827;background:#fbfcfe;border:1px solid ${fadeColor(brandColor, 0.12)};border-radius:20px;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;max-width:500px;font-family:Arial,Helvetica,sans-serif;color:#111827;">
   <tbody>
     <tr>
-      <td style="${cellResetStyle()}padding:16px;">
+      <td style="${cellResetStyle()}padding:8px 0 0 0;">
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
           <tbody>
             <tr>
-              <td width="4" bgcolor="${brandColor}" style="${cellResetStyle()}width:4px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
-              <td style="${cellResetStyle()}padding:0 0 0 14px;">
+              <td width="2" bgcolor="${brandColor}" style="${cellResetStyle()}width:2px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
+              <td style="${cellResetStyle()}padding:0 0 0 12px;">
                 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${tableResetStyle()}width:100%;">
                   <tbody>
                     ${descriptor ? `<tr><td style="${cellResetStyle()}padding:0 0 8px 0;font-family:${fontConfig.identity};font-size:10px;line-height:1.4;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${brandColor};">${escapeHtml(descriptor)}</td></tr>` : ""}
                     ${photoMarkup ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;">${photoMarkup}</td></tr>` : ""}
                     <tr>
-                      <td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+                      <td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:20px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:#111827;padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
                     </tr>
-                    ${titleLineMarkup ? `<tr><td style="${cellResetStyle()}font-size:12px;line-height:17px;color:#666666;padding:0 0 8px 0;${multilineTextStyle()}">${titleLineMarkup}</td></tr>` : ""}
-                    <tr>
-                      <td style="${cellResetStyle()}padding:6px 0;">
-                        <table cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:40px;">
-                          <tbody>
-                            <tr>
-                              <td height="1" bgcolor="${brandColor}" style="${cellResetStyle()}height:1px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </td>
-                    </tr>
+                    ${titleLineMarkup ? `<tr><td style="${cellResetStyle()}font-size:13px;line-height:1.4;color:#6B7280;padding:0 0 6px 0;${multilineTextStyle()}">${titleLineMarkup}</td></tr>` : ""}
                     ${contactRows}
                     ${socialRows}
                     ${ctaMarkup}
@@ -924,7 +917,7 @@ function renderStackedLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, 
       <td align="center" style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 16px 4px 16px;">${escapeHtml(sanitized.fullName)}</td>
     </tr>
     <tr>
-      <td align="center" style="${cellResetStyle()}font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 16px 10px 16px;${multilineTextStyle()}">${buildThemedTitleLineMarkup(sanitized, brandColor, fontConfig)}</td>
+      <td align="center" style="${cellResetStyle()}font-size:13px;line-height:1.4;font-weight:400;color:#6B7280;padding:0 16px 10px 16px;${multilineTextStyle()}">${buildThemedTitleLineMarkup(sanitized, brandColor, fontConfig)}</td>
     </tr>
     ${contactRows}
     ${socialRows}
@@ -968,10 +961,10 @@ function renderCardLayout({ brandColor, familyMeta, logoMarkup, photoMarkup, san
             ${badgeMarkup}
             ${descriptor ? `<tr><td align="center" style="${cellResetStyle()}padding:0 0 8px 0;font-family:${fontConfig.identity};font-size:10px;line-height:1.4;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${brandColor};">${escapeHtml(descriptor)}</td></tr>` : ""}
             <tr>
-              <td align="center" style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+              <td align="center" style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:18px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:0 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
             </tr>
             <tr>
-              <td align="center" style="${cellResetStyle()}font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 0 10px 0;${multilineTextStyle()}">${buildThemedTitleLineMarkup(sanitized, brandColor, fontConfig)}</td>
+              <td align="center" style="${cellResetStyle()}font-size:13px;line-height:1.4;font-weight:400;color:#6B7280;padding:0 0 10px 0;${multilineTextStyle()}">${buildThemedTitleLineMarkup(sanitized, brandColor, fontConfig)}</td>
             </tr>
             ${contactRows}
             ${socialRows}
@@ -1003,12 +996,12 @@ function buildInfoBlock({ brandColor, familyMeta, logoMarkup, sanitized, variant
     ? `<tr><td style="${cellResetStyle()}padding:0 0 8px 0;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background:${fadeColor(brandColor, 0.12)};color:${brandColor};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;">${familyMeta.name}</span></td></tr>`
     : "";
   const companyMarkup = sanitized.companyName
-    ? `<tr><td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:11px;line-height:1.4;font-weight:600;color:${brandColor};${variantConfig.companySmallCaps ? "font-variant:small-caps;letter-spacing:0.06em;" : ""}${multilineTextStyle()}padding:0 0 4px 0;">${escapeHtml(sanitized.companyName)}</td></tr>`
+    ? `<tr><td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:14px;line-height:1.4;font-weight:600;color:#374151;${variantConfig.companySmallCaps ? "font-variant:small-caps;letter-spacing:0.06em;" : ""}${multilineTextStyle()}padding:0 0 4px 0;">${escapeHtml(sanitized.companyName)}</td></tr>`
     : "";
   const titleOnlyMarkup = sanitized.jobTitle
-    ? `<tr><td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 0 8px 0;">${escapeHtml(sanitized.jobTitle)}</td></tr>`
+    ? `<tr><td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:13px;line-height:1.4;font-weight:400;color:#6B7280;padding:0 0 8px 0;${sanitized.resolvedLayout === "professional-classic" ? "letter-spacing:0.04em;text-transform:uppercase;" : ""}">${escapeHtml(sanitized.jobTitle)}</td></tr>`
     : "";
-  const titleLineMarkup = `<tr><td style="${cellResetStyle()}font-size:12px;line-height:1.4;font-weight:400;color:#666666;padding:0 0 8px 0;${multilineTextStyle()}">${buildThemedTitleLineMarkup(sanitized, brandColor, fontConfig)}</td></tr>`;
+  const titleLineMarkup = `<tr><td style="${cellResetStyle()}font-size:13px;line-height:1.4;font-weight:400;color:#6B7280;padding:0 0 8px 0;${sanitized.resolvedLayout === "professional-classic" ? "letter-spacing:0.04em;text-transform:uppercase;" : ""}${multilineTextStyle()}">${buildThemedTitleLineMarkup(sanitized, brandColor, fontConfig)}</td></tr>`;
   const topLogoMarkup = variantConfig.logoPosition === "top" && logoMarkup
     ? `<tr><td style="${cellResetStyle()}padding:0 0 10px 0;">${logoMarkup}</td></tr>`
     : "";
@@ -1029,7 +1022,7 @@ function buildInfoBlock({ brandColor, familyMeta, logoMarkup, sanitized, variant
         ${descriptor ? `<tr><td style="${cellResetStyle()}padding:0 0 8px 0;font-family:${fontConfig.identity};font-size:10px;line-height:1.4;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${brandColor};">${escapeHtml(descriptor)}</td></tr>` : ""}
         ${variantConfig.companyPlacement === "above-name" ? companyMarkup : ""}
         <tr>
-          <td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:17px;line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:4px 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
+          <td style="${cellResetStyle()}font-family:${fontConfig.identity};font-size:${sanitized.resolvedLayout === "professional-classic" ? "18px" : "17px"};line-height:1.2;letter-spacing:-0.3px;font-weight:700;color:${brandColor};padding:4px 0 4px 0;">${escapeHtml(sanitized.fullName)}</td>
         </tr>
         ${variantConfig.companyPlacement === "above-name" ? titleOnlyMarkup : titleLineMarkup}
         ${variantConfig.companyPlacement === "above-name" ? "" : companyMarkup}
@@ -1109,8 +1102,8 @@ function buildContactRows(draft, mode = "stacked", centered = false, variantConf
   const labelPrefix = variantConfig.contactPrefix || "";
   const useUnifiedHierarchy = Boolean(variantConfig.unifiedHierarchy);
   const valueLinkStyle = useUnifiedHierarchy
-    ? "color:#444444;text-decoration:none;font-family:Arial, Helvetica, sans-serif;font-size:11px;font-weight:400;"
-    : "color:#444444;text-decoration:none;font-family:Arial, Helvetica, sans-serif;font-weight:400;";
+    ? "color:#374151;text-decoration:none;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;"
+    : "color:#374151;text-decoration:none;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;";
   if (draft.phone) {
     items.push([`${labelPrefix}Phone`, `<a href="tel:${sanitizePhoneHref(draft.phone)}" style="${valueLinkStyle}">${escapeHtml(draft.phone)}</a>`]);
   }
@@ -1128,12 +1121,12 @@ function buildContactRows(draft, mode = "stacked", centered = false, variantConf
     const inlineValue = items
       .map(([label, value]) =>
         useUnifiedHierarchy
-          ? `<span><strong style="color:${draft.brandColor};font-family:${fontConfig.label};font-size:11px;font-weight:600;">${label}:</strong> <span style="color:#444444;font-family:Arial, Helvetica, sans-serif;font-size:11px;font-weight:400;">${value}</span></span>`
-          : `<span><strong style="color:${draft.brandColor};font-family:${fontConfig.label};font-weight:600;">${label}:</strong> <span style="color:#444444;font-family:Arial, Helvetica, sans-serif;font-weight:400;">${value}</span></span>`
+          ? `<span><strong style="color:${draft.brandColor};font-family:${fontConfig.label};font-size:12px;font-weight:600;">${label}:</strong> <span style="color:#374151;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;">${value}</span></span>`
+          : `<span><strong style="color:${draft.brandColor};font-family:${fontConfig.label};font-size:12px;font-weight:600;">${label}:</strong> <span style="color:#374151;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;">${value}</span></span>`
       )
       .join(` <span style="color:#9ca3af;">|</span> `);
     return inlineValue
-      ? `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:6px;font-size:11px;line-height:1.4;color:#444444;font-weight:400;">${inlineValue}</td></tr>`
+      ? `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:6px;font-size:13px;line-height:1.5;color:#374151;font-weight:400;">${inlineValue}</td></tr>`
       : "";
   }
 
@@ -1141,7 +1134,7 @@ function buildContactRows(draft, mode = "stacked", centered = false, variantConf
     return items
       .map(
         ([label, value]) =>
-          `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:4px;font-size:11px;line-height:1.4;color:#444444;font-weight:400;"><strong style="color:${draft.brandColor};font-family:${fontConfig.label};font-size:11px;font-weight:600;">${label}:</strong> <span style="color:#444444;font-family:Arial, Helvetica, sans-serif;font-size:11px;font-weight:400;">${value}</span></td></tr>`
+          `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:4px;font-size:13px;line-height:1.5;color:#374151;font-weight:400;"><strong style="color:${draft.brandColor};font-family:${fontConfig.label};font-size:12px;font-weight:600;">${label}:</strong> <span style="color:#374151;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;">${value}</span></td></tr>`
       )
       .join("");
   }
@@ -1149,7 +1142,7 @@ function buildContactRows(draft, mode = "stacked", centered = false, variantConf
   return items
     .map(
       ([label, value]) =>
-        `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:4px;font-size:11px;line-height:1.4;color:#444444;font-weight:400;"><span style="display:inline-block;min-width:${centered ? "0" : "62px"};font-family:${fontConfig.label};font-size:11px;font-weight:600;color:${draft.brandColor};">${label}:</span> <span style="color:#444444;font-family:Arial, Helvetica, sans-serif;font-size:11px;font-weight:400;">${value}</span></td></tr>`
+        `<tr><td ${centered ? 'align="center"' : ""} style="${cellResetStyle()}padding-top:4px;font-size:13px;line-height:1.5;color:#374151;font-weight:400;"><span style="display:inline-block;min-width:${centered ? "0" : "62px"};font-family:${fontConfig.label};font-size:12px;font-weight:600;color:${draft.brandColor};">${label}:</span> <span style="color:#374151;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;">${value}</span></td></tr>`
     )
     .join("");
 }
@@ -1157,19 +1150,19 @@ function buildContactRows(draft, mode = "stacked", centered = false, variantConf
 function buildBannerContactMarkup(draft, mode = "inline", brandColor) {
   const items = [];
   if (draft.phone) {
-    items.push(`<a href="tel:${sanitizePhoneHref(draft.phone)}" style="${linkStyle(brandColor)}">${escapeHtml(draft.phone)}</a>`);
+    items.push(`<strong style="color:${brandColor};font-size:12px;font-weight:600;">Phone:</strong> <a href="tel:${sanitizePhoneHref(draft.phone)}" style="color:#374151;text-decoration:none;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;">${escapeHtml(draft.phone)}</a>`);
   }
   if (draft.email) {
-    items.push(`<a href="mailto:${escapeAttribute(draft.email)}" style="${linkStyle(brandColor)}">${escapeHtml(draft.email)}</a>`);
+    items.push(`<strong style="color:${brandColor};font-size:12px;font-weight:600;">Email:</strong> <a href="mailto:${escapeAttribute(draft.email)}" style="color:#374151;text-decoration:none;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;">${escapeHtml(draft.email)}</a>`);
   }
   if (draft.website) {
-    items.push(`<a href="${ensureProtocol(draft.website)}" style="${linkStyle(brandColor)}">${escapeHtml(stripProtocol(draft.website))}</a>`);
+    items.push(`<strong style="color:${brandColor};font-size:12px;font-weight:600;">Web:</strong> <a href="${ensureProtocol(draft.website)}" style="color:#374151;text-decoration:none;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;">${escapeHtml(stripProtocol(draft.website))}</a>`);
   }
   if (draft.address) {
-    items.push(escapeHtml(draft.address));
+    items.push(`<strong style="color:${brandColor};font-size:12px;font-weight:600;">Address:</strong> <span style="color:#374151;font-size:13px;font-weight:400;">${escapeHtml(draft.address)}</span>`);
   }
   if (draft.location) {
-    items.push(escapeHtml(draft.location));
+    items.push(`<strong style="color:${brandColor};font-size:12px;font-weight:600;">Location:</strong> <span style="color:#374151;font-size:13px;font-weight:400;">${escapeHtml(draft.location)}</span>`);
   }
 
   if (!items.length) {
@@ -1183,7 +1176,7 @@ function buildBannerContactMarkup(draft, mode = "inline", brandColor) {
     ${items
       .map(
         (item) =>
-          `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${item}</td></tr>`
+          `<tr><td style="${cellResetStyle()}padding:0 0 4px 0;font-size:13px;line-height:1.5;font-weight:400;color:#374151;">${item}</td></tr>`
       )
       .join("")}
   </tbody>
@@ -1194,7 +1187,7 @@ function buildBannerContactMarkup(draft, mode = "inline", brandColor) {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="${tableResetStyle()}width:100%;">
   <tbody>
     <tr>
-      <td style="${cellResetStyle()}font-size:11px;line-height:1.4;font-weight:400;color:#444444;">
+      <td style="${cellResetStyle()}font-size:13px;line-height:1.5;font-weight:400;color:#374151;">
         ${items.join(' <span style="color:#6b7280;">&middot;</span> ')}
       </td>
     </tr>
@@ -1205,7 +1198,7 @@ function buildBannerContactMarkup(draft, mode = "inline", brandColor) {
 function buildSplitColumnContactRows(draft, brandColor) {
   const fontConfig = getTemplateFontConfig(draft.resolvedLayout);
   const items = [];
-  const valueLinkStyle = "color:#444444;text-decoration:none;font-family:Arial, Helvetica, sans-serif;font-weight:400;";
+  const valueLinkStyle = "color:#374151;text-decoration:none;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;";
   if (draft.phone) {
     items.push(["P:", `<a href="tel:${sanitizePhoneHref(draft.phone)}" style="${valueLinkStyle}">${escapeHtml(draft.phone)}</a>`]);
   }
@@ -1222,7 +1215,7 @@ function buildSplitColumnContactRows(draft, brandColor) {
   return items
     .map(
       ([label, value]) =>
-        `<tr><td style="${cellResetStyle()}padding:0 0 6px 0;font-size:11px;line-height:1.4;color:#444444;font-weight:400;"><span style="display:inline-block;min-width:22px;font-family:${fontConfig.label};font-size:11px;font-weight:600;color:${brandColor};">${label}</span> <span style="color:#444444;font-family:Arial, Helvetica, sans-serif;font-size:11px;font-weight:400;">${value}</span></td></tr>`
+        `<tr><td style="${cellResetStyle()}padding:0 0 6px 0;font-size:13px;line-height:1.5;color:#374151;font-weight:400;"><span style="display:inline-block;min-width:26px;font-family:${fontConfig.label};font-size:12px;font-weight:600;color:${brandColor};">${label}</span> <span style="color:#374151;font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:400;">${value}</span></td></tr>`
     )
     .join("");
 }
@@ -1252,7 +1245,7 @@ function buildBorderedCardContactRows(draft, brandColor) {
         <tr>
           <td width="6" height="6" bgcolor="${brandColor}" valign="middle" style="${cellResetStyle()}width:6px;height:6px;background-color:${brandColor};font-size:0;line-height:0;">&nbsp;</td>
           <td width="4" style="${cellResetStyle()}width:4px;font-size:0;line-height:0;">&nbsp;</td>
-          <td valign="middle" style="${cellResetStyle()}font-size:11px;line-height:1.4;font-weight:400;color:#444444;">${value}</td>
+          <td valign="middle" style="${cellResetStyle()}font-size:13px;line-height:1.5;font-weight:400;color:#374151;">${value}</td>
         </tr>
       </tbody>
     </table>

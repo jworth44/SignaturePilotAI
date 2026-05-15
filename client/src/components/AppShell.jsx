@@ -35,7 +35,9 @@ export default function AppShell({ children }) {
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
-              className={`topbar-link ${item.to === "/upgrade" ? "topbar-link-upgrade" : ""}`}
+              className={({ isActive }) =>
+                `topbar-link ${item.to === "/upgrade" ? "topbar-link-upgrade" : ""}${isActive ? " active" : ""}`
+              }
               end={item.end}
               to={item.to}
             >
